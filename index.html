@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GURPS Приложение</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; padding: 20px; min-height: 100vh; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 20px; text-align: center; }
+        .character-info { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
+        .input-group { flex: 1; min-width: 200px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #ecf0f1; }
+        .input-group input { width: 100%; padding: 10px; border: none; border-radius: 8px; font-size: 16px; background: rgba(255,255,255,0.9); }
+        
+        .level-system { background: #f8f9fa; padding: 15px; border-bottom: 2px solid #dee2e6; }
+        .level-display { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .level-info { font-size: 1.2em; font-weight: bold; color: #2c3e50; }
+        .exp-display { display: flex; align-items: center; gap: 10px; }
+        .exp-input { width: 120px; padding: 8px; border: 2px solid #3498db; border-radius: 6px; font-size: 16px; text-align: center; }
+        
+        .stats-panel { padding: 15px; background: #fff; border-bottom: 2px solid #ecf0f1; }
+        .stat-row { display: flex; align-items: center; padding: 8px 0; gap: 10px; }
+        .stat-label { flex: 1; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .stat-input { width: 80px; padding: 6px; border: 1px solid #bdc3c7; border-radius: 4px; text-align: center; }
+        .stat-separator { font-weight: bold; color: #7f8c8d; }
+        
+        .skills-section { padding: 20px; border-bottom: 2px solid #ecf0f1; }
+        .section-title { font-size: 1.4em; color: #2c3e50; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #3498db; display: flex; align-items: center; gap: 10px; }
+        .skill-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #ecf0f1; }
+        .skill-name { flex: 2; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .skill-controls { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+        .skill-value { font-size: 1.2em; font-weight: bold; color: #2c3e50; min-width: 30px; text-align: center; }
+        
+        .btn { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s; }
+        .btn-plus { background: #27ae60; color: white; }
+        .btn-minus { background: #e74c3c; color: white; }
+        .btn-roll { background: #3498db; color: white; padding: 8px 15px; }
+        .btn-convert { background: #9b59b6; color: white; }
+        .btn-levels { background: #f39c12; color: white; padding: 6px 10px; }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+        
+        .result-popup, .levels-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .result-content, .levels-content { background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 90%; width: 400px; max-height: 80vh; overflow-y: auto; }
+        .dice-rolls { display: flex; justify-content: center; gap: 15px; margin: 15px 0; }
+        .dice { width: 50px; height: 50px; background: #3498db; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.5em; font-weight: bold; color: white; }
+        
+        .success { color: #27ae60; font-weight: bold; }
+        .failure { color: #e74c3c; font-weight: bold; }
+        .critical-success { color: #f39c12; font-weight: bold; }
+        .critical-failure { color: #c0392b; font-weight: bold; }
+        
+        .free-points-warning { color: #e74c3c; font-weight: bold; text-align: center; margin: 10px; padding: 10px; background: #ffeaa7; border-radius: 5px; }
+        
+        .levels-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        .levels-table th, .levels-table td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+        .levels-table th { background: #34495e; color: white; }
+        
+        @media (max-width: 600px) {
+            .character-info, .stat-row, .skill-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .skill-controls { width: 100%; justify-content: space-between; }
+            .exp-display { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎲 GURPS Приложение</h1>
+            <div class="character-info">
+                <div class="input-group">
+                    <label for="characterName">Имя:</label>
+                    <input type="text" id="characterName" placeholder="Введите имя">
+                </div>
+                <div class="input-group">
+                    <label for="characterSurname">Фамилия:</label>
+                    <input type="text" id="characterSurname" placeholder="Введите фамилию">
+                </div>
+                <div class="input-group">
+                    <label for="characterTitle">Титул:</label>
+                    <input type="text" id="characterTitle" placeholder="Введите титул">
+                </div>
+            </div>
+        </div>
+
+        <div class="level-system">
+            <div class="level-display">
+                <div class="level-info">
+                    Уровень: <span id="currentLevel">1</span>
+                    <button class="btn btn-levels" onclick="showLevelsTable()">📊</button>
+                </div>
+                <div class="exp-display">
+                    <input type="number" id="currentExp" class="exp-input" value="0" min="0">
+                    <span>/ <span id="requiredExp">1000</span></span>
+                    <button class="btn btn-plus" onclick="addExperience()">➕ Опыт</button>
+                    <button class="btn btn-convert" id="convertBtn" onclick="convertExpToPoints()" style="display: none;">💎 Конвертировать</button>
+                </div>
+            </div>
+            <div id="convertInfo" style="display: none; text-align: center; margin-top: 10px; font-size: 0.9em; color: #9b59b6;">
+                💎 1000 опыта = 1 очко навыков
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stat-row">
+                <div class="stat-label">❤️ ЗДОРОВЬЕ:</div>
+                <input type="number" class="stat-input" id="healthCurrent" value="100">
+                <span class="stat-separator">/</span>
+                <input type="number" class="stat-input" id="healthMax" value="100">
+                <button class="btn btn-minus" onclick="changeStat('health', -10)">-10</button>
+                <button class="btn btn-plus" onclick="changeStat('health', 10)">+10</button>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label">💧 МАНА:</div>
+                <input type="number" class="stat-input" id="manaCurrent" value="100">
+                <span class="stat-separator">/</span>
+                <input type="number" class="stat-input" id="manaMax" value="100">
+                <button class="btn btn-minus" onclick="changeStat('mana', -5)">-5</button>
+                <button class="btn btn-plus" onclick="changeStat('mana', 5)">+5</button>
+            </div>
+            <div class="stat-row">
+                <div class="stat-label">⚡ СТАМИНА:</div>
+                <input type="number" class="stat-input" id="staminaCurrent" value="100">
+                <span class="stat-separator">/</span>
+                <input type="number" class="stat-input" id="staminaMax" value="100">
+                <button class="btn btn-minus" onclick="changeStat('stamina', -5)">-5</button>
+                <button class="btn btn-plus" onclick="changeStat('stamina', 5)">+5</button>
+            </div>
+        </div>
+
+        <div style="padding: 15px; background: #e8f4f8; border-bottom: 2px solid #3498db;">
+            <div style="text-align: center; font-size: 1.2em; font-weight: bold; color: #2c3e50;">
+                Свободные очки: <span id="freePoints">20</span>
+            </div>
+        </div>
+
+        <div id="skillsContainer"></div>
+        
+        <div class="free-points-warning" id="pointsWarning" style="display: none;">
+            ⚠️ Свободные очки закончились!
+        </div>
+    </div>
+
+    <script>
+        // Таблица уровней
+        const levelTable = {
+            1: { expRequired: 1000, hp: 100, mana: 100, stamina: 100, points: 20 },
+            2: { expRequired: 3000, hp: 200, mana: 200, stamina: 200, points: 30 },
+            3: { expRequired: 5000, hp: 300, mana: 300, stamina: 300, points: 40 },
+            4: { expRequired: 8000, hp: 400, mana: 400, stamina: 400, points: 50 },
+            5: { expRequired: 12000, hp: 500, mana: 500, stamina: 500, points: 60 },
+            6: { expRequired: 16000, hp: 600, mana: 600, stamina: 600, points: 70 },
+            7: { expRequired: 20000, hp: 700, mana: 700, stamina: 700, points: 80 },
+            8: { expRequired: 25000, hp: 800, mana: 800, stamina: 800, points: 90 },
+            9: { expRequired: 30000, hp: 900, mana: 900, stamina: 900, points: 100 },
+            10: { expRequired: 0, hp: 1000, mana: 1000, stamina: 1000, points: 0 }
+        };
+
+        // Структура навыков
+        const skillsStructure = {
+            "⚔️ БОЕВЫЕ НАВЫКИ": [
+                "Тяжёлая броня", "Лёгкая броня", "Двуручное оружие", 
+                "Одноручное оружие", "Стрельба", "Блокирование", 
+                "Древковое", "Рукопашный бой", "Метание"
+            ],
+            "🎭 ОБЩИЕ НАВЫКИ": [
+                "Скрытность", "Красноречие", "Ловкость", "Выносливость",
+                "Взлом", "Восприятие", "Удача", "Карманные кражи"
+            ],
+            "⚗️ РЕМЕСЛА": [
+                "Алхимия", "Кузнечное дело", "Зачарование", "Ремесло"
+            ],
+            "🔮 МАГИЯ": [
+                "Магия воды", "Магия земли", "Магия воздуха", "Магия крови",
+                "Магия огня", "Магия металла", "Магия природы", "Магия света",
+                "Магия тьмы", "Магия инферно", "Магия хаоса", "Магия разума",
+                "Магия Жизни", "Магия смерти", "Магия пустоты", "Магия Энергии"
+            ]
+        };
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCharacterData();
+            renderSkills();
+            updateUI();
+            updateLevelDisplay();
+        });
+
+        // Рендер навыков
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            container.innerHTML = '';
+
+            for (const [groupName, skills] of Object.entries(skillsStructure)) {
+                const section = document.createElement('div');
+                section.className = 'skills-section';
+                
+                const title = document.createElement('div');
+                title.className = 'section-title';
+                title.innerHTML = groupName;
+                section.appendChild(title);
+
+                skills.forEach(skill => {
+                    const skillRow = document.createElement('div');
+                    skillRow.className = 'skill-row';
+                    skillRow.innerHTML = `
+                        <div class="skill-name"><span>🎯</span><span>${skill}</span></div>
+                        <div class="skill-controls">
+                            <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" disabled>-</button>
+                            <span class="skill-value" id="skill-${skill}">5</span>
+                            <button class="btn btn-plus" onclick="increaseSkill('${skill}')">+</button>
+                            <button class="btn btn-roll" onclick="rollSkill('${skill}')">Бросок</button>
+                        </div>
+                    `;
+                    section.appendChild(skillRow);
+                });
+                container.appendChild(section);
+            }
+        }
+
+        // Система навыков
+        function increaseSkill(skillName) {
+            const freePoints = getFreePoints();
+            if (freePoints > 0) {
+                const skillValue = getSkillValue(skillName);
+                setSkillValue(skillName, skillValue + 1);
+                setFreePoints(freePoints - 1);
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        function decreaseSkill(skillName) {
+            const skillValue = getSkillValue(skillName);
+            if (skillValue > 5) {
+                const freePoints = getFreePoints();
+                setSkillValue(skillName, skillValue - 1);
+                setFreePoints(freePoints + 1);
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        // Система уровней
+        function addExperience() {
+            const expToAdd = prompt('Сколько опыта добавить?');
+            if (expToAdd && !isNaN(expToAdd)) {
+                let currentExp = getCurrentExp();
+                const currentLevel = getCurrentLevel();
+                
+                currentExp += parseInt(expToAdd);
+                setCurrentExp(currentExp);
+                
+                checkLevelUp();
+                updateLevelDisplay();
+                saveCharacterData();
+            }
+        }
+
+        function checkLevelUp() {
+            let currentLevel = getCurrentLevel();
+            let currentExp = getCurrentExp();
+            
+            if (currentLevel >= 10) return; // Макс уровень
+            
+            while (currentLevel < 10 && currentExp >= levelTable[currentLevel].expRequired) {
+                // Повышение уровня
+                currentLevel++;
+                
+                // Добавление бонусов
+                const healthMax = getHealthMax() + levelTable[currentLevel].hp;
+                const manaMax = getManaMax() + levelTable[currentLevel].mana;
+                const staminaMax = getStaminaMax() + levelTable[currentLevel].stamina;
+                const freePoints = getFreePoints() + levelTable[currentLevel].points;
+                
+                setHealthMax(healthMax);
+                setManaMax(manaMax);
+                setStaminaMax(staminaMax);
+                setFreePoints(freePoints);
+                
+                // Восстановление характеристик
+                setHealthCurrent(healthMax);
+                setManaCurrent(manaMax);
+                setStaminaCurrent(staminaMax);
+                
+                // Перенос избытка опыта
+                currentExp = currentExp - levelTable[currentLevel-1].expRequired;
+                setCurrentExp(currentExp);
+                
+                setCurrentLevel(currentLevel);
+                
+                showMessage(`🎉 Уровень повышен до ${currentLevel}!`);
+            }
+        }
+
+        function convertExpToPoints() {
+            const currentExp = getCurrentExp();
+            const availablePoints = Math.floor(currentExp / 1000);
+            
+            if (availablePoints > 0) {
+                const expToConvert = availablePoints * 1000;
+                setCurrentExp(currentExp - expToConvert);
+                setFreePoints(getFreePoints() + availablePoints);
+                
+                showMessage(`💎 Конвертировано ${availablePoints} очков навыков!`);
+                updateLevelDisplay();
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        function updateLevelDisplay() {
+            const currentLevel = getCurrentLevel();
+            const currentExp = getCurrentExp();
+            const convertBtn = document.getElementById('convertBtn');
+            const convertInfo = document.getElementById('convertInfo');
+            
+            document.getElementById('currentLevel').textContent = currentLevel;
+            document.getElementById('currentExp').value = currentExp;
+            
+            if (currentLevel < 10) {
+                document.getElementById('requiredExp').textContent = levelTable[currentLevel].expRequired;
+                convertBtn.style.display = 'none';
+                convertInfo.style.display = 'none';
+            } else {
+                document.getElementById('requiredExp').textContent = 'MAX';
+                convertBtn.style.display = 'block';
+                convertInfo.style.display = 'block';
+            }
+        }
+
+        function showLevelsTable() {
+            const popup = document.createElement('div');
+            popup.className = 'levels-popup';
+            popup.innerHTML = `
+                <div class="levels-content">
+                    <h2>📊 Таблица уровней</h2>
+                    <table class="levels-table">
+                        <tr><th>Ур.</th><th>Опыт</th><th>ХП</th><th>Мана</th><th>Стамина</th><th>Очки</th></tr>
+                        ${Object.entries(levelTable).map(([level, data]) => `
+                            <tr>
+                                <td>${level}</td>
+                                <td>${data.expRequired || 'MAX'}</td>
+                                <td>${data.hp}</td>
+                                <td>${data.mana}</td>
+                                <td>${data.stamina}</td>
+                                <td>${data.points}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <button class="btn close-btn" onclick="this.closest('.levels-popup').remove()" style="background: #34495e; color: white; padding: 10px 25px;">Закрыть</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        // Система характеристик
+        function changeStat(stat, value) {
+            const current = parseInt(document.getElementById(stat + 'Current').value);
+            const max = parseInt(document.getElementById(stat + 'Max').value);
+            let newValue = current + value;
+            
+            if (newValue < 0) newValue = 0;
+            if (newValue > max) newValue = max;
+            
+            document.getElementById(stat + 'Current').value = newValue;
+            saveCharacterData();
+        }
+
+        // Броски навыков
+        function rollSkill(skillName) {
+            const skillValue = getSkillValue(skillName);
+            const roll1 = Math.floor(Math.random() * 6) + 1;
+            const roll2 = Math.floor(Math.random() * 6) + 1;
+            const roll3 = Math.floor(Math.random() * 6) + 1;
+            const totalRoll = roll1 + roll2 + roll3;
+
+            let resultType, resultText, resultClass;
+            if (totalRoll === 3 || totalRoll === 4) {
+                resultText = "💫 КРИТИЧЕСКИЙ УСПЕХ!";
+                resultClass = "critical-success";
+            } else if (totalRoll === 17 || totalRoll === 18) {
+                resultText = "💥 КРИТИЧЕСКИЙ ПРОВАЛ!";
+                resultClass = "critical-failure";
+            } else if (totalRoll <= skillValue) {
+                resultText = "✅ УСПЕХ!";
+                resultClass = "success";
+            } else {
+                resultText = "❌ НЕУДАЧА!";
+                resultClass = "failure";
+            }
+
+            showRollResult(skillName, skillValue, [roll1, roll2, roll3], totalRoll, resultText, resultClass);
+        }
+
+        function showRollResult(skillName, skillValue, dice, total, resultText, resultClass) {
+            const popup = document.createElement('div');
+            popup.className = 'result-popup';
+            popup.innerHTML = `
+                <div class="result-content">
+                    <h2>Бросок на "${skillName}" (${skillValue})</h2>
+                    <div class="dice-rolls">
+                        <div class="dice">${dice[0]}</div>
+                        <div class="dice">${dice[1]}</div>
+                        <div class="dice">${dice[2]}</div>
+                    </div>
+                    <div style="font-size: 1.5em; margin: 15px 0;">${dice.join(' + ')} = ${total}</div>
+                    <div class="${resultClass}">${resultText}</div>
+                    <button class="btn close-btn" onclick="this.closest('.result-popup').remove()" style="background: #34495e; color: white; padding: 10px 25px; margin-top: 15px;">Закрыть</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        // Вспомогательные функции
+        function updateUI() {
+            const freePoints = getFreePoints();
+            const warning = document.getElementById('pointsWarning');
+            warning.style.display = freePoints === 0 ? 'block' : 'none';
+            
+            document.querySelectorAll('.skill-row').forEach(row => {
+                const skillName = row.querySelector('.skill-name span:nth-child(2)').textContent;
+                const skillValue = getSkillValue(skillName);
+                const minusBtn = row.querySelector('.btn-minus');
+                const plusBtn = row.querySelector('.btn-plus');
+                
+                row.querySelector('.skill-value').textContent = skillValue;
+                minusBtn.disabled = skillValue <= 5;
+                plusBtn.disabled = freePoints <= 0;
+            });
+        }
+
+        function showMessage(text) {
+            alert(text);
+        }
+
+        // Геттеры/сеттеры
+        function getFreePoints() { return parseInt(localStorage.getItem('freePoints')) || 20; }
+        function setFreePoints(value) { 
+            localStorage.setItem('freePoints', value); 
+            document.getElementById('freePoints').textContent = value;
+        }
+
+        function getCurrentLevel() { return parseInt(localStorage.getItem('currentLevel')) || 1; }
+        function setCurrentLevel(value) { localStorage.setItem('currentLevel', value); }
+
+        function getCurrentExp() { return parseInt(localStorage.getItem('currentExp')) || 0; }
+        function setCurrentExp(value) { localStorage.setItem('currentExp', value); }
+
+        function getHealthCurrent() { return parseInt(document.getElementById('healthCurrent').value) || 100; }
+        function setHealthCurrent(value) { document.getElementById('healthCurrent').value = value; }
+        function getHealthMax() { return parseInt(document.getElementById('healthMax').value) || 100; }
+        function setHealthMax(value) { document.getElementById('healthMax').value = value; }
+
+        function getManaCurrent() { return parseInt(document.getElementById('manaCurrent').value) || 100; }
+        function setManaCurrent(value) { document.getElementById('manaCurrent').value = value; }
+        function getManaMax() { return parseInt(document.getElementById('manaMax').value) || 100; }
+        function setManaMax(value) { document.getElementById('manaMax').value = value; }
+
+        function getStaminaCurrent() { return parseInt(document.getElementById('staminaCurrent').value) || 100; }
+        function setStaminaCurrent(value) { document.getElementById('staminaCurrent').value = value; }
+        function getStaminaMax() { return parseInt(document.getElementById('staminaMax').value) || 100; }
+        function setStaminaMax(value) { document.getElementById('staminaMax').value = value; }
+
+        function getSkillValue(skillName) { return parseInt(localStorage.getItem(`skill_${skillName}`)) || 5; }
+        function setSkillValue(skillName, value) { localStorage.setItem(`skill_${skillName}`, value); }
+
+        // Сохранение/загрузка
+        function saveCharacterData() {
+            localStorage.setItem('characterName', document.getElementById('characterName').value);
+            localStorage.setItem('characterSurname', document.getElementById('characterSurname').value);
+            localStorage.setItem('characterTitle', document.getElementById('characterTitle').value);
+        }
+
+        function loadCharacterData() {
+            document.getElementById('characterName').value = localStorage.getItem('characterName') || '';
+            document.getElementById('characterSurname').value = localStorage.getItem('characterSurname') || '';
+            document.getElementById('characterTitle').value = localStorage.getItem('characterTitle') || '';
+        }
+
+        // Слушатели
+        document.getElementById('characterName').addEventListener('input', saveCharacterData);
+        document.getElementById('characterSurname').addEventListener('input', saveCharacterData);
+        document.getElementById('characterTitle').addEventListener('input', saveCharacterData);
+        document.getElementById('healthCurrent').addEventListener('input', saveCharacterData);
+        document.getElementById('healthMax').addEventListener('input', saveCharacterData);
+        document.getElementById('manaCurrent').addEventListener('input', saveCharacterData);
+        document.getElementById('manaMax').addEventListener('input', saveCharacterData);
+        document.getElementById('staminaCurrent').addEventListener('input', saveCharacterData);
+        document.getElementById('staminaMax').addEventListener('input', saveCharacterData);
+        document.getElementById('currentExp').addEventListener('input', function() {
+            setCurrentExp(parseInt(this.value) || 0);
+            checkLevelUp();
+            updateLevelDisplay();
+            saveCharacterData();
+        });
+    </script>
+</body>
+</html>
