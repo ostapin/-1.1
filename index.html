@@ -404,13 +404,6 @@
             color: #e0d0c0;
         }
 
-        .export-import {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            justify-content: center;
-        }
-
         @media (max-width: 768px) {
             .character-info, .stat-row, .skill-row { flex-direction: column; gap: 12px; }
             .skill-controls { width: 100%; justify-content: space-between; }
@@ -418,7 +411,6 @@
             .points-display { flex-direction: column; }
             .tabs { flex-direction: column; }
             .dice-container { flex-direction: column; }
-            .export-import { flex-direction: column; }
         }
     </style>
 </head>
@@ -434,12 +426,6 @@
         <div id="character-tab" class="tab-content active">
             <div class="header">
                 <h1 style="font-size: 2.5em; color: #d4af37; margin-bottom: 20px;">⚔️ D&D Character Sheet</h1>
-                
-                <div class="export-import">
-                    <button class="btn btn-roll" onclick="exportCharacter()">📤 Экспорт персонажа</button>
-                    <button class="btn btn-roll" onclick="importCharacter()">📥 Импорт персонажа</button>
-                </div>
-                
                 <div class="character-info">
                     <div class="input-group">
                         <label for="characterName">Имя персонажа:</label>
@@ -594,8 +580,6 @@
     </div>
 
     <script>
-        // ========== КОНФИГУРАЦИЯ И ДАННЫЕ ==========
-        
         // Таблица уровней
         const levelTable = {
             0: { expRequired: 1000, hp: 100, mana: 100, stamina: 100, points: 20 },
@@ -754,6 +738,16 @@
                 cost: "30 манны",
                 learned: false
             },
+            {
+                name: "Ржавчина",
+                order: 10,
+                effect: "Магически ускоряет коррозию металла. Заклинание позволяет ослаблять или разрушать металлические объекты, в том числе и оружие.",
+                type: "Заклятие, накладываемое на область, точечное",
+                conditions: "1 секунда концентрации, при прямом контакте с металлом – 1 волшебный жест. При одном лишь зрительном контакте – 2 секунды концентрации, 3 волшебных жеста",
+                duration: "Металл после применения заклинания не восстанавливается, используется максимум раз в 2 минуты",
+                cost: "30 манны",
+                learned: false
+            },
             // ... остальные заклинания (сокращено для краткости)
         ];
 
@@ -761,11 +755,14 @@
             "Магия воды": waterSpells
         };
 
-        // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
-        
+        // Система доступных магических школ
         let availableMagicSchools = {};
         const baseMagicSchools = ["Магия воды", "Магия земли", "Магия воздуха", "Магия огня"];
+
+        // Система заметок
         let notes = [];
+
+        // Система инвентаря
         let inventory = {
             weapons: [],
             armor: [],
@@ -776,190 +773,183 @@
             tools: [],
             other: []
         };
+
+        // История бросков кубиков
         let diceHistory = [];
 
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
-        
+        // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            try {
-                loadAllData();
-                renderSkills();
-                renderInventory();
-                renderNotes();
-                updateUI();
-                updateLevelDisplay();
-                
-                // Слушатели поиска
-                document.getElementById('inventorySearch').addEventListener('input', renderInventory);
-                document.getElementById('notesSearch').addEventListener('input', renderNotes);
-                
-                console.log('Приложение успешно инициализировано');
-            } catch (error) {
-                console.error('Ошибка инициализации:', error);
-                alert('Произошла ошибка при загрузке приложения. Проверьте консоль для деталей.');
-            }
-        });
-
-        // ========== СИСТЕМА УПРАВЛЕНИЯ ДАННЫМИ ==========
-        
-        function loadAllData() {
             loadCharacterData();
             loadNotes();
             loadInventory();
             loadSpells();
-        }
-
-        function exportCharacter() {
-            try {
-                const characterData = {
-                    character: {
-                        name: document.getElementById('characterName').value,
-                        surname: document.getElementById('characterSurname').value,
-                        title: document.getElementById('characterTitle').value,
-                        race: document.getElementById('characterRace').value,
-                        heritage: document.getElementById('characterHeritage').value,
-                        height: document.getElementById('characterHeight').value,
-                        weight: document.getElementById('characterWeight').value,
-                        age: document.getElementById('characterAge').value,
-                        health: getHealth(),
-                        mana: getMana(),
-                        stamina: getStamina(),
-                        level: getCurrentLevel(),
-                        exp: getCurrentExp(),
-                        freePoints: getFreePoints()
-                    },
-                    skills: getAllSkills(),
-                    spells: spellsBySchool,
-                    notes: notes,
-                    inventory: inventory,
-                    availableMagicSchools: availableMagicSchools,
-                    metadata: {
-                        exportDate: new Date().toISOString(),
-                        version: '1.0'
-                    }
-                };
-                
-                const dataStr = JSON.stringify(characterData, null, 2);
-                const dataBlob = new Blob([dataStr], {type: 'application/json'});
-                
-                const url = URL.createObjectURL(dataBlob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `dnd_character_${characterData.character.name || 'unknown'}.json`;
-                link.click();
-                
-                URL.revokeObjectURL(url);
-                alert('Персонаж успешно экспортирован!');
-            } catch (error) {
-                console.error('Ошибка экспорта:', error);
-                alert('Ошибка при экспорте персонажа');
-            }
-        }
-
-        function importCharacter() {
-            try {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                
-                input.onchange = function(event) {
-                    const file = event.target.files[0];
-                    if (!file) return;
-                    
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const characterData = JSON.parse(e.target.result);
-                            
-                            if (!characterData.character || !characterData.skills) {
-                                throw new Error('Неверный формат файла');
-                            }
-                            
-                            // Восстанавливаем данные
-                            restoreCharacterData(characterData);
-                            alert('Персонаж успешно импортирован!');
-                        } catch (error) {
-                            console.error('Ошибка импорта:', error);
-                            alert('Ошибка при импорте персонажа: неверный формат файла');
-                        }
-                    };
-                    reader.readAsText(file);
-                };
-                
-                input.click();
-            } catch (error) {
-                console.error('Ошибка импорта:', error);
-                alert('Ошибка при импорте персонажа');
-            }
-        }
-
-        function restoreCharacterData(data) {
-            // Восстановление основных данных персонажа
-            if (data.character) {
-                document.getElementById('characterName').value = data.character.name || '';
-                document.getElementById('characterSurname').value = data.character.surname || '';
-                document.getElementById('characterTitle').value = data.character.title || '';
-                document.getElementById('characterRace').value = data.character.race || '';
-                document.getElementById('characterHeritage').value = data.character.heritage || '';
-                document.getElementById('characterHeight').value = data.character.height || '';
-                document.getElementById('characterWeight').value = data.character.weight || '';
-                document.getElementById('characterAge').value = data.character.age || '';
-                
-                setHealth(data.character.health || 100);
-                setMana(data.character.mana || 100);
-                setStamina(data.character.stamina || 100);
-                setCurrentLevel(data.character.level || 0);
-                setCurrentExp(data.character.exp || 0);
-                setFreePoints(data.character.freePoints || 0);
-            }
-            
-            // Восстановление навыков
-            if (data.skills) {
-                Object.entries(data.skills).forEach(([skill, value]) => {
-                    setSkillValue(skill, value);
-                });
-            }
-            
-            // Восстановление заклинаний
-            if (data.spells) {
-                Object.keys(spellsBySchool).forEach(school => {
-                    if (data.spells[school]) {
-                        spellsBySchool[school] = data.spells[school];
-                    }
-                });
-                saveSpells();
-            }
-            
-            // Восстановление заметок и инвентаря
-            if (data.notes) notes = data.notes;
-            if (data.inventory) inventory = data.inventory;
-            if (data.availableMagicSchools) availableMagicSchools = data.availableMagicSchools;
-            
-            saveAllData();
             renderSkills();
             renderInventory();
             renderNotes();
             updateUI();
             updateLevelDisplay();
+            
+            // Слушатели поиска
+            document.getElementById('inventorySearch').addEventListener('input', renderInventory);
+            document.getElementById('notesSearch').addEventListener('input', renderNotes);
+        });
+
+        // === ОСНОВНЫЕ ФУНКЦИИ ===
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        function getAllSkills() {
-            const skills = {};
-            Object.values(skillsStructure).flat().forEach(skill => {
-                skills[skill] = getSkillValue(skill);
-            });
-            return skills;
+        // === СИСТЕМА РАС ===
+        function generateRandomHeight(raceId) {
+            const range = raceHeightRanges[raceId];
+            return range ? Math.floor(Math.random() * (range.max - range.min + 1)) + range.min : 170;
         }
 
-        function saveAllData() {
+        function onRaceChange() {
+            const raceId = document.getElementById('characterRace').value;
+            if (raceId) {
+                showRaceInfo(raceId);
+            }
+        }
+
+        function showRaceInfo(raceId) {
+            const race = races[raceId];
+            if (!race) return;
+
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37; margin-bottom: 15px;">${race.name}</h2>
+                    <p style="margin-bottom: 10px;"><strong>Описание:</strong> ${race.description}</p>
+                    <p style="margin-bottom: 10px;"><strong>Продолжительность жизни:</strong> ${race.lifespan}</p>
+                    
+                    ${Object.keys(race.bonuses).length > 0 ? `
+                        <p style="margin-bottom: 5px;"><strong>Бонусы:</strong></p>
+                        <ul style="margin-bottom: 15px; margin-left: 20px;">
+                            ${Object.entries(race.bonuses).map(([skill, bonus]) => 
+                                `<li>${skill}: +${bonus}</li>`
+                            ).join('')}
+                        </ul>
+                    ` : ''}
+                    
+                    ${Object.keys(race.limitations).length > 0 ? `
+                        <p style="margin-bottom: 5px;"><strong>Ограничения:</strong></p>
+                        <ul style="margin-bottom: 15px; margin-left: 20px;">
+                            ${Object.entries(race.limitations).map(([skill, limit]) => 
+                                `<li>${skill}: максимум ${limit === 0 ? 'недоступно' : limit}</li>`
+                            ).join('')}
+                        </ul>
+                    ` : ''}
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-plus" onclick="setRace('${raceId}')">✅ Выбрать расу</button>
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        function setRace(raceId) {
+            const race = races[raceId];
+            if (!race) return;
+            
+            availableMagicSchools = {};
+            document.getElementById('characterRace').value = raceId;
+            
+            const randomHeight = generateRandomHeight(raceId);
+            document.getElementById('characterHeight').value = randomHeight;
+            
+            const lifespan = parseInt(race.lifespan);
+            document.getElementById('characterAge').value = Math.max(15, Math.floor(lifespan * 0.1));
+            
+            document.getElementById('generateHeightBtn').disabled = true;
+            
+            determineAvailableMagicSchools(raceId);
+            applyRaceBonuses(raceId);
+            
             saveCharacterData();
-            saveNotes();
-            saveInventory();
-            saveSpells();
+            document.querySelector('.popup').remove();
+            alert(`✅ Раса "${race.name}" выбрана!\n📏 Рост: ${randomHeight} см`);
         }
 
-        // ========== ОПТИМИЗИРОВАННАЯ СИСТЕМА НАВЫКОВ ==========
-        
+        function determineAvailableMagicSchools(raceId) {
+            availableMagicSchools = {};
+            
+            switch(raceId) {
+                case 'forest_elf':
+                    availableMagicSchools["Магия природы"] = true;
+                    break;
+                case 'dark_elf':
+                    availableMagicSchools["Магия тьмы"] = true;
+                    break;
+                case 'high_elf':
+                    const shuffled = [...baseMagicSchools].sort(() => 0.5 - Math.random());
+                    availableMagicSchools[shuffled[0]] = true;
+                    availableMagicSchools[shuffled[1]] = true;
+                    break;
+                case 'goblin':
+                    break;
+                default:
+                    const randomSchool = baseMagicSchools[Math.floor(Math.random() * baseMagicSchools.length)];
+                    availableMagicSchools[randomSchool] = true;
+            }
+            
+            const race = races[raceId];
+            if (race && race.limitations) {
+                Object.keys(race.limitations).forEach(school => {
+                    if (race.limitations[school] === 0) {
+                        availableMagicSchools[school] = false;
+                    }
+                });
+            }
+            
+            updateMagicSkillsDisplay();
+        }
+
+        function updateMagicSkillsDisplay() {
+            const magicSkills = skillsStructure["🔮 МАГИЯ"];
+            magicSkills.forEach(skill => {
+                const skillElement = document.getElementById(`skill-${skill}`);
+                if (skillElement) {
+                    const skillRow = skillElement.closest('.skill-row');
+                    const isAvailable = availableMagicSchools[skill] || getSkillValue(skill) > 5;
+                    skillRow.classList.toggle('skill-disabled', !isAvailable);
+                }
+            });
+        }
+
+        function applyRaceBonuses(raceId) {
+            const race = races[raceId];
+            if (!race || !race.bonuses) return;
+            
+            Object.entries(race.bonuses).forEach(([skill, bonus]) => {
+                const currentValue = getSkillValue(skill);
+                setSkillValue(skill, currentValue + bonus);
+            });
+            
+            updateUI();
+        }
+
+        function generateHeightForSelectedRace() {
+            const selectedRace = document.getElementById('characterRace').value;
+            if (!selectedRace) {
+                alert('❌ Сначала выберите расу!');
+                return;
+            }
+            
+            const randomHeight = generateRandomHeight(selectedRace);
+            document.getElementById('characterHeight').value = randomHeight;
+            document.getElementById('generateHeightBtn').disabled = true;
+            saveCharacterData();
+            alert(`📏 Новый рост: ${randomHeight} см`);
+        }
+
+        // === СИСТЕМА НАВЫКОВ ===
         function renderSkills() {
             const container = document.getElementById('skillsContainer');
             if (!container) return;
@@ -976,7 +966,25 @@
                 section.appendChild(title);
 
                 skills.forEach(skill => {
-                    const skillRow = createSkillRow(skill, groupName);
+                    const skillRow = document.createElement('div');
+                    skillRow.className = 'skill-row';
+                    
+                    const spellIcon = groupName === "🔮 МАГИЯ" ? 
+                        `<span class="spell-icon" onclick="showSpells('${skill}')" title="Просмотреть заклинания">🔮</span>` : '';
+                    
+                    skillRow.innerHTML = `
+                        <div class="skill-name">
+                            <span>🎯</span>
+                            <span>${skill}</span>
+                            ${spellIcon}
+                        </div>
+                        <div class="skill-controls">
+                            <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" disabled>-</button>
+                            <span class="skill-value" id="skill-${skill}">5</span>
+                            <button class="btn btn-plus" onclick="increaseSkill('${skill}')">+</button>
+                            <button class="btn btn-roll" onclick="rollSkill('${skill}')">Бросок</button>
+                        </div>
+                    `;
                     section.appendChild(skillRow);
                 });
                 container.appendChild(section);
@@ -984,38 +992,10 @@
             updateUI();
         }
 
-        function createSkillRow(skill, groupName) {
-            const skillRow = document.createElement('div');
-            skillRow.className = 'skill-row';
-            
-            const spellIcon = groupName === "🔮 МАГИЯ" ? 
-                `<span class="spell-icon" onclick="showSpells('${skill}')" title="Просмотреть заклинания">🔮</span>` : '';
-            
-            skillRow.innerHTML = `
-                <div class="skill-name">
-                    <span>🎯</span>
-                    <span>${skill}</span>
-                    ${spellIcon}
-                </div>
-                <div class="skill-controls">
-                    <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" disabled>-</button>
-                    <span class="skill-value" id="skill-${skill}">5</span>
-                    <button class="btn btn-plus" onclick="increaseSkill('${skill}')">+</button>
-                    <button class="btn btn-roll" onclick="rollSkill('${skill}')">Бросок</button>
-                </div>
-            `;
-            return skillRow;
-        }
-
         function increaseSkill(skillName) {
-            const freePoints = getFreePoints();
-            if (freePoints <= 0) return;
-            
-            const skillValue = getSkillValue(skillName);
-            
             // Проверка на доступность магии для ВСЕХ рас
             const isMagicSkill = skillsStructure["🔮 МАГИЯ"].includes(skillName);
-            if (isMagicSkill && !availableMagicSchools[skillName] && skillValue <= 5) {
+            if (isMagicSkill && !availableMagicSchools[skillName] && getSkillValue(skillName) <= 5) {
                 const masterPermission = confirm(
                     `🔮 Вы пытаетесь изучить недоступную магию!\n\n` +
                     `Навык "${skillName}" не доступен для вашей расы.\n` +
@@ -1028,21 +1008,25 @@
                     setSkillValue(skillName, 5);
                     updateMagicSkillsDisplay();
                     updateUI();
-                    saveAllData();
+                    saveCharacterData();
                 }
                 return;
             }
             
-            setSkillValue(skillName, skillValue + 1);
-            setFreePoints(freePoints - 1);
-            updateUI();
-            saveAllData();
+            const freePoints = getFreePoints();
+            if (freePoints > 0) {
+                const skillValue = getSkillValue(skillName);
+                setSkillValue(skillName, skillValue + 1);
+                setFreePoints(freePoints - 1);
+                updateUI();
+                saveCharacterData();
+            }
         }
 
         function decreaseSkill(skillName) {
             const skillValue = getSkillValue(skillName);
             
-            // Если навык достиг 5 и мы пытаемся его уменьшить
+            // Если навык достиг 5 и мы пытаемся его уменьшить - запрашиваем подтверждение
             if (skillValue === 5) {
                 const masterPermission = confirm(
                     `⚠️ ВНИМАНИЕ: Понижение навыка ниже базового уровня!\n\n` +
@@ -1054,7 +1038,7 @@
                 if (!masterPermission) return;
             }
             
-            // Если навык достиг 0, блокируем его
+            // Если навык достиг 1 и мы пытаемся его уменьшить до 0 - полная блокировка
             if (skillValue === 1) {
                 const masterPermission = confirm(
                     `🚫 КРИТИЧЕСКОЕ ПОНИЖЕНИЕ НАВЫКА!\n\n` +
@@ -1069,7 +1053,7 @@
                 const freePoints = getFreePoints();
                 setFreePoints(freePoints + 1);
                 updateUI();
-                saveAllData();
+                saveCharacterData();
                 return;
             }
             
@@ -1078,7 +1062,578 @@
                 setSkillValue(skillName, skillValue - 1);
                 setFreePoints(freePoints + 1);
                 updateUI();
-                saveAllData();
+                saveCharacterData();
+            }
+        }
+
+        function rollSkill(skillName) {
+            const skillValue = getSkillValue(skillName);
+            const roll1 = Math.floor(Math.random() * 6) + 1;
+            const roll2 = Math.floor(Math.random() * 6) + 1;
+            const roll3 = Math.floor(Math.random() * 6) + 1;
+            const totalRoll = roll1 + roll2 + roll3;
+
+            let resultText, resultClass;
+            if (totalRoll === 3 || totalRoll === 4) {
+                resultText = "💫 КРИТИЧЕСКИЙ УСПЕХ!";
+                resultClass = "success";
+            } else if (totalRoll === 17 || totalRoll === 18) {
+                resultText = "💥 КРИТИЧЕСКИЙ ПРОВАЛ!";
+                resultClass = "failure";
+            } else if (totalRoll <= skillValue) {
+                resultText = "✅ УСПЕХ!";
+                resultClass = "success";
+            } else {
+                resultText = "❌ НЕУДАЧА!";
+                resultClass = "failure";
+            }
+
+            showRollResult(skillName, skillValue, [roll1, roll2, roll3], totalRoll, resultText, resultClass);
+        }
+
+        function showRollResult(skillName, skillValue, dice, total, resultText, resultClass) {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37;">Бросок на "${skillName}" (${skillValue})</h2>
+                    <div class="dice-rolls">
+                        <div class="dice">${dice[0]}</div>
+                        <div class="dice">${dice[1]}</div>
+                        <div class="dice">${dice[2]}</div>
+                    </div>
+                    <div style="font-size: 1.5em; margin: 20px 0; color: #e0d0c0;">${dice.join(' + ')} = ${total}</div>
+                    <div class="${resultClass}">${resultText}</div>
+                    <button class="btn btn-roll" onclick="this.closest('.popup').remove()" style="margin-top: 20px;">Закрыть</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        // === СИСТЕМА ЗАКЛИНАНИЙ ===
+        function loadSpells() {
+            const saved = localStorage.getItem('characterSpells');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.keys(spellsBySchool).forEach(school => {
+                    if (data[school]) {
+                        spellsBySchool[school] = data[school];
+                    }
+                });
+            }
+        }
+
+        function saveSpells() {
+            localStorage.setItem('characterSpells', JSON.stringify(spellsBySchool));
+        }
+
+        function showSpells(schoolName) {
+            if (!availableMagicSchools[schoolName] && getSkillValue(schoolName) <= 5) {
+                alert('❌ Эта школа магии недоступна для вашей расы!');
+                return;
+            }
+            
+            const spells = spellsBySchool[schoolName] || [];
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            
+            let spellsHTML = '';
+            spells.forEach((spell, index) => {
+                spellsHTML += `
+                    <div class="spell-item">
+                        <div class="spell-header">
+                            <span class="spell-name">${spell.name}</span>
+                            <span class="spell-order">Порядок ${spell.order}</span>
+                        </div>
+                        <div class="spell-details">
+                            <p><strong>Эффект:</strong> ${spell.effect}</p>
+                            <p><strong>Тип:</strong> ${spell.type}</p>
+                            <p><strong>Условия:</strong> ${spell.conditions}</p>
+                            <p><strong>Длительность:</strong> ${spell.duration}</p>
+                            <p><strong>Затраты:</strong> ${spell.cost}</p>
+                        </div>
+                        <div class="spell-learned">
+                            <input type="checkbox" id="spell-${schoolName}-${index}" 
+                                   ${spell.learned ? 'checked' : ''} 
+                                   onchange="toggleSpellLearned('${schoolName}', ${index})">
+                            <label for="spell-${schoolName}-${index}" style="color: #e0d0c0;">Изучено</label>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            popup.innerHTML = `
+                <div class="popup-content spells-content">
+                    <h2 style="color: #d4af37; text-align: center; margin-bottom: 20px;">🔮 ${schoolName}</h2>
+                    <div style="max-height: 60vh; overflow-y: auto;">
+                        ${spellsHTML || '<p style="text-align: center; color: #8b7d6b;">Заклинания не найдены</p>'}
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Закрыть</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+        }
+
+        function toggleSpellLearned(schoolName, spellIndex) {
+            if (spellsBySchool[schoolName] && spellsBySchool[schoolName][spellIndex]) {
+                spellsBySchool[schoolName][spellIndex].learned = 
+                    !spellsBySchool[schoolName][spellIndex].learned;
+                saveSpells();
+            }
+        }
+
+        // === СИСТЕМА КУБИКОВ ===
+        function rollDice(diceType) {
+            const count = parseInt(document.getElementById('diceCount').value) || 1;
+            let results = [];
+            let total = 0;
+            
+            if (diceType === 'coin') {
+                for (let i = 0; i < count; i++) {
+                    const result = Math.random() > 0.5 ? 'Орёл' : 'Решка';
+                    results.push(result);
+                }
+            } else {
+                for (let i = 0; i < count; i++) {
+                    const result = Math.floor(Math.random() * diceType) + 1;
+                    results.push(result);
+                    total += result;
+                }
+            }
+            
+            displayDiceResults(diceType, count, results, total);
+            addToDiceHistory(diceType, count, results, total);
+        }
+
+        function rollCustomDice() {
+            const sides = parseInt(document.getElementById('customDiceSides').value) || 6;
+            if (sides < 2) {
+                alert('Количество граней должно быть не меньше 2!');
+                return;
+            }
+            rollDice(sides);
+        }
+
+        function displayDiceResults(diceType, count, results, total) {
+            const container = document.getElementById('diceResults');
+            let resultHTML = '';
+            
+            if (diceType === 'coin') {
+                resultHTML = `<h3 style="color: #d4af37;">Монетка (${count} раз):</h3>`;
+                resultHTML += `<div style="font-size: 1.2em; margin: 10px 0;">${results.join(', ')}</div>`;
+            } else {
+                const diceName = diceType === 0 ? 'Кастомный' : `D${diceType}`;
+                resultHTML = `<h3 style="color: #d4af37;">Бросок ${count}d${diceType}:</h3>`;
+                resultHTML += `<div style="font-size: 1.2em; margin: 10px 0;">${results.join(' + ')}`;
+                if (count > 1) {
+                    resultHTML += ` = <strong>${total}</strong>`;
+                }
+                resultHTML += `</div>`;
+            }
+            
+            container.innerHTML = resultHTML;
+        }
+
+        function addToDiceHistory(diceType, count, results, total) {
+            const timestamp = new Date().toLocaleTimeString();
+            let entry = {
+                timestamp,
+                diceType: diceType === 'coin' ? 'Монетка' : `D${diceType}`,
+                count,
+                results: [...results],
+                total
+            };
+            
+            diceHistory.unshift(entry);
+            if (diceHistory.length > 10) diceHistory.pop();
+            renderDiceHistory();
+        }
+
+        function renderDiceHistory() {
+            const container = document.getElementById('diceHistory');
+            if (diceHistory.length === 0) {
+                container.innerHTML = '<p style="color: #8b7d6b; text-align: center;">История бросков пуста</p>';
+                return;
+            }
+            
+            let historyHTML = '<h4 style="color: #d4af37; margin-bottom: 10px;">История бросков:</h4>';
+            diceHistory.forEach(entry => {
+                if (entry.diceType === 'Монетка') {
+                    historyHTML += `<p style="margin: 5px 0;">${entry.timestamp} - ${entry.diceType}: ${entry.results.join(', ')}</p>`;
+                } else {
+                    historyHTML += `<p style="margin: 5px 0;">${entry.timestamp} - ${entry.count}${entry.diceType}: [${entry.results.join(', ')}]`;
+                    if (entry.count > 1) {
+                        historyHTML += ` = ${entry.total}`;
+                    }
+                    historyHTML += `</p>`;
+                }
+            });
+            
+            container.innerHTML = historyHTML;
+        }
+
+        // === СИСТЕМА ЗАМЕТОК ===
+        function loadNotes() {
+            const saved = localStorage.getItem('characterNotes');
+            if (saved) {
+                notes = JSON.parse(saved);
+            }
+        }
+
+        function saveNotes() {
+            localStorage.setItem('characterNotes', JSON.stringify(notes));
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notesContainer');
+            const searchTerm = document.getElementById('notesSearch').value.toLowerCase();
+            
+            let filteredNotes = notes;
+            if (searchTerm) {
+                filteredNotes = notes.filter(note => 
+                    note.title.toLowerCase().includes(searchTerm) || 
+                    note.content.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            if (filteredNotes.length === 0) {
+                container.innerHTML = '<p style="color: #8b7d6b; text-align: center;">Заметок нет</p>';
+                return;
+            }
+            
+            let notesHTML = '';
+            filteredNotes.forEach((note, index) => {
+                const preview = note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content;
+                notesHTML += `
+                    <div class="note-item">
+                        <div class="note-header">
+                            <span class="note-title">${note.title}</span>
+                            <div class="note-actions">
+                                <button class="btn btn-small" onclick="editNote(${index})" style="background: #3498db;">✏️</button>
+                                <button class="btn btn-small" onclick="deleteNote(${index})" style="background: #c44536;">❌</button>
+                                <button class="btn btn-small" onclick="toggleNoteExpand(${index})" style="background: #8b4513;">
+                                    ${note.expanded ? '▼' : '▶'}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="note-preview">
+                            ${note.expanded ? note.content : preview}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = notesHTML;
+        }
+
+        function showAddNotePopup() {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37;">Добавить заметку</h2>
+                    <input type="text" id="noteTitle" placeholder="Название заметки" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    <textarea id="noteContent" placeholder="Текст заметка" style="width: 100%; height: 200px; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0; resize: vertical;"></textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-plus" onclick="addNote()">Добавить</button>
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        function addNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+            
+            if (!title) {
+                alert('Введите название заметки!');
+                return;
+            }
+            
+            notes.push({
+                id: Date.now(),
+                title,
+                content,
+                expanded: false
+            });
+            
+            saveNotes();
+            renderNotes();
+            document.querySelector('.popup').remove();
+        }
+
+        function editNote(index) {
+            const note = notes[index];
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37;">Редактировать заметку</h2>
+                    <input type="text" id="editNoteTitle" value="${note.title}" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    <textarea id="editNoteContent" style="width: 100%; height: 200px; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0; resize: vertical;">${note.content}</textarea>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-plus" onclick="saveEditedNote(${index})">Сохранить</button>
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        function saveEditedNote(index) {
+            const title = document.getElementById('editNoteTitle').value.trim();
+            const content = document.getElementById('editNoteContent').value.trim();
+            
+            if (!title) {
+                alert('Введите название заметки!');
+                return;
+            }
+            
+            notes[index].title = title;
+            notes[index].content = content;
+            
+            saveNotes();
+            renderNotes();
+            document.querySelector('.popup').remove();
+        }
+
+        function deleteNote(index) {
+            if (confirm('Удалить эту заметку?')) {
+                notes.splice(index, 1);
+                saveNotes();
+                renderNotes();
+            }
+        }
+
+        function toggleNoteExpand(index) {
+            notes[index].expanded = !notes[index].expanded;
+            saveNotes();
+            renderNotes();
+        }
+
+        // === СИСТЕМА ИНВЕНТАРЯ ===
+        function loadInventory() {
+            const saved = localStorage.getItem('inventoryData');
+            if (saved) {
+                inventory = JSON.parse(saved);
+            }
+        }
+
+        function saveInventory() {
+            localStorage.setItem('inventoryData', JSON.stringify(inventory));
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('inventoryContainer');
+            const searchTerm = document.getElementById('inventorySearch').value.toLowerCase();
+            
+            let inventoryHTML = '';
+            Object.entries(inventory).forEach(([category, items]) => {
+                let filteredItems = items;
+                if (searchTerm) {
+                    filteredItems = items.filter(item => 
+                        item.name.toLowerCase().includes(searchTerm) ||
+                        (item.details && item.details.toLowerCase().includes(searchTerm)) ||
+                        (item.quantity && item.quantity.toString().includes(searchTerm))
+                    );
+                }
+                
+                if (filteredItems.length === 0) return;
+                
+                inventoryHTML += `
+                    <div class="skills-section">
+                        <div class="section-title">${getCategoryName(category)}</div>
+                        ${filteredItems.map((item, index) => `
+                            <div class="skill-row">
+                                <div class="skill-name">
+                                    <span>${getCategoryIcon(category)}</span>
+                                    <span>${item.name} ${item.quantity ? '×' + item.quantity : ''}</span>
+                                </div>
+                                <div class="skill-controls">
+                                    <span style="color: #b8a28a;">${item.details || ''}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = inventoryHTML || '<p style="color: #8b7d6b; text-align: center;">Инвентарь пуст</p>';
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                weapons: '⚔️ Оружие',
+                armor: '🛡️ Броня',
+                potions: '🧪 Зелья',
+                scrolls: '📜 Свитки',
+                resources: '💎 Ресурсы',
+                valuables: '💰 Ценности',
+                tools: '🔧 Инструменты',
+                other: '🎒 Прочее'
+            };
+            return names[category] || category;
+        }
+
+        function getCategoryIcon(category) {
+            const icons = {
+                weapons: '⚔️',
+                armor: '🛡️',
+                potions: '🧪',
+                scrolls: '📜',
+                resources: '💎',
+                valuables: '💰',
+                tools: '🔧',
+                other: '🎒'
+            };
+            return icons[category] || '📁';
+        }
+
+        // === СИСТЕМА УРОВНЕЙ ===
+        function addExperience() {
+            const expToAdd = prompt('Сколько опыта добавить?');
+            if (expToAdd && !isNaN(expToAdd)) {
+                let currentExp = getCurrentExp();
+                currentExp += parseInt(expToAdd);
+                setCurrentExp(currentExp);
+                checkLevelUp();
+                updateLevelDisplay();
+                saveCharacterData();
+            }
+        }
+
+        function checkLevelUp() {
+            let currentLevel = getCurrentLevel();
+            let currentExp = getCurrentExp();
+            
+            if (currentLevel >= 9) return;
+            
+            while (currentLevel < 9 && currentExp >= levelTable[currentLevel].expRequired) {
+                currentLevel++;
+                
+                const health = getHealth() + levelTable[currentLevel].hp;
+                const mana = getMana() + levelTable[currentLevel].mana;
+                const stamina = getStamina() + levelTable[currentLevel].stamina;
+                const freePoints = getFreePoints() + levelTable[currentLevel].points;
+                
+                setHealth(health);
+                setMana(mana);
+                setStamina(stamina);
+                setFreePoints(freePoints);
+                
+                currentExp = currentExp - levelTable[currentLevel-1].expRequired;
+                setCurrentExp(currentExp);
+                setCurrentLevel(currentLevel);
+                
+                alert(`🎉 Уровень повышен до ${currentLevel}!`);
+            }
+        }
+
+        function editLevel() {
+            const newLevel = prompt('Введите новый уровень (0-9):', getCurrentLevel());
+            if (newLevel && !isNaN(newLevel) && newLevel >= 0 && newLevel <= 9) {
+                setCurrentLevel(parseInt(newLevel));
+                updateStatsForLevel();
+                updateLevelDisplay();
+                saveCharacterData();
+            }
+        }
+
+        function updateStatsForLevel() {
+            const currentLevel = getCurrentLevel();
+            let totalHP = 100, totalMana = 100, totalStamina = 100;
+            
+            for (let i = 0; i <= currentLevel; i++) {
+                totalHP += levelTable[i].hp;
+                totalMana += levelTable[i].mana;
+                totalStamina += levelTable[i].stamina;
+            }
+            
+            setHealth(totalHP);
+            setMana(totalMana);
+            setStamina(totalStamina);
+        }
+
+        function convertExpToPoints() {
+            const currentExp = getCurrentExp();
+            const availablePoints = Math.floor(currentExp / 1000);
+            
+            if (availablePoints > 0) {
+                const expToConvert = availablePoints * 1000;
+                setCurrentExp(currentExp - expToConvert);
+                setFreePoints(getFreePoints() + availablePoints);
+                
+                alert(`💎 Конвертировано ${availablePoints} очков навыков!`);
+                updateLevelDisplay();
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        function updateLevelDisplay() {
+            const currentLevel = getCurrentLevel();
+            const currentExp = getCurrentExp();
+            const convertBtn = document.getElementById('convertBtn');
+            
+            document.getElementById('currentLevel').textContent = currentLevel;
+            document.getElementById('currentExp').value = currentExp;
+            
+            if (currentLevel < 9) {
+                document.getElementById('requiredExp').textContent = levelTable[currentLevel].expRequired;
+                convertBtn.style.display = 'none';
+            } else {
+                document.getElementById('requiredExp').textContent = 'MAX';
+                convertBtn.style.display = 'block';
+            }
+        }
+
+        function showLevelsTable() {
+            const currentLevel = getCurrentLevel();
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37; margin-bottom: 20px;">📊 Таблица уровней</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <tr><th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Ур.</th><th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Опыт</th><th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">ХП</th><th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Мана</th><th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Стамина</th><th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Очки</th></tr>
+                        ${Object.entries(levelTable).map(([level, data]) => `
+                            <tr style="${level == currentLevel ? 'background: #8b4513; font-weight: bold;' : ''}">
+                                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">${level}</td>
+                                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">${data.expRequired || 'MAX'}</td>
+                                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.hp}</td>
+                                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.mana}</td>
+                                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.stamina}</td>
+                                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.points}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Закрыть</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===
+        function changeStat(stat, value) {
+            const input = document.getElementById(stat);
+            let currentValue = parseInt(input.value) || 0;
+            let newValue = currentValue + value;
+            if (newValue < 0) newValue = 0;
+            input.value = newValue;
+            saveCharacterData();
+        }
+
+        function editFreePoints() {
+            const newPoints = prompt('Введите количество свободных очков:', getFreePoints());
+            if (newPoints && !isNaN(newPoints)) {
+                setFreePoints(parseInt(newPoints));
+                updateUI();
+                saveCharacterData();
             }
         }
 
@@ -1115,211 +1670,101 @@
             updateMagicSkillsDisplay();
         }
 
-        // ========== ИСПРАВЛЕННАЯ СИСТЕМА ЗАКЛИНАНИЙ ==========
-        
-        function loadSpells() {
-            try {
-                const saved = localStorage.getItem('characterSpells');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    Object.keys(spellsBySchool).forEach(school => {
-                        if (data[school]) {
-                            spellsBySchool[school] = data[school];
-                        }
-                    });
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки заклинаний:', error);
-            }
-        }
-
-        function saveSpells() {
-            try {
-                localStorage.setItem('characterSpells', JSON.stringify(spellsBySchool));
-            } catch (error) {
-                console.error('Ошибка сохранения заклинаний:', error);
-            }
-        }
-
-        function showSpells(schoolName) {
-            if (!availableMagicSchools[schoolName] && getSkillValue(schoolName) <= 5) {
-                alert('❌ Эта школа магии недоступна для вашей расы!');
-                return;
-            }
-            
-            const spells = spellsBySchool[schoolName] || [];
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-            
-            let spellsHTML = '';
-            if (spells.length > 0) {
-                spells.forEach((spell, index) => {
-                    spellsHTML += `
-                        <div class="spell-item">
-                            <div class="spell-header">
-                                <span class="spell-name">${spell.name}</span>
-                                <span class="spell-order">Порядок ${spell.order}</span>
-                            </div>
-                            <div class="spell-details">
-                                <p><strong>Эффект:</strong> ${spell.effect}</p>
-                                <p><strong>Тип:</strong> ${spell.type}</p>
-                                <p><strong>Условия:</strong> ${spell.conditions}</p>
-                                <p><strong>Длительность:</strong> ${spell.duration}</p>
-                                <p><strong>Затраты:</strong> ${spell.cost}</p>
-                            </div>
-                            <div class="spell-learned">
-                                <input type="checkbox" id="spell-${schoolName}-${index}" 
-                                       ${spell.learned ? 'checked' : ''} 
-                                       onchange="toggleSpellLearned('${schoolName}', ${index})">
-                                <label for="spell-${schoolName}-${index}" style="color: #e0d0c0;">Изучено</label>
-                            </div>
-                        </div>
-                    `;
-                });
-            } else {
-                spellsHTML = '<p style="text-align: center; color: #8b7d6b;">Заклинания не найдены</p>';
-            }
-            
-            popup.innerHTML = `
-                <div class="popup-content spells-content">
-                    <h2 style="color: #d4af37; text-align: center; margin-bottom: 20px;">🔮 ${schoolName}</h2>
-                    <div style="max-height: 60vh; overflow-y: auto;">
-                        ${spellsHTML}
-                    </div>
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Закрыть</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(popup);
-        }
-
-        function toggleSpellLearned(schoolName, spellIndex) {
-            try {
-                if (spellsBySchool[schoolName] && spellsBySchool[schoolName][spellIndex]) {
-                    spellsBySchool[schoolName][spellIndex].learned = 
-                        !spellsBySchool[schoolName][spellIndex].learned;
-                    saveSpells();
-                }
-            } catch (error) {
-                console.error('Ошибка переключения заклинания:', error);
-            }
-        }
-
-        // ========== ОСТАЛЬНЫЕ СИСТЕМЫ (с оптимизацией) ==========
-        
-        // [Остальной код остается таким же, но с добавленными обработками ошибок]
-        // Система рас, кубиков, заметок, инвентаря, уровней и т.д.
-
-        // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-        
-        function openTab(tabName) {
-            try {
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                document.getElementById(tabName + '-tab').classList.add('active');
-                event.currentTarget.classList.add('active');
-            } catch (error) {
-                console.error('Ошибка переключения вкладки:', error);
-            }
-        }
-
-        // Геттеры/сеттеры с обработкой ошибок
+        // Геттеры/сеттеры
         function getFreePoints() { 
-            try {
-                const element = document.getElementById('freePoints');
-                return element ? parseInt(element.value) || 0 : 0; 
-            } catch (error) {
-                return 0;
-            }
+            const element = document.getElementById('freePoints');
+            return element ? parseInt(element.value) || 0 : 0; 
         }
-        
         function setFreePoints(value) { 
-            try {
-                const element = document.getElementById('freePoints');
-                if (element) element.value = Math.max(0, value); 
-            } catch (error) {
-                console.error('Ошибка установки свободных очков:', error);
-            }
+            const element = document.getElementById('freePoints');
+            if (element) element.value = value; 
         }
-        
-        function getSkillValue(skillName) { 
-            try {
-                return parseInt(localStorage.getItem(`skill_${skillName}`)) || 5; 
-            } catch (error) {
-                return 5;
-            }
+        function getCurrentLevel() { return parseInt(localStorage.getItem('currentLevel')) || 0; }
+        function setCurrentLevel(value) { localStorage.setItem('currentLevel', value); }
+        function getCurrentExp() { return parseInt(localStorage.getItem('currentExp')) || 0; }
+        function setCurrentExp(value) { localStorage.setItem('currentExp', value); }
+        function getHealth() { 
+            const element = document.getElementById('health');
+            return element ? parseInt(element.value) || 100 : 100; 
         }
-        
-        function setSkillValue(skillName, value) { 
-            try {
-                localStorage.setItem(`skill_${skillName}`, Math.max(0, value)); 
-            } catch (error) {
-                console.error('Ошибка установки навыка:', error);
-            }
+        function setHealth(value) { 
+            const element = document.getElementById('health');
+            if (element) element.value = value; 
         }
+        function getMana() { 
+            const element = document.getElementById('mana');
+            return element ? parseInt(element.value) || 100 : 100; 
+        }
+        function setMana(value) { 
+            const element = document.getElementById('mana');
+            if (element) element.value = value; 
+        }
+        function getStamina() { 
+            const element = document.getElementById('stamina');
+            return element ? parseInt(element.value) || 100 : 100; 
+        }
+        function setStamina(value) { 
+            const element = document.getElementById('stamina');
+            if (element) element.value = value; 
+        }
+        function getSkillValue(skillName) { return parseInt(localStorage.getItem(`skill_${skillName}`)) || 5; }
+        function setSkillValue(skillName, value) { localStorage.setItem(`skill_${skillName}`, value); }
 
-        // [Остальные геттеры/сеттеры и функции...]
-
-        // Сохранение/загрузка данных
+        // Сохранение/загрузка
         function saveCharacterData() {
-            try {
-                const data = {
-                    characterName: document.getElementById('characterName').value,
-                    characterSurname: document.getElementById('characterSurname').value,
-                    characterTitle: document.getElementById('characterTitle').value,
-                    characterRace: document.getElementById('characterRace').value,
-                    characterHeritage: document.getElementById('characterHeritage').value,
-                    characterHeight: document.getElementById('characterHeight').value,
-                    characterWeight: document.getElementById('characterWeight').value,
-                    characterAge: document.getElementById('characterAge').value,
-                    health: getHealth(),
-                    mana: getMana(),
-                    stamina: getStamina(),
-                    freePoints: getFreePoints(),
-                    availableMagicSchools: availableMagicSchools
-                };
-                localStorage.setItem('characterData', JSON.stringify(data));
-            } catch (error) {
-                console.error('Ошибка сохранения персонажа:', error);
-            }
+            localStorage.setItem('characterName', document.getElementById('characterName').value);
+            localStorage.setItem('characterSurname', document.getElementById('characterSurname').value);
+            localStorage.setItem('characterTitle', document.getElementById('characterTitle').value);
+            localStorage.setItem('characterRace', document.getElementById('characterRace').value);
+            localStorage.setItem('characterHeritage', document.getElementById('characterHeritage').value);
+            localStorage.setItem('characterHeight', document.getElementById('characterHeight').value);
+            localStorage.setItem('characterWeight', document.getElementById('characterWeight').value);
+            localStorage.setItem('characterAge', document.getElementById('characterAge').value);
+            localStorage.setItem('availableMagicSchools', JSON.stringify(availableMagicSchools));
         }
 
         function loadCharacterData() {
-            try {
-                const saved = localStorage.getItem('characterData');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    document.getElementById('characterName').value = data.characterName || '';
-                    document.getElementById('characterSurname').value = data.characterSurname || '';
-                    document.getElementById('characterTitle').value = data.characterTitle || '';
-                    document.getElementById('characterRace').value = data.characterRace || '';
-                    document.getElementById('characterHeritage').value = data.characterHeritage || '';
-                    document.getElementById('characterHeight').value = data.characterHeight || '';
-                    document.getElementById('characterWeight').value = data.characterWeight || '';
-                    document.getElementById('characterAge').value = data.characterAge || '';
-                    
-                    setHealth(data.health || 100);
-                    setMana(data.mana || 100);
-                    setStamina(data.stamina || 100);
-                    setFreePoints(data.freePoints || 0);
-                    
-                    if (data.availableMagicSchools) {
-                        availableMagicSchools = data.availableMagicSchools;
-                    }
-                    
-                    if (data.characterRace) {
-                        document.getElementById('generateHeightBtn').disabled = true;
-                    }
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки персонажа:', error);
+            document.getElementById('characterName').value = localStorage.getItem('characterName') || '';
+            document.getElementById('characterSurname').value = localStorage.getItem('characterSurname') || '';
+            document.getElementById('characterTitle').value = localStorage.getItem('characterTitle') || '';
+            document.getElementById('characterRace').value = localStorage.getItem('characterRace') || '';
+            document.getElementById('characterHeritage').value = localStorage.getItem('characterHeritage') || '';
+            document.getElementById('characterHeight').value = localStorage.getItem('characterHeight') || '';
+            document.getElementById('characterWeight').value = localStorage.getItem('characterWeight') || '';
+            document.getElementById('characterAge').value = localStorage.getItem('characterAge') || '';
+            
+            const savedMagicSchools = localStorage.getItem('availableMagicSchools');
+            if (savedMagicSchools) {
+                availableMagicSchools = JSON.parse(savedMagicSchools);
+            }
+            
+            if (localStorage.getItem('characterRace')) {
+                document.getElementById('generateHeightBtn').disabled = true;
             }
         }
 
-        // [Остальные функции системы...]
-
+        // Слушатели
+        document.getElementById('characterName').addEventListener('input', saveCharacterData);
+        document.getElementById('characterSurname').addEventListener('input', saveCharacterData);
+        document.getElementById('characterTitle').addEventListener('input', saveCharacterData);
+        document.getElementById('characterRace').addEventListener('change', saveCharacterData);
+        document.getElementById('characterHeritage').addEventListener('input', saveCharacterData);
+        document.getElementById('characterHeight').addEventListener('input', saveCharacterData);
+        document.getElementById('characterWeight').addEventListener('input', saveCharacterData);
+        document.getElementById('characterAge').addEventListener('input', saveCharacterData);
+        document.getElementById('health').addEventListener('input', saveCharacterData);
+        document.getElementById('mana').addEventListener('input', saveCharacterData);
+        document.getElementById('stamina').addEventListener('input', saveCharacterData);
+        document.getElementById('freePoints').addEventListener('input', function() {
+            updateUI();
+            saveCharacterData();
+        });
+        document.getElementById('currentExp').addEventListener('input', function() {
+            setCurrentExp(parseInt(this.value) || 0);
+            checkLevelUp();
+            updateLevelDisplay();
+            saveCharacterData();
+        });
     </script>
 </body>
 </html>
