@@ -283,6 +283,15 @@
             color: #8b7d6b !important;
         }
 
+        .skill-locked {
+            opacity: 0.4;
+            color: #8b7d6b !important;
+            background: #3d2418;
+        }
+        .skill-locked .skill-value {
+            color: #8b7d6b !important;
+        }
+
         .spell-icon {
             cursor: pointer;
             margin-left: 10px;
@@ -392,6 +401,45 @@
         .note-actions {
             display: flex;
             gap: 10px;
+        }
+
+        .inventory-item {
+            background: #3d2418;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #d4af37;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .item-name {
+            font-weight: bold;
+            color: #d4af37;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .item-quantity {
+            background: #8b4513;
+            color: #e0d0c0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .item-description {
+            color: #b8a28a;
+            font-size: 0.95em;
+            line-height: 1.4;
+            margin-top: 8px;
+        }
+        .item-actions {
+            display: flex;
+            gap: 8px;
         }
 
         .search-box {
@@ -535,6 +583,11 @@
 
         <div id="inventory-tab" class="tab-content">
             <h2 style="color: #d4af37; text-align: center; margin-bottom: 25px;">🎒 ИНВЕНТАРЬ</h2>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn btn-plus" onclick="showAddItemPopup()">➕ Добавить предмет</button>
+            </div>
+            
             <input type="text" class="search-box" id="inventorySearch" placeholder="🔍 Поиск в инвентаре...">
             <div id="inventoryContainer"></div>
         </div>
@@ -963,7 +1016,7 @@
                 order: 3,
                 effect: "Маг, концентрируясь, испускает по земле волну острых и тонких, похожих на лезвия ледяных шипов, которые легко сломать. Волна идет во все стороны и ее радиус равен примерно 20 метрам. Высота шипов колеблется от 10 сантиметров - 40 сантиметров. лезвие наносит- 100 урона в секунду.",
                 type: "Заклятие, накладываемое на область",
-                conditions: "10 секунд концентрации, 6 волшебных жестов, 7 волшебных слов",
+                conditions: "10 секунд концентрации, 6 волшебных жестов, 7 волшебных слова",
                 duration: "Шипы ломаются через пять секунд после того как было применено заклинание. Повторное применение заклинания возможно только через 10 минут",
                 cost: "1000 манны",
                 learned: false
@@ -1013,7 +1066,7 @@
                 order: 2,
                 effect: "Маг вызывает облака горячего пара, которые начинают кружить вокруг него, попавший в такое облачко, сварится заживо. - 30 хп секунда восприятия - 10, 5 метров о мага - 15 метров от мага",
                 type: "Заклятие, накладываемое на область",
-                conditions: "10 секунд концентрации, 5 волшебных жестов",
+                conditions: "10 секунд концентрации, 5 волшебных жеста",
                 duration: "Облако кружат вокруг мага от 5 секунд до 25 секунд",
                 cost: "300 манны 700 манны",
                 learned: false
@@ -1086,12 +1139,16 @@
         // История бросков кубиков
         let diceHistory = [];
 
+        // Система блокировки навыков
+        let lockedSkills = {};
+
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
             loadCharacterData();
             loadNotes();
             loadInventory();
             loadSpells();
+            loadLockedSkills();
             renderSkills();
             renderInventory();
             renderNotes();
@@ -1259,6 +1316,26 @@
         }
 
         // === СИСТЕМА НАВЫКОВ ===
+        function loadLockedSkills() {
+            const saved = localStorage.getItem('lockedSkills');
+            if (saved) {
+                lockedSkills = JSON.parse(saved);
+            }
+        }
+
+        function saveLockedSkills() {
+            localStorage.setItem('lockedSkills', JSON.stringify(lockedSkills));
+        }
+
+        function isSkillLocked(skillName) {
+            return lockedSkills[skillName] || false;
+        }
+
+        function setSkillLocked(skillName, locked) {
+            lockedSkills[skillName] = locked;
+            saveLockedSkills();
+        }
+
         function renderSkills() {
             const container = document.getElementById('skillsContainer');
             if (!container) return;
@@ -1277,9 +1354,16 @@
                 skills.forEach(skill => {
                     const skillRow = document.createElement('div');
                     skillRow.className = 'skill-row';
+                    const isLocked = isSkillLocked(skill);
+                    if (isLocked) {
+                        skillRow.classList.add('skill-locked');
+                    }
                     
                     const spellIcon = groupName === "🔮 МАГИЯ" ? 
                         `<span class="spell-icon" onclick="showSpells('${skill}')" title="Просмотреть заклинания">🔮</span>` : '';
+                    
+                    const minusBtnDisabled = isLocked || getSkillValue(skill) <= 5;
+                    const plusBtnDisabled = isLocked || getFreePoints() <= 0;
                     
                     skillRow.innerHTML = `
                         <div class="skill-name">
@@ -1288,10 +1372,10 @@
                             ${spellIcon}
                         </div>
                         <div class="skill-controls">
-                            <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" disabled>-</button>
-                            <span class="skill-value" id="skill-${skill}">5</span>
-                            <button class="btn btn-plus" onclick="increaseSkill('${skill}')">+</button>
-                            <button class="btn btn-roll" onclick="rollSkill('${skill}')">Бросок</button>
+                            <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" ${minusBtnDisabled ? 'disabled' : ''}>-</button>
+                            <span class="skill-value" id="skill-${skill}">${getSkillValue(skill)}</span>
+                            <button class="btn btn-plus" onclick="increaseSkill('${skill}')" ${plusBtnDisabled ? 'disabled' : ''}>+</button>
+                            <button class="btn btn-roll" onclick="rollSkill('${skill}')" ${isLocked ? 'disabled' : ''}>Бросок</button>
                         </div>
                     `;
                     section.appendChild(skillRow);
@@ -1302,6 +1386,24 @@
         }
 
         function increaseSkill(skillName) {
+            // Проверка на блокировку
+            if (isSkillLocked(skillName)) {
+                const unlock = confirm(
+                    `🔒 Навык "${skillName}" заблокирован!\n\n` +
+                    `Вы хотите разблокировать этот навык?\n` +
+                    `После разблокировки навык вернется к 5 уровню.`
+                );
+                
+                if (unlock) {
+                    setSkillLocked(skillName, false);
+                    setSkillValue(skillName, 5);
+                    renderSkills();
+                    updateUI();
+                    saveCharacterData();
+                }
+                return;
+            }
+            
             // Проверка на доступность магии для ВСЕХ рас
             const isMagicSkill = skillsStructure["🔮 МАГИЯ"].includes(skillName);
             if (isMagicSkill && !availableMagicSchools[skillName] && getSkillValue(skillName) <= 5) {
@@ -1333,7 +1435,28 @@
         }
 
         function decreaseSkill(skillName) {
+            // Проверка на блокировку
+            if (isSkillLocked(skillName)) {
+                return;
+            }
+            
             const skillValue = getSkillValue(skillName);
+            if (skillValue === 5) {
+                const lock = confirm(
+                    `🔒 Вы пытаетесь понизить навык "${skillName}" до 4 уровня.\n\n` +
+                    `Это заблокирует навык и сделает его недоступным для использования.\n` +
+                    `Вы уверены, что хотите заблокировать этот навык?`
+                );
+                
+                if (lock) {
+                    setSkillLocked(skillName, true);
+                    renderSkills();
+                    updateUI();
+                    saveCharacterData();
+                }
+                return;
+            }
+            
             if (skillValue > 5) {
                 const freePoints = getFreePoints();
                 setSkillValue(skillName, skillValue - 1);
@@ -1344,6 +1467,11 @@
         }
 
         function rollSkill(skillName) {
+            if (isSkillLocked(skillName)) {
+                alert('❌ Этот навык заблокирован и недоступен для использования!');
+                return;
+            }
+            
             const skillValue = getSkillValue(skillName);
             const roll1 = Math.floor(Math.random() * 6) + 1;
             const roll2 = Math.floor(Math.random() * 6) + 1;
@@ -1705,6 +1833,143 @@
             localStorage.setItem('inventoryData', JSON.stringify(inventory));
         }
 
+        function showAddItemPopup() {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37;">Добавить предмет</h2>
+                    <input type="text" id="itemName" placeholder="Название предмета" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    
+                    <select id="itemCategory" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                        <option value="weapons">⚔️ Оружие</option>
+                        <option value="armor">🛡️ Броня</option>
+                        <option value="potions">🧪 Зелья</option>
+                        <option value="scrolls">📜 Свитки</option>
+                        <option value="resources">💎 Ресурсы</option>
+                        <option value="valuables">💰 Ценности</option>
+                        <option value="tools">🔧 Инструменты</option>
+                        <option value="other">🎒 Прочее</option>
+                    </select>
+                    
+                    <input type="number" id="itemQuantity" placeholder="Количество" value="1" min="1" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    
+                    <textarea id="itemDescription" placeholder="Описание предмета (опционально)" style="width: 100%; height: 120px; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0; resize: vertical;"></textarea>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-plus" onclick="addItem()">Добавить</button>
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        function addItem() {
+            const name = document.getElementById('itemName').value.trim();
+            const category = document.getElementById('itemCategory').value;
+            const quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
+            const description = document.getElementById('itemDescription').value.trim();
+            
+            if (!name) {
+                alert('Введите название предмета!');
+                return;
+            }
+            
+            if (!inventory[category]) {
+                inventory[category] = [];
+            }
+            
+            inventory[category].push({
+                id: Date.now(),
+                name,
+                quantity,
+                description,
+                expanded: false
+            });
+            
+            saveInventory();
+            renderInventory();
+            document.querySelector('.popup').remove();
+        }
+
+        function editItem(category, index) {
+            const item = inventory[category][index];
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <h2 style="color: #d4af37;">Редактировать предмет</h2>
+                    <input type="text" id="editItemName" value="${item.name}" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    
+                    <select id="editItemCategory" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                        <option value="weapons" ${category === 'weapons' ? 'selected' : ''}>⚔️ Оружие</option>
+                        <option value="armor" ${category === 'armor' ? 'selected' : ''}>🛡️ Броня</option>
+                        <option value="potions" ${category === 'potions' ? 'selected' : ''}>🧪 Зелья</option>
+                        <option value="scrolls" ${category === 'scrolls' ? 'selected' : ''}>📜 Свитки</option>
+                        <option value="resources" ${category === 'resources' ? 'selected' : ''}>💎 Ресурсы</option>
+                        <option value="valuables" ${category === 'valuables' ? 'selected' : ''}>💰 Ценности</option>
+                        <option value="tools" ${category === 'tools' ? 'selected' : ''}>🔧 Инструменты</option>
+                        <option value="other" ${category === 'other' ? 'selected' : ''}>🎒 Прочее</option>
+                    </select>
+                    
+                    <input type="number" id="editItemQuantity" value="${item.quantity}" min="1" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    
+                    <textarea id="editItemDescription" style="width: 100%; height: 120px; padding: 10px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0; resize: vertical;">${item.description}</textarea>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn btn-plus" onclick="saveEditedItem('${category}', ${index})">Сохранить</button>
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        function saveEditedItem(oldCategory, index) {
+            const name = document.getElementById('editItemName').value.trim();
+            const newCategory = document.getElementById('editItemCategory').value;
+            const quantity = parseInt(document.getElementById('editItemQuantity').value) || 1;
+            const description = document.getElementById('editItemDescription').value.trim();
+            
+            if (!name) {
+                alert('Введите название предмета!');
+                return;
+            }
+            
+            // Удаляем предмет из старой категории
+            const item = inventory[oldCategory].splice(index, 1)[0];
+            
+            // Обновляем данные предмета
+            item.name = name;
+            item.quantity = quantity;
+            item.description = description;
+            
+            // Добавляем в новую категорию
+            if (!inventory[newCategory]) {
+                inventory[newCategory] = [];
+            }
+            inventory[newCategory].push(item);
+            
+            saveInventory();
+            renderInventory();
+            document.querySelector('.popup').remove();
+        }
+
+        function deleteItem(category, index) {
+            if (confirm('Удалить этот предмет?')) {
+                inventory[category].splice(index, 1);
+                saveInventory();
+                renderInventory();
+            }
+        }
+
+        function toggleItemExpand(category, index) {
+            inventory[category][index].expanded = !inventory[category][index].expanded;
+            saveInventory();
+            renderInventory();
+        }
+
         function renderInventory() {
             const container = document.getElementById('inventoryContainer');
             const searchTerm = document.getElementById('inventorySearch').value.toLowerCase();
@@ -1715,8 +1980,7 @@
                 if (searchTerm) {
                     filteredItems = items.filter(item => 
                         item.name.toLowerCase().includes(searchTerm) ||
-                        (item.details && item.details.toLowerCase().includes(searchTerm)) ||
-                        (item.quantity && item.quantity.toString().includes(searchTerm))
+                        (item.description && item.description.toLowerCase().includes(searchTerm))
                     );
                 }
                 
@@ -1726,14 +1990,28 @@
                     <div class="skills-section">
                         <div class="section-title">${getCategoryName(category)}</div>
                         ${filteredItems.map((item, index) => `
-                            <div class="skill-row">
-                                <div class="skill-name">
-                                    <span>${getCategoryIcon(category)}</span>
-                                    <span>${item.name} ${item.quantity ? '×' + item.quantity : ''}</span>
+                            <div class="inventory-item">
+                                <div class="item-header">
+                                    <div class="item-name">
+                                        ${getCategoryIcon(category)}
+                                        ${item.name}
+                                        ${item.quantity > 1 ? `<span class="item-quantity">×${item.quantity}</span>` : ''}
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="btn btn-small" onclick="editItem('${category}', ${index})" style="background: #3498db;">✏️</button>
+                                        <button class="btn btn-small" onclick="deleteItem('${category}', ${index})" style="background: #c44536;">❌</button>
+                                        ${item.description ? `
+                                            <button class="btn btn-small" onclick="toggleItemExpand('${category}', ${index})" style="background: #8b4513;">
+                                                ${item.expanded ? '▼' : '▶'}
+                                            </button>
+                                        ` : ''}
+                                    </div>
                                 </div>
-                                <div class="skill-controls">
-                                    <span style="color: #b8a28a;">${item.details || ''}</span>
-                                </div>
+                                ${item.description && item.expanded ? `
+                                    <div class="item-description">
+                                        ${item.description}
+                                    </div>
+                                ` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -1920,12 +2198,24 @@
             document.querySelectorAll('.skill-row').forEach(row => {
                 const skillName = row.querySelector('.skill-name span:nth-child(2)').textContent;
                 const skillValue = getSkillValue(skillName);
+                const isLocked = isSkillLocked(skillName);
                 const minusBtn = row.querySelector('.btn-minus');
                 const plusBtn = row.querySelector('.btn-plus');
+                const rollBtn = row.querySelector('.btn-roll');
                 
                 row.querySelector('.skill-value').textContent = skillValue;
-                minusBtn.disabled = skillValue <= 5;
-                plusBtn.disabled = freePoints <= 0;
+                
+                if (isLocked) {
+                    minusBtn.disabled = true;
+                    plusBtn.disabled = false; // Плюс активен для разблокировки
+                    rollBtn.disabled = true;
+                    row.classList.add('skill-locked');
+                } else {
+                    minusBtn.disabled = skillValue <= 5;
+                    plusBtn.disabled = freePoints <= 0;
+                    rollBtn.disabled = false;
+                    row.classList.remove('skill-locked');
+                }
             });
             
             updateMagicSkillsDisplay();
