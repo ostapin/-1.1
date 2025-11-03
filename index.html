@@ -1211,7 +1211,41 @@
         // ========== НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ НОВЫХ ФУНКЦИЙ ==========
         let lockedSkills = {};
         let customCategories = [];
+// ========== НОВАЯ СИСТЕМА ИСТОРИИ БРОСКОВ ПО НАВЫКАМ ==========
+let skillRollHistory = {};
 
+function loadSkillRollHistory() {
+    const saved = localStorage.getItem('skillRollHistory');
+    if (saved) {
+        skillRollHistory = JSON.parse(saved);
+    }
+}
+
+function saveSkillRollHistory() {
+    localStorage.setItem('skillRollHistory', JSON.stringify(skillRollHistory));
+}
+
+function addToSkillHistory(skillName, rollData) {
+    if (!skillRollHistory[skillName]) {
+        skillRollHistory[skillName] = [];
+    }
+    
+    skillRollHistory[skillName].unshift({
+        timestamp: new Date().toLocaleTimeString(),
+        ...rollData
+    });
+    
+    // Ограничиваем историю 10 записями на навык
+    if (skillRollHistory[skillName].length > 10) {
+        skillRollHistory[skillName].pop();
+    }
+    
+    saveSkillRollHistory();
+}
+
+function getSkillHistory(skillName) {
+    return skillRollHistory[skillName] || [];
+}
         // ========== СУЩЕСТВУЮЩИЕ ФУНКЦИИ (НАЧАЛО) ==========
         
         // Система блокировки навыков
@@ -2587,7 +2621,40 @@
             updateMagicSkillsDisplay();
         }
 
-        function showRollResult(skillName, skillValue, dice, total, resultText, resultClass) {
+               function showRollResult(skillName, skillValue, dice, total, resultText, resultClass) {
+            // Добавляем бросок в историю
+            addToSkillHistory(skillName, {
+                skillValue: skillValue,
+                dice: dice,
+                total: total,
+                result: resultText,
+                success: resultClass === "success"
+            });
+            
+            const history = getSkillHistory(skillName);
+            let historyHTML = '';
+            
+            if (history.length > 0) {
+                historyHTML = `
+                    <div style="margin-top: 20px; border-top: 2px solid #5a3928; padding-top: 15px;">
+                        <h4 style="color: #d4af37; margin-bottom: 10px;">📊 История бросков (${history.length}/10):</h4>
+                        <div style="max-height: 150px; overflow-y: auto;">
+                `;
+                
+                history.forEach((roll, index) => {
+                    const successIcon = roll.success ? '✅' : '❌';
+                    historyHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #3d2418;">
+                            <span style="font-size: 0.9em;">${roll.timestamp}</span>
+                            <span style="font-size: 0.9em;">${roll.dice.join('+')}=${roll.total}</span>
+                            <span>${successIcon}</span>
+                        </div>
+                    `;
+                });
+                
+                historyHTML += `</div></div>`;
+            }
+            
             const popup = document.createElement('div');
             popup.className = 'popup';
             popup.innerHTML = `
@@ -2600,7 +2667,13 @@
                     </div>
                     <div style="font-size: 1.5em; margin: 20px 0; color: #e0d0c0;">${dice.join(' + ')} = ${total}</div>
                     <div class="${resultClass}">${resultText}</div>
-                    <button class="btn btn-roll" onclick="this.closest('.popup').remove()" style="margin-top: 20px;">Закрыть</button>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                        <button class="btn btn-roll" onclick="rollSkill('${skillName}'); this.closest('.popup').remove();">🎲 Кинуть еще</button>
+                        <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Закрыть</button>
+                    </div>
+                    
+                    ${historyHTML}
                 </div>
             `;
             document.body.appendChild(popup);
@@ -2704,3 +2777,4 @@
     </script>
 </body>
 </html>
+
