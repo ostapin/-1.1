@@ -334,12 +334,13 @@
                             <div class="category-section">
                                 <div class="category-header">
                                     <h3>${category.name}</h3>
-                                    ${category.editable ? `
-                                        <div class="item-actions">
+                                    <div class="item-actions">
+                                        <button class="btn btn-small" onclick="addItemToCategory('${category.id}')" style="background: #27ae60;">➕</button>
+                                        ${category.editable ? `
                                             <button class="btn btn-small" onclick="editCategory('${category.id}')">✏️</button>
                                             <button class="btn btn-small" onclick="deleteCategory('${category.id}')" style="background: #e74c3c;">❌</button>
-                                        </div>
-                                    ` : ''}
+                                        ` : ''}
+                                    </div>
                                 </div>
                                 <div class="category-items" id="items-${category.id}">
                                     ${renderCategoryItems(category.id)}
@@ -447,31 +448,47 @@
         }
 
         function addItem() {
-            const categoryId = prompt('Введите ID категории для предмета:\n' + 
-                inventoryCategories.map(cat => `${cat.name} (${cat.id})`).join('\n'));
+            // Показываем выбор категории
+            let categoryOptions = '';
+            inventoryCategories.forEach(category => {
+                categoryOptions += `<option value="${category.id}">${category.name}</option>`;
+            });
             
-            if (categoryId && inventoryCategories.find(cat => cat.id === categoryId)) {
-                const name = prompt('Название предмета:');
-                if (name) {
-                    const details = prompt('Описание предмета (необязательно):') || '';
-                    const quantity = prompt('Количество (необязательно):') || '';
-                    
-                    if (!inventory[categoryId]) {
-                        inventory[categoryId] = [];
-                    }
-                    
-                    inventory[categoryId].push({
-                        name: name,
-                        details: details,
-                        quantity: quantity,
-                        added: new Date().toLocaleDateString()
-                    });
-                    
-                    saveInventory();
-                    renderInventory();
+            const categoryId = prompt(`Выберите категорию:\n\n${inventoryCategories.map((cat, index) => `${index + 1}. ${cat.name}`).join('\n')}\n\nВведите номер категории:`);
+            
+            if (categoryId) {
+                const categoryIndex = parseInt(categoryId) - 1;
+                if (categoryIndex >= 0 && categoryIndex < inventoryCategories.length) {
+                    const selectedCategory = inventoryCategories[categoryIndex];
+                    addItemToCategory(selectedCategory.id);
+                } else {
+                    alert('Неверный номер категории!');
                 }
-            } else {
-                alert('Категория не найдена!');
+            }
+        }
+
+        function addItemToCategory(categoryId) {
+            const category = inventoryCategories.find(cat => cat.id === categoryId);
+            if (!category) return;
+            
+            const name = prompt(`Добавить предмет в категорию "${category.name}":\n\nНазвание предмета:`);
+            if (name) {
+                const details = prompt('Описание предмета (необязательно):') || '';
+                const quantity = prompt('Количество (необязательно):') || '1';
+                
+                if (!inventory[categoryId]) {
+                    inventory[categoryId] = [];
+                }
+                
+                inventory[categoryId].push({
+                    name: name,
+                    details: details,
+                    quantity: quantity,
+                    added: new Date().toLocaleDateString()
+                });
+                
+                saveInventory();
+                renderInventory();
             }
         }
 
