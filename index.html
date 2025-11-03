@@ -502,9 +502,115 @@
             }
         }
 
-        // === ОСТАЛЬНОЙ КОД (система персонажа, бросков, уровней) ===
-        // [Здесь должен быть весь предыдущий код системы персонажа...]
-        // Из-за ограничения длины оставлю основные функции, но в реальном файле будет полный код
+        // === СИСТЕМА ПЕРСОНАЖА ===
+        function renderSkills() {
+            const container = document.getElementById('skillsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            for (const [groupName, skills] of Object.entries(skillsStructure)) {
+                const section = document.createElement('div');
+                section.className = 'skills-section';
+                
+                const title = document.createElement('div');
+                title.className = 'section-title';
+                title.innerHTML = groupName;
+                section.appendChild(title);
+
+                skills.forEach(skill => {
+                    const skillRow = document.createElement('div');
+                    skillRow.className = 'skill-row';
+                    skillRow.innerHTML = `
+                        <div class="skill-name"><span>🎯</span><span>${skill}</span></div>
+                        <div class="skill-controls">
+                            <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" disabled>-</button>
+                            <span class="skill-value" id="skill-${skill}">5</span>
+                            <button class="btn btn-plus" onclick="increaseSkill('${skill}')">+</button>
+                            <button class="btn btn-roll" onclick="rollSkill('${skill}')">Бросок</button>
+                        </div>
+                    `;
+                    section.appendChild(skillRow);
+                });
+                container.appendChild(section);
+            }
+            updateUI();
+        }
+
+        // Система навыков
+        function increaseSkill(skillName) {
+            saveStateToHistory();
+            const freePoints = getFreePoints();
+            if (freePoints > 0) {
+                const skillValue = getSkillValue(skillName);
+                setSkillValue(skillName, skillValue + 1);
+                setFreePoints(freePoints - 1);
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        function decreaseSkill(skillName) {
+            saveStateToHistory();
+            const skillValue = getSkillValue(skillName);
+            if (skillValue > 5) {
+                const freePoints = getFreePoints();
+                setSkillValue(skillName, skillValue - 1);
+                setFreePoints(freePoints + 1);
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        // Система бросков
+        function rollSkill(skillName) {
+            const skillValue = getSkillValue(skillName);
+            const roll1 = Math.floor(Math.random() * 6) + 1;
+            const roll2 = Math.floor(Math.random() * 6) + 1;
+            const roll3 = Math.floor(Math.random() * 6) + 1;
+            const totalRoll = roll1 + roll2 + roll3;
+
+            let resultType, resultText, resultClass;
+            if (totalRoll === 3 || totalRoll === 4) {
+                resultText = "💫 КРИТИЧЕСКИЙ УСПЕХ!";
+                resultClass = "critical-success";
+            } else if (totalRoll === 17 || totalRoll === 18) {
+                resultText = "💥 КРИТИЧЕСКИЙ ПРОВАЛ!";
+                resultClass = "critical-failure";
+            } else if (totalRoll <= skillValue) {
+                resultText = "✅ УСПЕХ!";
+                resultClass = "success";
+            } else {
+                resultText = "❌ НЕУДАЧА!";
+                resultClass = "failure";
+            }
+
+            addToRollHistory(skillName, [roll1, roll2, roll3], totalRoll, totalRoll <= skillValue);
+            showRollResult(skillName, skillValue, [roll1, roll2, roll3], totalRoll, resultText, resultClass);
+        }
+
+        function showRollResult(skillName, skillValue, dice, total, resultText, resultClass) {
+            const popup = document.createElement('div');
+            popup.className = 'result-popup';
+            popup.innerHTML = `
+                <div class="result-content">
+                    <h2>Бросок на "${skillName}" (${skillValue})</h2>
+                    <div class="dice-rolls">
+                        <div class="dice">${dice[0]}</div>
+                        <div class="dice">${dice[1]}</div>
+                        <div class="dice">${dice[2]}</div>
+                    </div>
+                    <div style="font-size: 1.5em; margin: 15px 0;">${dice.join(' + ')} = ${total}</div>
+                    <div class="${resultClass}">${resultText}</div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn" onclick="rollSkill('${skillName}'); this.closest('.result-popup').remove()" style="background: #3498db; color: white;">🎲 Бросить ещё</button>
+                        <button class="btn" onclick="showRollHistory('${skillName}')" style="background: #9b59b6; color: white;">📜 История</button>
+                        <button class="btn" onclick="this.closest('.result-popup').remove()" style="background: #34495e; color: white;">Закрыть</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
 
         function loadRollHistory() {
             const saved = localStorage.getItem('rollHistory');
@@ -560,9 +666,333 @@
             document.body.appendChild(popup);
         }
 
-        // Остальные функции системы персонажа...
-        // [Здесь должен быть полный код из предыдущих версий]
+        // Система уровней
+        function addExperience() {
+            saveStateToHistory();
+            const expToAdd = prompt('Сколько опыта добавить?');
+            if (expToAdd && !isNaN(expToAdd)) {
+                let currentExp = getCurrentExp();
+                const currentLevel = getCurrentLevel();
+                
+                currentExp += parseInt(expToAdd);
+                setCurrentExp(currentExp);
+                
+                checkLevelUp();
+                updateLevelDisplay();
+                saveCharacterData();
+            }
+        }
 
+        function checkLevelUp() {
+            let currentLevel = getCurrentLevel();
+            let currentExp = getCurrentExp();
+            
+            if (currentLevel >= 9) return;
+            
+            while (currentLevel < 9 && currentExp >= levelTable[currentLevel].expRequired) {
+                currentLevel++;
+                
+                const health = getHealth() + levelTable[currentLevel].hp;
+                const mana = getMana() + levelTable[currentLevel].mana;
+                const stamina = getStamina() + levelTable[currentLevel].stamina;
+                const freePoints = getFreePoints() + levelTable[currentLevel].points;
+                
+                setHealth(health);
+                setMana(mana);
+                setStamina(stamina);
+                setFreePoints(freePoints);
+                
+                currentExp = currentExp - levelTable[currentLevel-1].expRequired;
+                setCurrentExp(currentExp);
+                
+                setCurrentLevel(currentLevel);
+                
+                showMessage(`🎉 Уровень повышен до ${currentLevel}!`);
+            }
+        }
+
+        function editLevel() {
+            saveStateToHistory();
+            const newLevel = prompt('Введите новый уровень (0-9):', getCurrentLevel());
+            if (newLevel && !isNaN(newLevel) && newLevel >= 0 && newLevel <= 9) {
+                setCurrentLevel(parseInt(newLevel));
+                updateStatsForLevel();
+                updateLevelDisplay();
+                saveCharacterData();
+            }
+        }
+
+        function updateStatsForLevel() {
+            const currentLevel = getCurrentLevel();
+            let totalHP = 100, totalMana = 100, totalStamina = 100;
+            
+            for (let i = 0; i <= currentLevel; i++) {
+                totalHP += levelTable[i].hp;
+                totalMana += levelTable[i].mana;
+                totalStamina += levelTable[i].stamina;
+            }
+            
+            setHealth(totalHP);
+            setMana(totalMana);
+            setStamina(totalStamina);
+        }
+
+        function convertExpToPoints() {
+            saveStateToHistory();
+            const currentExp = getCurrentExp();
+            const availablePoints = Math.floor(currentExp / 1000);
+            
+            if (availablePoints > 0) {
+                const expToConvert = availablePoints * 1000;
+                setCurrentExp(currentExp - expToConvert);
+                setFreePoints(getFreePoints() + availablePoints);
+                
+                showMessage(`💎 Конвертировано ${availablePoints} очков навыков!`);
+                updateLevelDisplay();
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        function updateLevelDisplay() {
+            const currentLevel = getCurrentLevel();
+            const currentExp = getCurrentExp();
+            const convertBtn = document.getElementById('convertBtn');
+            const convertInfo = document.getElementById('convertInfo');
+            
+            document.getElementById('currentLevel').textContent = currentLevel;
+            document.getElementById('currentExp').value = currentExp;
+            
+            if (currentLevel < 9) {
+                document.getElementById('requiredExp').textContent = levelTable[currentLevel].expRequired;
+                convertBtn.style.display = 'none';
+                convertInfo.style.display = 'none';
+            } else {
+                document.getElementById('requiredExp').textContent = 'MAX';
+                convertBtn.style.display = 'block';
+                convertInfo.style.display = 'block';
+            }
+        }
+
+        function showLevelsTable() {
+            const currentLevel = getCurrentLevel();
+            const popup = document.createElement('div');
+            popup.className = 'levels-popup';
+            popup.innerHTML = `
+                <div class="levels-content">
+                    <h2>📊 Таблица уровней</h2>
+                    <table class="levels-table">
+                        <tr><th>Ур.</th><th>Опыт</th><th>ХП</th><th>Мана</th><th>Стамина</th><th>Очки</th></tr>
+                        ${Object.entries(levelTable).map(([level, data]) => `
+                            <tr class="${level == currentLevel ? 'current-level' : ''}">
+                                <td>${level}</td>
+                                <td>${data.expRequired || 'MAX'}</td>
+                                <td>+${data.hp}</td>
+                                <td>+${data.mana}</td>
+                                <td>+${data.stamina}</td>
+                                <td>+${data.points}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <button class="btn close-btn" onclick="this.closest('.levels-popup').remove()" style="background: #34495e; color: white; padding: 10px 25px; margin-top: 15px;">Закрыть</button>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+        // Система характеристик
+        function changeStat(stat, value) {
+            saveStateToHistory();
+            const input = document.getElementById(stat);
+            let currentValue = parseInt(input.value) || 0;
+            let newValue = currentValue + value;
+            
+            if (newValue < 0) newValue = 0;
+            
+            input.value = newValue;
+            saveCharacterData();
+        }
+
+        function editFreePoints() {
+            saveStateToHistory();
+            const newPoints = prompt('Введите количество свободных очков:', getFreePoints());
+            if (newPoints && !isNaN(newPoints)) {
+                setFreePoints(parseInt(newPoints));
+                updateUI();
+                saveCharacterData();
+            }
+        }
+
+        // История действий
+        function saveStateToHistory() {
+            const state = {
+                level: getCurrentLevel(),
+                exp: getCurrentExp(),
+                health: getHealth(),
+                mana: getMana(),
+                stamina: getStamina(),
+                freePoints: getFreePoints(),
+                skills: {}
+            };
+
+            for (const group of Object.values(skillsStructure)) {
+                for (const skill of group) {
+                    state.skills[skill] = getSkillValue(skill);
+                }
+            }
+
+            actionHistory = actionHistory.slice(0, currentHistoryIndex + 1);
+            actionHistory.push(state);
+            currentHistoryIndex = actionHistory.length - 1;
+            updateHistoryButtons();
+        }
+
+        function undo() {
+            if (currentHistoryIndex > 0) {
+                currentHistoryIndex--;
+                loadStateFromHistory();
+            }
+        }
+
+        function redo() {
+            if (currentHistoryIndex < actionHistory.length - 1) {
+                currentHistoryIndex++;
+                loadStateFromHistory();
+            }
+        }
+
+        function loadStateFromHistory() {
+            const state = actionHistory[currentHistoryIndex];
+            
+            setCurrentLevel(state.level);
+            setCurrentExp(state.exp);
+            setHealth(state.health);
+            setMana(state.mana);
+            setStamina(state.stamina);
+            setFreePoints(state.freePoints);
+            
+            for (const [skill, value] of Object.entries(state.skills)) {
+                setSkillValue(skill, value);
+            }
+            
+            updateLevelDisplay();
+            updateUI();
+            updateHistoryButtons();
+        }
+
+        function updateHistoryButtons() {
+            const undoBtn = document.getElementById('undoBtn');
+            const redoBtn = document.getElementById('redoBtn');
+            if (undoBtn && redoBtn) {
+                undoBtn.disabled = currentHistoryIndex <= 0;
+                redoBtn.disabled = currentHistoryIndex >= actionHistory.length - 1;
+            }
+        }
+
+        // Вспомогательные функции
+        function updateUI() {
+            const freePoints = getFreePoints();
+            const warning = document.getElementById('pointsWarning');
+            if (warning) {
+                warning.style.display = freePoints === 0 ? 'block' : 'none';
+            }
+            
+            document.querySelectorAll('.skill-row').forEach(row => {
+                const skillName = row.querySelector('.skill-name span:nth-child(2)').textContent;
+                const skillValue = getSkillValue(skillName);
+                const minusBtn = row.querySelector('.btn-minus');
+                const plusBtn = row.querySelector('.btn-plus');
+                
+                row.querySelector('.skill-value').textContent = skillValue;
+                minusBtn.disabled = skillValue <= 5;
+                plusBtn.disabled = freePoints <= 0;
+            });
+        }
+
+        function showMessage(text) {
+            alert(text);
+        }
+
+        // Геттеры/сеттеры
+        function getFreePoints() { 
+            const element = document.getElementById('freePoints');
+            return element ? parseInt(element.value) || 0 : 0; 
+        }
+
+        function setFreePoints(value) { 
+            const element = document.getElementById('freePoints');
+            if (element) element.value = value; 
+        }
+
+        function getCurrentLevel() { return parseInt(localStorage.getItem('currentLevel')) || 0; }
+        function setCurrentLevel(value) { localStorage.setItem('currentLevel', value); }
+
+        function getCurrentExp() { return parseInt(localStorage.getItem('currentExp')) || 0; }
+        function setCurrentExp(value) { localStorage.setItem('currentExp', value); }
+
+        function getHealth() { 
+            const element = document.getElementById('health');
+            return element ? parseInt(element.value) || 100 : 100; 
+        }
+
+        function setHealth(value) { 
+            const element = document.getElementById('health');
+            if (element) element.value = value; 
+        }
+
+        function getMana() { 
+            const element = document.getElementById('mana');
+            return element ? parseInt(element.value) || 100 : 100; 
+        }
+
+        function setMana(value) { 
+            const element = document.getElementById('mana');
+            if (element) element.value = value; 
+        }
+
+        function getStamina() { 
+            const element = document.getElementById('stamina');
+            return element ? parseInt(element.value) || 100 : 100; 
+        }
+
+        function setStamina(value) { 
+            const element = document.getElementById('stamina');
+            if (element) element.value = value; 
+        }
+
+        function getSkillValue(skillName) { return parseInt(localStorage.getItem(`skill_${skillName}`)) || 5; }
+        function setSkillValue(skillName, value) { localStorage.setItem(`skill_${skillName}`, value); }
+
+        // Сохранение/загрузка
+        function saveCharacterData() {
+            localStorage.setItem('characterName', document.getElementById('characterName').value);
+            localStorage.setItem('characterSurname', document.getElementById('characterSurname').value);
+            localStorage.setItem('characterTitle', document.getElementById('characterTitle').value);
+        }
+
+        function loadCharacterData() {
+            document.getElementById('characterName').value = localStorage.getItem('characterName') || '';
+            document.getElementById('characterSurname').value = localStorage.getItem('characterSurname') || '';
+            document.getElementById('characterTitle').value = localStorage.getItem('characterTitle') || '';
+        }
+
+        // Слушатели
+        document.getElementById('characterName').addEventListener('input', saveCharacterData);
+        document.getElementById('characterSurname').addEventListener('input', saveCharacterData);
+        document.getElementById('characterTitle').addEventListener('input', saveCharacterData);
+        document.getElementById('health').addEventListener('input', saveCharacterData);
+        document.getElementById('mana').addEventListener('input', saveCharacterData);
+        document.getElementById('stamina').addEventListener('input', saveCharacterData);
+        document.getElementById('freePoints').addEventListener('input', function() {
+            updateUI();
+            saveCharacterData();
+        });
+        document.getElementById('currentExp').addEventListener('input', function() {
+            setCurrentExp(parseInt(this.value) || 0);
+            checkLevelUp();
+            updateLevelDisplay();
+            saveCharacterData();
+        });
     </script>
 </body>
 </html>
