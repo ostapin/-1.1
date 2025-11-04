@@ -482,6 +482,18 @@
             flex-wrap: wrap;
         }
 
+        .character-item {
+            background: #3d2418;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid #8b4513;
+        }
+        .character-item.active {
+            border-left-color: #27ae60;
+            background: #2c4d2c;
+        }
+
         @media (max-width: 768px) {
             .character-info, .stat-row, .skill-row { flex-direction: column; gap: 12px; }
             .skill-controls { width: 100%; justify-content: space-between; }
@@ -507,14 +519,13 @@
 <body>
     <div class="container">
         <div class="tabs">
-    <button class="tab-btn active" onclick="openTab('character')">🧙 Персонаж</button>
-    <button class="tab-btn" onclick="openTab('generator')">🎲 Генератор</button>
-    <button class="tab-btn" onclick="openTab('inventory')">🎒 Инвентарь</button>
-    <button class="tab-btn" onclick="openTab('dice')">🎲 Кубики</button>
-    <button class="tab-btn" onclick="openTab('notes')">✍️ Заметки</button>
-    <!-- 👇 ДОБАВЛЯЕМ ЭТУ СТРОКУ 👇 -->
-    <button class="tab-btn" onclick="openTab('characters')">👥 Персонажи</button>
-</div>
+            <button class="tab-btn active" onclick="openTab('character')">🧙 Персонаж</button>
+            <button class="tab-btn" onclick="openTab('generator')">🎲 Генератор</button>
+            <button class="tab-btn" onclick="openTab('inventory')">🎒 Инвентарь</button>
+            <button class="tab-btn" onclick="openTab('dice')">🎲 Кубики</button>
+            <button class="tab-btn" onclick="openTab('notes')">✍️ Заметки</button>
+            <button class="tab-btn" onclick="openTab('characters')">👥 Персонажи</button>
+        </div>
 
         <!-- Вкладка персонажа -->
         <div id="character-tab" class="tab-content active">
@@ -769,11 +780,8 @@
             
             <div class="notes-container" id="notesContainer"></div>
         </div>
-           <div id="notes-tab" class="tab-content">
-            <!-- ... существующий код заметок ... -->
-        </div>
 
-        <!-- 👇 ДОБАВЛЯЕМ ЭТУ НОВУЮ ВКЛАДКУ 👇 -->
+        <!-- Вкладка управления персонажами -->
         <div id="characters-tab" class="tab-content">
             <h2 style="color: #d4af37; text-align: center; margin-bottom: 25px;">👥 МЕНЕДЖЕР ПЕРСОНАЖЕЙ</h2>
             
@@ -797,8 +805,7 @@
                 </div>
             </div>
         </div>
-    </div> <!-- Закрывающий div контейнера -->
-
+    </div>
     <script>
 // ========== ВСЕ КОНСТАНТЫ И СТРУКТУРЫ ==========
 
@@ -948,6 +955,9 @@ const skillsStructure = {
     ]
 };
 
+// Базовые школы магии
+const baseMagicSchools = ["Магия воды", "Магия земли", "Магия воздуха", "Магия огня"];
+
 // Заклинания магии воды
 const allWaterSpells = [
     {
@@ -976,7 +986,7 @@ const allWaterSpells = [
         effect: "Позволяет уплотнить воду, временно делая её твёрдым объектом. Позволяет создавать слабые щиты из воды перед собой, способные, например, отразить брошенный в мага камень. Требуется настоящая (природная вода), на созданную магией воду не действует.",
         type: "Накладываемое на область 10 метров",
         conditions: "Настоящая вода, 2 секунды концентрации перед использованием заклинания, 1 магический жест",
-        duration: "Действует, пока маг не перестанет сосредотачиваться на заклинании или сам не прекратит его, максимальная длительность – час, после использования можно сотворить заклинание снова через секунду",
+        duration: "Действует, пока маг не перестанет сосредотачиваться на заклинание или сам не прекратит его, максимальная длительность – час, после использования можно сотворить заклинание снова через секунду",
         cost: "30 манны",
         learned: false
     },
@@ -1118,8 +1128,9 @@ const nicknames = {
 };
 
 // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+let characters = {};
+let currentCharacterId = null;
 let availableMagicSchools = {};
-const baseMagicSchools = ["Магия воды", "Магия земли", "Магия воздуха", "Магия огня"];
 let notes = [];
 let inventory = {
     weapons: [],
@@ -1135,9 +1146,10 @@ let diceHistory = [];
 let lockedSkills = {};
 let customCategories = [];
 let skillRollHistory = {};
-let characters = {};
-let currentCharacterId = null;
-// ========== ОСНОВНЫЕ ФУНКЦИИ ИНИЦИАЛИЗАЦИИ ==========
+</script>
+<script>
+// ========== ФУНКЦИИ ЗАГРУЗКИ И СОХРАНЕНИЯ ДАННЫХ ==========
+
 function loadSkillRollHistory() {
     const saved = localStorage.getItem('skillRollHistory');
     if (saved) {
@@ -1352,8 +1364,7 @@ function generateHeightForSelectedRace() {
     saveCharacterData();
     alert(`📏 Новый рост: ${randomHeight} см`);
 }
-</script> 
-    <script>
+
 // ========== СИСТЕМА НАВЫКОВ И МАГИИ ==========
 
 function updateMagicSkillsDisplay() {
@@ -1665,8 +1676,10 @@ function toggleSpellLearned(schoolName, spellIndex) {
         saveSpells();
     }
 }
-
+</script>
+<script>
 // ========== СИСТЕМА УРОВНЕЙ И ХАРАКТЕРИСТИК ==========
+
 function addExperience() {
     const expToAdd = prompt('Сколько опыта добавить?');
     if (expToAdd && !isNaN(expToAdd)) {
@@ -1836,8 +1849,7 @@ function updateUI() {
     
     updateMagicSkillsDisplay();
 }
-</script>
-<script>
+
 // ========== СИСТЕМА ИНВЕНТАРЯ ==========
 
 function showAddItemPopup() {
@@ -2188,8 +2200,10 @@ function deleteCustomCategory(categoryId) {
     updateCategoryManagement();
     renderInventory();
 }
-
+</script>
+<script>
 // ========== СИСТЕМА ЗАМЕТОК ==========
+
 function showAddNotePopup() {
     const popup = document.createElement('div');
     popup.className = 'popup';
@@ -2318,8 +2332,7 @@ function toggleNoteExpand(index) {
     saveNotes();
     renderNotes();
 }
-</script>
-<script>
+
 // ========== СИСТЕМА КУБИКОВ ==========
 
 function rollDice(diceType) {
@@ -2592,54 +2605,425 @@ function copyToClipboard(text) {
         alert('✅ Скопировано в буфер обмена!');
     });
 }
+</script>
+<script>
+// ========== СИСТЕМА УПРАВЛЕНИЯ ПЕРСОНАЖАМИ ==========
 
-// ========== ЭКСПОРТ/ИМПОРТ ==========
+// Загрузка списка персонажей
+function loadCharacters() {
+    const saved = localStorage.getItem('dnd_characters');
+    if (saved) {
+        characters = JSON.parse(saved);
+    }
+    const savedCurrent = localStorage.getItem('current_character_id');
+    if (savedCurrent) {
+        currentCharacterId = savedCurrent;
+    }
+    renderCharactersList();
+}
 
-function exportCharacter() {
-    const characterData = {
+// Сохранение списка персонажей
+function saveCharacters() {
+    localStorage.setItem('dnd_characters', JSON.stringify(characters));
+    localStorage.setItem('current_character_id', currentCharacterId);
+}
+
+// Создание нового персонажа
+function showCreateCharacterPopup() {
+    const popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h2 style="color: #d4af37;">Создание нового персонажа</h2>
+            <input type="text" id="newCharacterName" placeholder="Имя персонажа" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+            <select id="newCharacterRace" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                <option value="">Выберите расу</option>
+                <option value="atski">Ацки</option>
+                <option value="knofi">Кнофы</option>
+                <option value="vorki">Ворки</option>
+                <option value="minci">Минцы</option>
+                <option value="kaei">Каэйцы</option>
+                <option value="forest_elf">Лесные эльфы</option>
+                <option value="high_elf">Высшие эльфы</option>
+                <option value="dark_elf">Темные эльфы</option>
+                <option value="dwarf">Дварфы</option>
+                <option value="gnome">Гномы</option>
+                <option value="orc">Орки</option>
+                <option value="goblin">Гоблины</option>
+            </select>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-plus" onclick="createNewCharacter()">Создать</button>
+                <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+}
+
+function createNewCharacter() {
+    const name = document.getElementById('newCharacterName').value.trim();
+    const race = document.getElementById('newCharacterRace').value;
+    
+    if (!name) {
+        alert('Введите имя персонажа!');
+        return;
+    }
+    if (!race) {
+        alert('Выберите расу персонажа!');
+        return;
+    }
+
+    const characterId = 'char_' + Date.now();
+    const randomHeight = generateRandomHeight(race);
+
+    // Создаем базового персонажа
+    const newCharacter = {
+        id: characterId,
+        name: name,
         info: {
-            name: document.getElementById('characterName').value,
-            surname: document.getElementById('characterSurname').value,
-            title: document.getElementById('characterTitle').value,
-            race: document.getElementById('characterRace').value,
-            heritage: document.getElementById('characterHeritage').value,
-            height: document.getElementById('characterHeight').value,
-            weight: document.getElementById('characterWeight').value,
-            age: document.getElementById('characterAge').value
+            name: name,
+            surname: "",
+            title: "",
+            race: race,
+            heritage: "",
+            height: randomHeight,
+            weight: "",
+            age: Math.max(15, Math.floor(parseInt(races[race].lifespan) * 0.1))
         },
         level: {
-            current: getCurrentLevel(),
-            exp: getCurrentExp()
+            current: 0,
+            exp: 0
         },
         stats: {
-            health: getHealth(),
-            mana: getMana(),
-            stamina: getStamina(),
-            freePoints: getFreePoints()
+            health: 100,
+            mana: 100,
+            stamina: 100,
+            freePoints: 0
         },
-        skills: getAllSkills(),
-        lockedSkills: lockedSkills,
+        skills: {},
+        lockedSkills: {},
         magic: {
-            availableSchools: availableMagicSchools,
-            spells: spellsBySchool
+            availableSchools: {},
+            spells: JSON.parse(JSON.stringify(spellsBySchool))
         },
-        inventory: inventory,
-        customCategories: customCategories,
-        notes: notes
+        inventory: {
+            weapons: [], armor: [], potions: [], scrolls: [], 
+            resources: [], valuables: [], tools: [], other: []
+        },
+        customCategories: [],
+        notes: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
     };
 
-    const dataStr = JSON.stringify(characterData, null, 2);
+    // Инициализируем навыки
+    Object.values(skillsStructure).forEach(skillGroup => {
+        skillGroup.forEach(skill => {
+            newCharacter.skills[skill] = 5;
+        });
+    });
+
+    // Определяем доступные школы магии
+    determineAvailableMagicSchoolsForCharacter(newCharacter, race);
+    
+    characters[characterId] = newCharacter;
+    saveCharacters();
+    
+    // Переключаемся на нового персонажа
+    switchCharacter(characterId);
+    document.querySelector('.popup').remove();
+    alert(`✅ Персонаж "${name}" создан!`);
+}
+
+function determineAvailableMagicSchoolsForCharacter(character, raceId) {
+    character.magic.availableSchools = {};
+    
+    switch(raceId) {
+        case 'forest_elf':
+            character.magic.availableSchools["Магия природы"] = true;
+            break;
+        case 'dark_elf':
+            character.magic.availableSchools["Магия тьмы"] = true;
+            break;
+        case 'high_elf':
+            const shuffled = [...baseMagicSchools].sort(() => 0.5 - Math.random());
+            character.magic.availableSchools[shuffled[0]] = true;
+            character.magic.availableSchools[shuffled[1]] = true;
+            break;
+        case 'goblin':
+            break;
+        default:
+            const randomSchool = baseMagicSchools[Math.floor(Math.random() * baseMagicSchools.length)];
+            character.magic.availableSchools[randomSchool] = true;
+    }
+
+    const race = races[raceId];
+    if (race && race.limitations) {
+        Object.keys(race.limitations).forEach(school => {
+            if (race.limitations[school] === 0) {
+                character.magic.availableSchools[school] = false;
+            }
+        });
+    }
+}
+
+// Рендер списка персонажей
+function renderCharactersList() {
+    const container = document.getElementById('charactersList');
+    if (Object.keys(characters).length === 0) {
+        container.innerHTML = '<p style="color: #8b7d6b; text-align: center;">Персонажей пока нет</p>';
+        return;
+    }
+
+    let html = '';
+    Object.values(characters).forEach(character => {
+        const isCurrent = currentCharacterId === character.id;
+        const raceInfo = races[character.info.race] || { name: 'Неизвестно' };
+        
+        html += `
+            <div class="character-item ${isCurrent ? 'active' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; color: #d4af37; font-size: 1.1em;">${character.info.name}</div>
+                        <div style="color: #b8a28a; font-size: 0.9em; margin-top: 5px;">
+                            ${raceInfo.name} | Ур. ${character.level.current} | Опыт: ${character.level.exp}
+                        </div>
+                        <div style="color: #8b7d6b; font-size: 0.8em; margin-top: 5px;">
+                            Создан: ${new Date(character.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px; margin-left: 10px;">
+                        ${!isCurrent ? 
+                            `<button class="btn btn-small" onclick="switchCharacter('${character.id}')" style="background: #27ae60;">🎯 Выбрать</button>` : 
+                            `<button class="btn btn-small" disabled style="background: #5a3928;">✅ Активен</button>`
+                        }
+                        <button class="btn btn-small" onclick="exportSingleCharacter('${character.id}')" style="background: #3498db;">💾 Экспорт</button>
+                        <button class="btn btn-small" onclick="showRenameCharacterPopup('${character.id}')" style="background: #f39c12;">✏️ Переименовать</button>
+                        <button class="btn btn-small" onclick="showDeleteCharacterPopup('${character.id}')" style="background: #c44536;">❌ Удалить</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Переключение между персонажами
+function switchCharacter(characterId) {
+    if (!characters[characterId]) {
+        alert('Персонаж не найден!');
+        return;
+    }
+
+    // Сохраняем текущего персонажа если он есть
+    if (currentCharacterId && characters[currentCharacterId]) {
+        saveCurrentCharacter();
+    }
+
+    // Загружаем нового персонажа
+    currentCharacterId = characterId;
+    loadCurrentCharacter();
+    saveCharacters();
+
+    // Обновляем интерфейс
+    renderCharactersList();
+    updateUI();
+    updateLevelDisplay();
+
+    // Переключаемся на вкладку персонажа
+    openTab('character');
+    alert(`✅ Переключен на персонажа: ${characters[characterId].info.name}`);
+}
+
+// Сохранение текущего персонажа
+function saveCurrentCharacter() {
+    if (!currentCharacterId) return;
+    
+    const character = characters[currentCharacterId];
+    if (!character) return;
+
+    // Сохраняем все данные текущего персонажа
+    character.info = {
+        name: document.getElementById('characterName').value,
+        surname: document.getElementById('characterSurname').value,
+        title: document.getElementById('characterTitle').value,
+        race: document.getElementById('characterRace').value,
+        heritage: document.getElementById('characterHeritage').value,
+        height: document.getElementById('characterHeight').value,
+        weight: document.getElementById('characterWeight').value,
+        age: document.getElementById('characterAge').value
+    };
+
+    character.level = {
+        current: getCurrentLevel(),
+        exp: getCurrentExp()
+    };
+
+    character.stats = {
+        health: getHealth(),
+        mana: getMana(),
+        stamina: getStamina(),
+        freePoints: getFreePoints()
+    };
+
+    // Сохраняем навыки
+    character.skills = {};
+    Object.values(skillsStructure).forEach(skillGroup => {
+        skillGroup.forEach(skill => {
+            character.skills[skill] = getSkillValue(skill);
+        });
+    });
+
+    character.lockedSkills = lockedSkills;
+    character.magic.availableSchools = availableMagicSchools;
+    character.inventory = inventory;
+    character.customCategories = customCategories;
+    character.notes = notes;
+    character.updatedAt = new Date().toISOString();
+
+    saveCharacters();
+}
+
+// Загрузка текущего персонажа
+function loadCurrentCharacter() {
+    if (!currentCharacterId || !characters[currentCharacterId]) {
+        // Если нет персонажей, создаем временного
+        if (Object.keys(characters).length === 0) {
+            showCreateCharacterPopup();
+            return;
+        }
+        // Или выбираем первого
+        currentCharacterId = Object.keys(characters)[0];
+    }
+
+    const character = characters[currentCharacterId];
+
+    // Загружаем основные данные
+    document.getElementById('characterName').value = character.info.name || '';
+    document.getElementById('characterSurname').value = character.info.surname || '';
+    document.getElementById('characterTitle').value = character.info.title || '';
+    document.getElementById('characterRace').value = character.info.race || '';
+    document.getElementById('characterHeritage').value = character.info.heritage || '';
+    document.getElementById('characterHeight').value = character.info.height || '';
+    document.getElementById('characterWeight').value = character.info.weight || '';
+    document.getElementById('characterAge').value = character.info.age || '';
+
+    // Загружаем уровни
+    setCurrentLevel(character.level.current || 0);
+    setCurrentExp(character.level.exp || 0);
+
+    // Загружаем характеристики
+    setHealth(character.stats.health || 100);
+    setMana(character.stats.mana || 100);
+    setStamina(character.stats.stamina || 100);
+    setFreePoints(character.stats.freePoints || 0);
+
+    // Загружаем навыки
+    Object.entries(character.skills || {}).forEach(([skill, value]) => {
+        setSkillValue(skill, value);
+    });
+
+    // Загружаем остальные данные
+    lockedSkills = character.lockedSkills || {};
+    availableMagicSchools = character.magic.availableSchools || {};
+    inventory = character.inventory || { weapons: [], armor: [], potions: [], scrolls: [], resources: [], valuables: [], tools: [], other: [] };
+    customCategories = character.customCategories || [];
+    notes = character.notes || [];
+
+    // Обновляем интерфейс
+    renderSkills();
+    renderInventory();
+    renderNotes();
+    updateCategoryManagement();
+}
+
+// Управление персонажами
+function showRenameCharacterPopup(characterId) {
+    const character = characters[characterId];
+    const newName = prompt('Введите новое имя персонажа:', character.info.name);
+    if (newName && newName.trim()) {
+        character.info.name = newName.trim();
+        character.updatedAt = new Date().toISOString();
+        saveCharacters();
+        renderCharactersList();
+        alert('✅ Имя персонажа изменено!');
+    }
+}
+
+function showDeleteCharacterPopup(characterId) {
+    const character = characters[characterId];
+    
+    if (Object.keys(characters).length <= 1) {
+        alert('❌ Нельзя удалить последнего персонажа!');
+        return;
+    }
+
+    if (confirm(`Удалить персонажа "${character.info.name}"? Это действие нельзя отменить!`)) {
+        delete characters[characterId];
+        
+        // Если удаляем текущего персонажа, переключаемся на другого
+        if (currentCharacterId === characterId) {
+            const remainingIds = Object.keys(characters);
+            if (remainingIds.length > 0) {
+                switchCharacter(remainingIds[0]);
+            } else {
+                currentCharacterId = null;
+            }
+        }
+        
+        saveCharacters();
+        renderCharactersList();
+        alert('✅ Персонаж удален!');
+    }
+}
+
+function showClearAllPopup() {
+    if (Object.keys(characters).length === 0) {
+        alert('Нет персонажей для удаления!');
+        return;
+    }
+
+    if (confirm(`❌ ВЫ УВЕРЕНЫ?\n\nЭто удалит ВСЕХ персонажей (${Object.keys(characters).length} шт.)!\nЭто действие нельзя отменить!`)) {
+        characters = {};
+        currentCharacterId = null;
+        saveCharacters();
+        location.reload();
+    }
+}
+
+// Экспорт персонажей
+function exportSingleCharacter(characterId) {
+    const character = characters[characterId];
+    const dataStr = JSON.stringify(character, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(dataBlob);
-    link.download = `character_${characterData.info.name || 'unknown'}.json`;
+    link.download = `character_${character.info.name || 'unknown'}.json`;
     link.click();
     
-    alert('✅ Персонаж экспортирован!');
+    alert(`✅ Персонаж "${character.info.name}" экспортирован!`);
 }
 
-function importCharacter() {
+function exportAllCharacters() {
+    if (Object.keys(characters).length === 0) {
+        alert('Нет персонажей для экспорта!');
+        return;
+    }
+
+    const dataStr = JSON.stringify(characters, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `dnd_characters_backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    alert(`✅ Все персонажи (${Object.keys(characters).length} шт.) экспортированы!`);
+}
+
+function showImportCharacterPopup() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -2652,8 +3036,7 @@ function importCharacter() {
         reader.onload = function(e) {
             try {
                 const characterData = JSON.parse(e.target.result);
-                loadCharacterFromData(characterData);
-                alert('✅ Персонаж загружен!');
+                importCharacterData(characterData);
             } catch (error) {
                 alert('❌ Ошибка загрузки файла!');
                 console.error(error);
@@ -2665,83 +3048,71 @@ function importCharacter() {
     input.click();
 }
 
-function loadCharacterFromData(data) {
-    if (data.info) {
-        document.getElementById('characterName').value = data.info.name || '';
-        document.getElementById('characterSurname').value = data.info.surname || '';
-        document.getElementById('characterTitle').value = data.info.title || '';
-        document.getElementById('characterRace').value = data.info.race || '';
-        document.getElementById('characterHeritage').value = data.info.heritage || '';
-        document.getElementById('characterHeight').value = data.info.height || '';
-        document.getElementById('characterWeight').value = data.info.weight || '';
-        document.getElementById('characterAge').value = data.info.age || '';
-    }
-
-    if (data.level) {
-        setCurrentLevel(data.level.current || 0);
-        setCurrentExp(data.level.exp || 0);
-    }
-
-    if (data.stats) {
-        setHealth(data.stats.health || 100);
-        setMana(data.stats.mana || 100);
-        setStamina(data.stats.stamina || 100);
-        setFreePoints(data.stats.freePoints || 0);
-    }
-
-    if (data.skills) {
-        Object.entries(data.skills).forEach(([skill, value]) => {
-            setSkillValue(skill, value);
-        });
-    }
-
-    if (data.lockedSkills) {
-        lockedSkills = data.lockedSkills;
-        saveLockedSkills();
-    }
-
-    if (data.magic) {
-        availableMagicSchools = data.magic.availableSchools || {};
-        if (data.magic.spells) {
-            Object.assign(spellsBySchool, data.magic.spells);
-            saveSpells();
+function importCharacterData(characterData) {
+    // Проверяем структуру файла
+    if (!characterData.info || !characterData.info.name) {
+        // Если это файл с несколькими персонажами
+        if (characterData.info === undefined && Object.keys(characterData).length > 0) {
+            let importedCount = 0;
+            Object.values(characterData).forEach(char => {
+                if (char.info && char.info.name) {
+                    const newId = 'char_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    characters[newId] = char;
+                    characters[newId].id = newId;
+                    characters[newId].updatedAt = new Date().toISOString();
+                    importedCount++;
+                }
+            });
+            saveCharacters();
+            renderCharactersList();
+            alert(`✅ Импортировано ${importedCount} персонажей!`);
+            return;
         }
+        alert('❌ Неверный формат файла персонажа!');
+        return;
     }
 
-    if (data.inventory) {
-        inventory = data.inventory;
-        saveInventory();
-    }
-
-    if (data.customCategories) {
-        customCategories = data.customCategories;
-        saveCustomCategories();
-    }
-
-    if (data.notes) {
-        notes = data.notes;
-        saveNotes();
-    }
-
-    updateLevelDisplay();
-    updateUI();
-    renderSkills();
-    renderInventory();
-    renderNotes();
-    updateCategoryManagement();
+    // Если это одиночный персонаж
+    const newId = 'char_import_' + Date.now();
+    characters[newId] = characterData;
+    characters[newId].id = newId;
+    characters[newId].updatedAt = new Date().toISOString();
+    
+    saveCharacters();
+    renderCharactersList();
+    alert(`✅ Персонаж "${characterData.info.name}" импортирован!`);
 }
 
-function getAllSkills() {
-    const skills = {};
-    Object.values(skillsStructure).forEach(skillGroup => {
-        skillGroup.forEach(skill => {
-            skills[skill] = getSkillValue(skill);
-        });
-    });
-    return skills;
+// Автосохранение при изменении данных
+function setupAutoSave() {
+    // Переопределяем saveCharacterData для автосохранения
+    const originalSaveCharacterData = saveCharacterData;
+    saveCharacterData = function() {
+        originalSaveCharacterData();
+        if (currentCharacterId) {
+            saveCurrentCharacter();
+        }
+    };
+
+    // Автосохранение при изменении инвентаря
+    const originalSaveInventory = saveInventory;
+    saveInventory = function() {
+        originalSaveInventory();
+        if (currentCharacterId) {
+            saveCurrentCharacter();
+        }
+    };
+
+    // Автосохранение при изменении заметок
+    const originalSaveNotes = saveNotes;
+    saveNotes = function() {
+        originalSaveNotes();
+        if (currentCharacterId) {
+            saveCurrentCharacter();
+        }
+    };
 }
-</script>
-<script>
+
 // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 
 // Геттеры/сеттеры для характеристик
@@ -2855,11 +3226,7 @@ function initializeSkills() {
 
 // ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ==========
 
-// ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ==========
-
 document.addEventListener('DOMContentLoaded', function() {
-    // 👇 ЗАМЕНЯЕМ ВЕСЬ ЭТОТ БЛОК 👇
-    
     // Загружаем систему персонажей
     loadCharacters();
     setupAutoSave();
@@ -2930,636 +3297,41 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`🎯 Текущий персонаж: ${characters[currentCharacterId].info.name}`);
     }
 });
-    
-    document.getElementById('currentExp').addEventListener('input', function() {
-        setCurrentExp(parseInt(this.value) || 0);
-        checkLevelUp();
-        updateLevelDisplay();
-        saveCharacterData();
-    });
-    
-    // Слушатели поиска
-    const inventorySearch = document.getElementById('inventorySearch');
-    const notesSearch = document.getElementById('notesSearch');
-    
-    if (inventorySearch) {
-        inventorySearch.addEventListener('input', renderInventory);
-    }
-    
-    if (notesSearch) {
-        notesSearch.addEventListener('input', renderNotes);
-    }
-    
-    console.log('✅ D&D Character Sheet загружен!');
-});
 
 // ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ДОСТУПНЫЕ В КОНСОЛИ ==========
 
 // Для отладки - сброс всех данных
 function resetAllData() {
-    if (confirm('❌ ВЫ УВЕРЕНЫ? Это удалит ВСЕ данные персонажа!')) {
+    if (confirm('❌ ВЫ УВЕРЕНЫ?\n\nЭто удалит ВСЕ данные всех персонажей!\nЭто действие нельзя отменить!')) {
         localStorage.clear();
         location.reload();
     }
 }
 
-// Для отладки - показать все сохраненные данные
-function showAllData() {
-    console.log('=== ВСЕ ДАННЫЕ ПЕРСОНАЖА ===');
-    console.log('Основная информация:', {
-        name: document.getElementById('characterName').value,
-        race: document.getElementById('characterRace').value,
-        level: getCurrentLevel(),
-        exp: getCurrentExp()
-    });
-    console.log('Характеристики:', {
-        health: getHealth(),
-        mana: getMana(),
-        stamina: getStamina(),
-        freePoints: getFreePoints()
-    });
-    console.log('Навыки:', getAllSkills());
-    console.log('Магия:', availableMagicSchools);
-    console.log('Инвентарь:', inventory);
-    console.log('Заметки:', notes);
-}
-
-// Экспорт в консоль для отладки
-function exportToConsole() {
-    const characterData = {
-        info: {
-            name: document.getElementById('characterName').value,
-            surname: document.getElementById('characterSurname').value,
-            title: document.getElementById('characterTitle').value,
-            race: document.getElementById('characterRace').value,
-            heritage: document.getElementById('characterHeritage').value,
-            height: document.getElementById('characterHeight').value,
-            weight: document.getElementById('characterWeight').value,
-            age: document.getElementById('characterAge').value
-        },
-        level: {
-            current: getCurrentLevel(),
-            exp: getCurrentExp()
-        },
-        stats: {
-            health: getHealth(),
-            mana: getMana(),
-            stamina: getStamina(),
-            freePoints: getFreePoints()
-        },
-        skills: getAllSkills(),
-        magic: {
-            availableSchools: availableMagicSchools
-        }
-    };
-    
-    console.log('💾 Экспорт данных персонажа:', characterData);
-    return characterData;
-}
-
-// Быстрое добавление опыта (для тестирования)
-function quickExp(amount = 1000) {
-    let currentExp = getCurrentExp();
-    currentExp += amount;
-    setCurrentExp(currentExp);
-    checkLevelUp();
-    updateLevelDisplay();
-    saveCharacterData();
-    alert(`➕ Добавлено ${amount} опыта!`);
-}
-
-// Быстрое добавление очков навыков (для тестирования)
-function quickPoints(amount = 10) {
-    const freePoints = getFreePoints();
-    setFreePoints(freePoints + amount);
-    updateUI();
-    saveCharacterData();
-    alert(`🎯 Добавлено ${amount} очков навыков!`);
-}
-// 👇 ДОБАВЛЯЕМ ВЕСЬ ЭТОТ БЛОК ПЕРЕД ЗАКРЫВАЮЩИМ </script> 👇
-
-// ========== СИСТЕМА УПРАВЛЕНИЯ ПЕРСОНАЖАМИ ==========
-
-// Загрузка списка персонажей
-function loadCharacters() {
-    const saved = localStorage.getItem('dnd_characters');
-    if (saved) {
-        characters = JSON.parse(saved);
-    }
-    
-    const savedCurrent = localStorage.getItem('current_character_id');
-    if (savedCurrent) {
-        currentCharacterId = savedCurrent;
-    }
-    
-    renderCharactersList();
-}
-
-// Сохранение списка персонажей
-function saveCharacters() {
-    localStorage.setItem('dnd_characters', JSON.stringify(characters));
-    localStorage.setItem('current_character_id', currentCharacterId);
-}
-
-// Создание нового персонажа
-function showCreateCharacterPopup() {
-    const popup = document.createElement('div');
-    popup.className = 'popup';
-    popup.innerHTML = `
-        <div class="popup-content">
-            <h2 style="color: #d4af37;">Создание нового персонажа</h2>
-            <input type="text" id="newCharacterName" placeholder="Имя персонажа" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0; font-size: 16px;">
-            
-            <select id="newCharacterRace" style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0; font-size: 16px;">
-                <option value="">Выберите расу</option>
-                <option value="atski">🔥 Ацки (Персы)</option>
-                <option value="knofi">🗣️ Кнофы (Римляне)</option>
-                <option value="vorki">❄️ Ворки (Викинги)</option>
-                <option value="minci">🎯 Минцы (Азиаты)</option>
-                <option value="kaei">⚒️ Каэйцы (Негры)</option>
-                <option value="forest_elf">🌿 Лесные эльфы</option>
-                <option value="high_elf">✨ Высшие эльфы</option>
-                <option value="dark_elf">🌑 Темные эльфы</option>
-                <option value="dwarf">⛰️ Дварфы</option>
-                <option value="gnome">🔮 Гномы</option>
-                <option value="orc">💀 Орки</option>
-                <option value="goblin">👹 Гоблины</option>
-            </select>
-            
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-plus" onclick="createNewCharacter()">Создать</button>
-                <button class="btn btn-roll" onclick="this.closest('.popup').remove()">Отмена</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(popup);
-}
-
-function createNewCharacter() {
-    const name = document.getElementById('newCharacterName').value.trim();
-    const race = document.getElementById('newCharacterRace').value;
-    
-    if (!name) {
-        alert('Введите имя персонажа!');
-        return;
-    }
-    
-    if (!race) {
-        alert('Выберите расу персонажа!');
-        return;
-    }
-    
-    const characterId = 'char_' + Date.now();
-    const randomHeight = generateRandomHeight(race);
-    
-    // Создаем базового персонажа
-    const newCharacter = {
-        id: characterId,
-        name: name,
-        info: {
-            name: name,
-            surname: "",
-            title: "",
-            race: race,
-            heritage: "",
-            height: randomHeight,
-            weight: "",
-            age: Math.max(15, Math.floor(parseInt(races[race].lifespan) * 0.1))
-        },
-        level: {
-            current: 0,
-            exp: 0
-        },
-        stats: {
-            health: 100,
-            mana: 100,
-            stamina: 100,
-            freePoints: 0
-        },
-        skills: {},
-        lockedSkills: {},
-        magic: {
-            availableSchools: {},
-            spells: JSON.parse(JSON.stringify(spellsBySchool))
-        },
-        inventory: {
-            weapons: [], armor: [], potions: [], scrolls: [],
-            resources: [], valuables: [], tools: [], other: []
-        },
-        customCategories: [],
-        notes: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    };
-    
-    // Инициализируем навыки
-    Object.values(skillsStructure).forEach(skillGroup => {
-        skillGroup.forEach(skill => {
-            newCharacter.skills[skill] = 5;
-        });
-    });
-    
-    // Определяем доступные школы магии
-    determineAvailableMagicSchoolsForCharacter(newCharacter, race);
-    
-    characters[characterId] = newCharacter;
-    saveCharacters();
-    
-    // Переключаемся на нового персонажа
-    switchCharacter(characterId);
-    
-    document.querySelector('.popup').remove();
-    alert(`✅ Персонаж "${name}" создан!`);
-}
-
-function determineAvailableMagicSchoolsForCharacter(character, raceId) {
-    character.magic.availableSchools = {};
-    
-    switch(raceId) {
-        case 'forest_elf':
-            character.magic.availableSchools["Магия природы"] = true;
-            break;
-        case 'dark_elf':
-            character.magic.availableSchools["Магия тьмы"] = true;
-            break;
-        case 'high_elf':
-            const shuffled = [...baseMagicSchools].sort(() => 0.5 - Math.random());
-            character.magic.availableSchools[shuffled[0]] = true;
-            character.magic.availableSchools[shuffled[1]] = true;
-            break;
-        case 'goblin':
-            break;
-        default:
-            const randomSchool = baseMagicSchools[Math.floor(Math.random() * baseMagicSchools.length)];
-            character.magic.availableSchools[randomSchool] = true;
-    }
-    
-    const race = races[raceId];
-    if (race && race.limitations) {
-        Object.keys(race.limitations).forEach(school => {
-            if (race.limitations[school] === 0) {
-                character.magic.availableSchools[school] = false;
-            }
-        });
-    }
-}
-
-// Рендер списка персонажей
-function renderCharactersList() {
-    const container = document.getElementById('charactersList');
-    
-    if (Object.keys(characters).length === 0) {
-        container.innerHTML = '<p style="color: #8b7d6b; text-align: center;">Персонажей пока нет</p>';
-        return;
-    }
-    
-    let html = '';
-    Object.values(characters).forEach(character => {
-        const isCurrent = currentCharacterId === character.id;
-        const raceInfo = races[character.info.race] || { name: 'Неизвестно' };
-        
-        html += `
-            <div class="character-card" style="background: ${isCurrent ? '#8b4513' : '#3d2418'}; padding: 15px; margin: 10px 0; border-radius: 6px; border-left: 4px solid #d4af37;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 style="color: #d4af37; margin: 0 0 5px 0;">${character.info.name}</h3>
-                        <p style="color: #b8a28a; margin: 0; font-size: 0.9em;">
-                            ${raceInfo.name} | Ур. ${character.level.current} | Опыт: ${character.level.exp}
-                        </p>
-                        <p style="color: #8b7d6b; margin: 5px 0 0 0; font-size: 0.8em;">
-                            Создан: ${new Date(character.createdAt).toLocaleDateString()}
-                        </p>
-                    </div>
-                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                        ${!isCurrent ? `
-                            <button class="btn btn-small" onclick="switchCharacter('${character.id}')" style="background: #27ae60;">🎯 Выбрать</button>
-                        ` : `
-                            <button class="btn btn-small" style="background: #d4af37; color: #1a0f0b;" disabled>✅ Активен</button>
-                        `}
-                        <button class="btn btn-small" onclick="exportSingleCharacter('${character.id}')" style="background: #3498db;">💾 Экспорт</button>
-                        <button class="btn btn-small" onclick="showRenameCharacterPopup('${character.id}')" style="background: #f39c12;">✏️ Переименовать</button>
-                        <button class="btn btn-small" onclick="showDeleteCharacterPopup('${character.id}')" style="background: #c44536;">❌ Удалить</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = html;
-}
-
-// Переключение между персонажами
-function switchCharacter(characterId) {
-    if (!characters[characterId]) {
-        alert('Персонаж не найден!');
-        return;
-    }
-    
-    // Сохраняем текущего персонажа если он есть
-    if (currentCharacterId && characters[currentCharacterId]) {
-        saveCurrentCharacter();
-    }
-    
-    // Загружаем нового персонажа
-    currentCharacterId = characterId;
-    loadCurrentCharacter();
-    saveCharacters();
-    
-    // Обновляем интерфейс
-    renderCharactersList();
-    updateUI();
-    updateLevelDisplay();
-    
-    // Переключаемся на вкладку персонажа
-    openTab('character');
-    
-    alert(`✅ Переключен на персонажа: ${characters[characterId].info.name}`);
-}
-
-// Сохранение текущего персонажа
-function saveCurrentCharacter() {
-    if (!currentCharacterId) return;
-    
-    const character = characters[currentCharacterId];
-    if (!character) return;
-    
-    // Сохраняем все данные текущего персонажа
-    character.info = {
-        name: document.getElementById('characterName').value,
-        surname: document.getElementById('characterSurname').value,
-        title: document.getElementById('characterTitle').value,
-        race: document.getElementById('characterRace').value,
-        heritage: document.getElementById('characterHeritage').value,
-        height: document.getElementById('characterHeight').value,
-        weight: document.getElementById('characterWeight').value,
-        age: document.getElementById('characterAge').value
-    };
-    
-    character.level = {
-        current: getCurrentLevel(),
-        exp: getCurrentExp()
-    };
-    
-    character.stats = {
-        health: getHealth(),
-        mana: getMana(),
-        stamina: getStamina(),
-        freePoints: getFreePoints()
-    };
-    
-    // Сохраняем навыки
-    character.skills = {};
-    Object.values(skillsStructure).forEach(skillGroup => {
-        skillGroup.forEach(skill => {
-            character.skills[skill] = getSkillValue(skill);
-        });
-    });
-    
-    character.lockedSkills = lockedSkills;
-    character.magic.availableSchools = availableMagicSchools;
-    character.inventory = inventory;
-    character.customCategories = customCategories;
-    character.notes = notes;
-    character.updatedAt = new Date().toISOString();
-    
-    saveCharacters();
-}
-
-// Загрузка текущего персонажа
-function loadCurrentCharacter() {
+// Экспорт текущего персонажа
+function exportCharacter() {
     if (!currentCharacterId || !characters[currentCharacterId]) {
-        // Если нет персонажей, создаем временного
-        if (Object.keys(characters).length === 0) {
-            showCreateCharacterPopup();
-            return;
-        }
-        // Или выбираем первого
-        currentCharacterId = Object.keys(characters)[0];
+        alert('❌ Нет активного персонажа для экспорта!');
+        return;
     }
-    
-    const character = characters[currentCharacterId];
-    
-    // Загружаем основные данные
-    document.getElementById('characterName').value = character.info.name || '';
-    document.getElementById('characterSurname').value = character.info.surname || '';
-    document.getElementById('characterTitle').value = character.info.title || '';
-    document.getElementById('characterRace').value = character.info.race || '';
-    document.getElementById('characterHeritage').value = character.info.heritage || '';
-    document.getElementById('characterHeight').value = character.info.height || '';
-    document.getElementById('characterWeight').value = character.info.weight || '';
-    document.getElementById('characterAge').value = character.info.age || '';
-    
-    // Загружаем уровни
-    setCurrentLevel(character.level.current || 0);
-    setCurrentExp(character.level.exp || 0);
-    
-    // Загружаем характеристики
-    setHealth(character.stats.health || 100);
-    setMana(character.stats.mana || 100);
-    setStamina(character.stats.stamina || 100);
-    setFreePoints(character.stats.freePoints || 0);
-    
-    // Загружаем навыки
-    Object.entries(character.skills || {}).forEach(([skill, value]) => {
-        setSkillValue(skill, value);
+    exportSingleCharacter(currentCharacterId);
+}
+
+// Импорт персонажа
+function importCharacter() {
+    showImportCharacterPopup();
+}
+
+// Получение всех навыков для экспорта
+function getAllSkills() {
+    const skills = {};
+    Object.values(skillsStructure).forEach(skillGroup => {
+        skillGroup.forEach(skill => {
+            skills[skill] = getSkillValue(skill);
+        });
     });
-    
-    // Загружаем остальные данные
-    lockedSkills = character.lockedSkills || {};
-    availableMagicSchools = character.magic.availableSchools || {};
-    inventory = character.inventory || {
-        weapons: [], armor: [], potions: [], scrolls: [],
-        resources: [], valuables: [], tools: [], other: []
-    };
-    customCategories = character.customCategories || [];
-    notes = character.notes || [];
-    
-    // Обновляем интерфейс
-    renderSkills();
-    renderInventory();
-    renderNotes();
-    updateCategoryManagement();
+    return skills;
 }
-
-// Управление персонажами
-function showRenameCharacterPopup(characterId) {
-    const character = characters[characterId];
-    const newName = prompt('Введите новое имя персонажа:', character.info.name);
-    
-    if (newName && newName.trim()) {
-        character.info.name = newName.trim();
-        character.updatedAt = new Date().toISOString();
-        saveCharacters();
-        renderCharactersList();
-        alert('✅ Имя персонажа изменено!');
-    }
-}
-
-function showDeleteCharacterPopup(characterId) {
-    const character = characters[characterId];
-    
-    if (Object.keys(characters).length <= 1) {
-        alert('❌ Нельзя удалить последнего персонажа!');
-        return;
-    }
-    
-    if (confirm(`Удалить персонажа "${character.info.name}"? Это действие нельзя отменить!`)) {
-        delete characters[characterId];
-        
-        // Если удаляем текущего персонажа, переключаемся на другого
-        if (currentCharacterId === characterId) {
-            const remainingIds = Object.keys(characters);
-            if (remainingIds.length > 0) {
-                switchCharacter(remainingIds[0]);
-            } else {
-                currentCharacterId = null;
-            }
-        }
-        
-        saveCharacters();
-        renderCharactersList();
-        alert('✅ Персонаж удален!');
-    }
-}
-
-function showClearAllPopup() {
-    if (Object.keys(characters).length === 0) {
-        alert('Нет персонажей для удаления!');
-        return;
-    }
-    
-    if (confirm(`❌ ВЫ УВЕРЕНЫ?\n\nЭто удалит ВСЕХ персонажей (${Object.keys(characters).length} шт.)!\nЭто действие нельзя отменить!`)) {
-        characters = {};
-        currentCharacterId = null;
-        saveCharacters();
-        location.reload();
-    }
-}
-
-// Экспорт персонажей
-function exportSingleCharacter(characterId) {
-    const character = characters[characterId];
-    const dataStr = JSON.stringify(character, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `character_${character.info.name || 'unknown'}.json`;
-    link.click();
-    
-    alert(`✅ Персонаж "${character.info.name}" экспортирован!`);
-}
-
-function exportAllCharacters() {
-    if (Object.keys(characters).length === 0) {
-        alert('Нет персонажей для экспорта!');
-        return;
-    }
-    
-    const dataStr = JSON.stringify(characters, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `dnd_characters_backup_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    alert(`✅ Все персонажи (${Object.keys(characters).length} шт.) экспортированы!`);
-}
-
-function showImportCharacterPopup() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const characterData = JSON.parse(e.target.result);
-                importCharacterData(characterData);
-            } catch (error) {
-                alert('❌ Ошибка загрузки файла!');
-                console.error(error);
-            }
-        };
-        reader.readAsText(file);
-    };
-    
-    input.click();
-}
-
-function importCharacterData(characterData) {
-    // Проверяем структуру файла
-    if (!characterData.info || !characterData.info.name) {
-        // Если это файл с несколькими персонажами
-        if (characterData.info === undefined && Object.keys(characterData).length > 0) {
-            let importedCount = 0;
-            Object.values(characterData).forEach(char => {
-                if (char.info && char.info.name) {
-                    const newId = 'char_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                    characters[newId] = char;
-                    characters[newId].id = newId;
-                    characters[newId].updatedAt = new Date().toISOString();
-                    importedCount++;
-                }
-            });
-            saveCharacters();
-            renderCharactersList();
-            alert(`✅ Импортировано ${importedCount} персонажей!`);
-            return;
-        }
-        alert('❌ Неверный формат файла персонажа!');
-        return;
-    }
-    
-    // Если это одиночный персонаж
-    const newId = 'char_import_' + Date.now();
-    characters[newId] = characterData;
-    characters[newId].id = newId;
-    characters[newId].updatedAt = new Date().toISOString();
-    
-    saveCharacters();
-    renderCharactersList();
-    alert(`✅ Персонаж "${characterData.info.name}" импортирован!`);
-}
-
-// Автосохранение при изменении данных
-function setupAutoSave() {
-    // Переопределяем saveCharacterData для автосохранения
-    const originalSaveCharacterData = saveCharacterData;
-    saveCharacterData = function() {
-        originalSaveCharacterData();
-        if (currentCharacterId) {
-            saveCurrentCharacter();
-        }
-    };
-    
-    // Автосохранение при изменении инвентаря
-    const originalSaveInventory = saveInventory;
-    saveInventory = function() {
-        originalSaveInventory();
-        if (currentCharacterId) {
-            saveCurrentCharacter();
-        }
-    };
-    
-    // Автосохранение при изменении заметок
-    const originalSaveNotes = saveNotes;
-    saveNotes = function() {
-        originalSaveNotes();
-        if (currentCharacterId) {
-            saveCurrentCharacter();
-        }
-    };
-}
-
-// 👆 КОНЕЦ БЛОКА С ФУНКЦИЯМИ 👆
-</script>
 </script>
 </body>
 </html>
-
