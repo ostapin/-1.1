@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D&D Расширенная Боевая Система</title>
     <style>
-        /* БАЗОВЫЕ СТИЛИ */
         * { 
             box-sizing: border-box; 
             margin: 0; 
@@ -26,7 +25,6 @@
             padding: 20px;
         }
 
-        /* СТИЛИ ВКЛАДОК */
         .tabs {
             display: flex;
             background: linear-gradient(to bottom, #5a3928, #3d2418);
@@ -64,7 +62,6 @@
 
         .tab-content.active { display: block; }
 
-        /* ОБЩИЕ СТИЛИ КНОПОК */
         .btn {
             padding: 12px 16px;
             border: none;
@@ -82,7 +79,6 @@
         .btn-roll { background: #8b4513; color: white; }
         .btn-dice { background: #3498db; color: white; margin: 5px; }
 
-        /* ЗАГОЛОВКИ СЕКЦИЙ */
         .section-title {
             font-size: 1.5em;
             color: #d4af37;
@@ -91,7 +87,6 @@
             border-bottom: 2px solid #8b4513;
         }
 
-        /* АДАПТИВНОСТЬ */
         @media (max-width: 768px) {
             .tabs { flex-direction: column; }
             .tab-btn { min-width: 100%; }
@@ -101,7 +96,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- ВКЛАДКИ -->
         <div class="tabs">
             <button class="tab-btn active" onclick="openTab('character')">🧙 Персонаж</button>
             <button class="tab-btn" onclick="openTab('combat')">⚔️ Бой</button>
@@ -112,62 +106,44 @@
             <button class="tab-btn" onclick="openTab('characters')">👥 Персонажи</button>
         </div>
 
-        <!-- СОДЕРЖИМОЕ ВКЛАДОК -->
         <div id="character-tab" class="tab-content active">
             <h2 class="section-title">🧙 Лист персонажа</h2>
-            <!-- Содержание будет в следующих частях -->
         </div>
 
         <div id="combat-tab" class="tab-content">
             <h2 class="section-title">⚔️ Боевая система</h2>
-            <!-- Боевая система будет в следующих частях -->
         </div>
 
         <div id="generator-tab" class="tab-content">
             <h2 class="section-title">🎲 Генераторы</h2>
-            <!-- Генераторы будут в следующих частях -->
         </div>
 
         <div id="inventory-tab" class="tab-content">
             <h2 class="section-title">🎒 Инвентарь</h2>
-            <!-- Инвентарь будет в следующих частях -->
         </div>
 
         <div id="dice-tab" class="tab-content">
             <h2 class="section-title">🎲 Система кубиков</h2>
-            <!-- Кубики будут в следующих частях -->
         </div>
 
         <div id="notes-tab" class="tab-content">
             <h2 class="section-title">✍️ Заметки</h2>
-            <!-- Заметки будут в следующих частях -->
         </div>
 
         <div id="characters-tab" class="tab-content">
             <h2 class="section-title">👥 Менеджер персонажей</h2>
-            <!-- Менеджер персонажей будет в следующих частях -->
         </div>
     </div>
-
     <script>
-        // БАЗОВЫЕ ФУНКЦИИ ДЛЯ ВКЛАДОК
-        function openTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabName + '-tab').classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+// ========== БАЗОВЫЕ ФУНКЦИИ ДЛЯ ВКЛАДОК ==========
+function openTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.currentTarget.classList.add('active');
+}
 
-        // ИНИЦИАЛИЗАЦИЯ
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ D&D Боевая Система загружена!');
-        });
-    </script>
-</body>
-</html>
 // ========== БАЗОВЫЕ СИСТЕМЫ И КОНСТАНТЫ ==========
-
-// Система рас
 const races = {
     atski: { name: "🔥 Ацки", description: "50% защита от огня", lifespan: "350 лет" },
     knofi: { name: "🗣️ Кнофы", description: "+1 к красноречию", lifespan: "400 лет" },
@@ -183,7 +159,6 @@ const races = {
     goblin: { name: "👹 Гоблины", description: "Быстрое обучение", lifespan: "25 лет" }
 };
 
-// Структура навыков
 const skillsStructure = {
     "⚔️ БОЕВЫЕ НАВЫКИ": [
         "Тяжёлая броня", "Лёгкая броня", "Двуручное оружие", 
@@ -191,7 +166,7 @@ const skillsStructure = {
         "Древковое", "Рукопашный бой", "Метание"
     ],
     "🎭 ОБЩИЕ НАВЫКИ": [
-        "Скрытность", "Красноречие", "Ловкость", "Выносливость",
+        "Скрытность", "Красноречию", "Ловкость", "Выносливость",
         "Взлом", "Восприятие", "Удача", "Карманные кражи"
     ],
     "⚗️ РЕМЕСЛА": [
@@ -205,7 +180,6 @@ const skillsStructure = {
     ]
 };
 
-// Система уровней
 const levelTable = {
     0: { expRequired: 1000, hp: 100, mana: 100, stamina: 100, points: 20 },
     1: { expRequired: 3000, hp: 200, mana: 200, stamina: 200, points: 30 },
@@ -220,7 +194,6 @@ const levelTable = {
 };
 
 // ========== СИСТЕМА КУБИКОВ ==========
-
 function rollDice(sides, count = 1) {
     let results = [];
     let total = 0;
@@ -254,7 +227,6 @@ function rollSkillCheck(skillValue, modifiers = 0) {
 }
 
 // ========== СИСТЕМА ХРАНЕНИЯ ДАННЫХ ==========
-
 class StorageSystem {
     static set(key, value) {
         try {
@@ -288,7 +260,6 @@ class StorageSystem {
 }
 
 // ========== БАЗОВЫЙ КЛАСС ПЕРСОНАЖА ==========
-
 class Character {
     constructor(id = null) {
         this.id = id || 'char_' + Date.now();
@@ -391,7 +362,6 @@ class Character {
 }
 
 // ========== СИСТЕМА УПРАВЛЕНИЯ ПЕРСОНАЖАМИ ==========
-
 class CharacterManager {
     constructor() {
         this.characters = {};
@@ -454,14 +424,11 @@ class CharacterManager {
 }
 
 // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
-
 let characterManager = new CharacterManager();
 let currentCharacter = characterManager.getCurrentCharacter();
 
 // ========== УТИЛИТЫ ==========
-
 function showPopup(title, content, buttons = []) {
-    // Функция для показа всплывающих окон
     const popup = document.createElement('div');
     popup.className = 'popup';
     popup.style.cssText = `
@@ -493,26 +460,9 @@ function closePopup(popup) {
         popup.parentNode.removeChild(popup);
     }
 }
-
-// ========== ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ==========
-
-function initializeSystem() {
-    console.log('🎮 Инициализация D&D системы...');
-    
-    // Если нет персонажей, создаем демо-персонажа
-    if (!currentCharacter && Object.keys(characterManager.characters).length === 0) {
-        const demoChar = characterManager.createCharacter('Новый Герой', 'human');
-        currentCharacter = demoChar;
-        console.log('✅ Создан демо-персонаж');
-    }
-    
-    console.log(`✅ Система готова! Персонажей: ${Object.keys(characterManager.characters).length}`);
-}
-
-// Запуск инициализации при загрузке
-document.addEventListener('DOMContentLoaded', initializeSystem);
-        // ========== СИСТЕМА ОТОБРАЖЕНИЯ ПЕРСОНАЖА ==========
-
+</script>
+<script>
+// ========== СИСТЕМА ОТОБРАЖЕНИЯ ПЕРСОНАЖА ==========
 function renderCharacterSheet() {
     const container = document.getElementById('character-tab');
     if (!container || !currentCharacter) return;
@@ -656,7 +606,6 @@ function renderCharacterSheet() {
         </div>
     `;
 
-    // Добавляем обработчики событий
     setupCharacterEventListeners();
     renderSkills();
 }
@@ -678,7 +627,6 @@ function setupCharacterEventListeners() {
 function saveCharacterData() {
     if (!currentCharacter) return;
 
-    // Сохраняем основную информацию
     currentCharacter.info.name = document.getElementById('characterName').value;
     currentCharacter.info.surname = document.getElementById('characterSurname').value;
     currentCharacter.info.title = document.getElementById('characterTitle').value;
@@ -688,26 +636,20 @@ function saveCharacterData() {
     currentCharacter.info.weight = document.getElementById('characterWeight').value;
     currentCharacter.info.age = document.getElementById('characterAge').value;
 
-    // Сохраняем характеристики
     currentCharacter.stats.health = parseInt(document.getElementById('health').value) || 0;
     currentCharacter.stats.mana = parseInt(document.getElementById('mana').value) || 0;
     currentCharacter.stats.stamina = parseInt(document.getElementById('stamina').value) || 0;
     currentCharacter.stats.freePoints = parseInt(document.getElementById('freePoints').value) || 0;
 
-    // Сохраняем опыт и уровень
     currentCharacter.level.exp = parseInt(document.getElementById('currentExp').value) || 0;
     currentCharacter.checkLevelUp();
 
-    // Обновляем отображение
     updateLevelDisplay();
-    
-    // Сохраняем в хранилище
     currentCharacter.save();
     characterManager.saveCharacters();
 }
 
 // ========== СИСТЕМА НАВЫКОВ ==========
-
 function renderSkills() {
     const container = document.getElementById('skillsContainer');
     if (!container || !currentCharacter) return;
@@ -819,9 +761,9 @@ function toggleSkillLock(skillName) {
         }
     }
 }
-
+</script>
+<script>
 // ========== ФУНКЦИИ УПРАВЛЕНИЯ УРОВНЕМ И СТАТАМИ ==========
-
 function editLevel() {
     if (!currentCharacter) return;
     
@@ -908,7 +850,6 @@ function changeStat(stat, value) {
     let currentValue = parseInt(input.value) || 0;
     let newValue = currentValue + value;
     
-    // Ограничиваем значения
     if (newValue < 0) newValue = 0;
     if (newValue > currentCharacter.stats['max' + stat.charAt(0).toUpperCase() + stat.slice(1)]) {
         newValue = currentCharacter.stats['max' + stat.charAt(0).toUpperCase() + stat.slice(1)];
@@ -933,7 +874,6 @@ function editFreePoints() {
 function updateUI() {
     if (!currentCharacter) return;
     
-    // Обновляем отображение свободных очков
     const freePointsElement = document.getElementById('freePoints');
     if (freePointsElement) {
         freePointsElement.value = currentCharacter.stats.freePoints;
@@ -941,7 +881,6 @@ function updateUI() {
 }
 
 // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-
 function showLevelsTable() {
     if (!currentCharacter) return;
     
@@ -982,7 +921,6 @@ function showLevelsTable() {
 }
 
 function showSpells(schoolName) {
-    // Заглушка для системы заклинаний
     alert(`🔮 Система заклинаний для "${schoolName}" будет реализована в следующих версиях!`);
 }
 
@@ -1014,7 +952,6 @@ function importCharacter() {
             try {
                 const characterData = JSON.parse(e.target.result);
                 
-                // Создаем нового персонажа из импортированных данных
                 const newCharacter = new Character();
                 Object.assign(newCharacter, characterData);
                 newCharacter.id = 'char_import_' + Date.now();
@@ -1090,24 +1027,24 @@ function showRollResult(skillName, skillValue, dice, total, resultText, resultCl
 }
 
 // ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ ==========
-
 function initializeSystem() {
     console.log('🎮 Инициализация D&D системы...');
     
-    // Если нет персонажей, создаем демо-персонажа
     if (!currentCharacter && Object.keys(characterManager.characters).length === 0) {
         const demoChar = characterManager.createCharacter('Новый Герой', 'human');
         currentCharacter = demoChar;
         console.log('✅ Создан демо-персонаж');
     }
     
-    // Рендерим лист персонажа
     renderCharacterSheet();
     
     console.log(`✅ Система готова! Персонажей: ${Object.keys(characterManager.characters).length}`);
 }
-        // ========== СИСТЕМА ГЕКСАГОНАЛЬНОГО ПОЛЯ ==========
 
+document.addEventListener('DOMContentLoaded', initializeSystem);
+</script>
+<script>
+// ========== СИСТЕМА ГЕКСАГОНАЛЬНОГО ПОЛЯ ==========
 class HexagonalBattlefield {
     constructor(width = 15, height = 10) {
         this.width = width;
@@ -1115,7 +1052,7 @@ class HexagonalBattlefield {
         this.cells = {};
         this.obstacles = {};
         this.characters = {};
-        this.hexSize = 40; // Размер гекса в пикселях
+        this.hexSize = 40;
         this.initializeGrid();
     }
 
@@ -1223,13 +1160,12 @@ class HexagonalBattlefield {
 
     placeCharacter(characterId, cellId, direction = 0) {
         if (this.cells[cellId] && !this.cells[cellId].occupied) {
-            // Освобождаем предыдущую позицию
             this.removeCharacter(characterId);
             
             this.cells[cellId].occupied = true;
             this.characters[characterId] = {
                 cellId: cellId,
-                direction: direction, // 0-5, где 0 - вправо, по часовой стрелке
+                direction: direction,
                 characterId: characterId
             };
             return true;
@@ -1253,7 +1189,6 @@ class HexagonalBattlefield {
         const currentCellId = this.characters[characterId].cellId;
         const distance = this.calculateDistance(currentCellId, targetCellId);
         
-        // Проверяем возможность перемещения (1 гекс за ход)
         if (distance <= 1 && this.placeCharacter(characterId, targetCellId)) {
             return true;
         }
@@ -1269,7 +1204,6 @@ class HexagonalBattlefield {
         let targetQ = coords.q;
         let targetR = coords.r;
 
-        // Векторы направления для гексагональной сетки
         const directionVectors = [
             [1, 0], [1, -1], [0, -1],
             [-1, 0], [-1, 1], [0, 1]
@@ -1292,7 +1226,6 @@ class HexagonalBattlefield {
         const visibleCells = new Set();
         const centerCoords = this.getCellCoordinates(character.cellId);
         
-        // Простой алгоритм видимости (можно улучшить)
         for (let q = -range; q <= range; q++) {
             for (let r = -range; r <= range; r++) {
                 const targetQ = centerCoords.q + q;
@@ -1317,20 +1250,18 @@ class HexagonalBattlefield {
         const dq = to.q - from.q;
         const dr = to.r - from.r;
         
-        // Упрощенное определение направления
-        if (dq > 0 && dr === 0) return 0; // Вправо
-        if (dq > 0 && dr < 0) return 1;   // Вправо-вверх
-        if (dq === 0 && dr < 0) return 2; // Вверх
-        if (dq < 0 && dr === 0) return 3; // Влево
-        if (dq < 0 && dr > 0) return 4;   // Влево-вниз
-        if (dq === 0 && dr > 0) return 5; // Вниз
+        if (dq > 0 && dr === 0) return 0;
+        if (dq > 0 && dr < 0) return 1;
+        if (dq === 0 && dr < 0) return 2;
+        if (dq < 0 && dr === 0) return 3;
+        if (dq < 0 && dr > 0) return 4;
+        if (dq === 0 && dr > 0) return 5;
         
         return 0;
     }
 }
 
 // ========== СИСТЕМА ВИЗУАЛИЗАЦИИ ПОЛЯ БОЯ ==========
-
 class BattlefieldRenderer {
     constructor(battlefield, containerId) {
         this.battlefield = battlefield;
@@ -1352,12 +1283,10 @@ class BattlefieldRenderer {
         this.container.style.borderRadius = '8px';
         this.container.style.overflow = 'hidden';
 
-        // Рендерим гексы
         for (const cellId in this.battlefield.cells) {
             this.renderHex(cellId);
         }
 
-        // Рендерим персонажей
         for (const characterId in this.battlefield.characters) {
             this.renderCharacter(characterId);
         }
@@ -1446,7 +1375,6 @@ class BattlefieldRenderer {
             color: #1a0f0b;
         `;
 
-        // Определяем символ по типу персонажа
         const charSymbol = characterId.startsWith('player') ? '👤' : 
                           characterId.startsWith('farmer') ? '👨‍🌾' : 
                           characterId.startsWith('bandit') ? '💀' : '⚔️';
@@ -1466,7 +1394,6 @@ class BattlefieldRenderer {
         console.log('Выбрана ячейка:', cellId);
         
         if (this.selectedCharacter) {
-            // Пытаемся переместить персонажа
             if (this.battlefield.moveCharacter(this.selectedCharacter, cellId)) {
                 console.log(`Персонаж ${this.selectedCharacter} перемещен в ${cellId}`);
                 this.render();
@@ -1491,8 +1418,6 @@ class BattlefieldRenderer {
     onCharacterClick(characterId) {
         this.selectedCharacter = characterId;
         console.log('Выбран персонаж:', characterId);
-        
-        // Подсвечиваем возможные ходы
         this.highlightPossibleMoves(characterId);
     }
 
@@ -1519,10 +1444,8 @@ class BattlefieldRenderer {
             this.battlefield.getCellCoordinates(currentCellId).r
         );
 
-        // Сбрасываем подсветку всех ячеек
         this.resetHighlights();
 
-        // Подсвечиваем возможные ходы
         neighbors.forEach(cellId => {
             const hexElement = document.getElementById(`hex_${cellId}`);
             if (hexElement && !this.battlefield.cells[cellId].occupied) {
@@ -1531,7 +1454,6 @@ class BattlefieldRenderer {
             }
         });
 
-        // Подсвечиваем текущую позицию
         const currentHex = document.getElementById(`hex_${currentCellId}`);
         if (currentHex) {
             currentHex.style.background = '#3498db';
@@ -1550,7 +1472,6 @@ class BattlefieldRenderer {
     }
 
     setupEventListeners() {
-        // Обработка кликов вне поля для сброса выделения
         document.addEventListener('click', (e) => {
             if (!this.container.contains(e.target)) {
                 this.selectedCell = null;
@@ -1560,9 +1481,9 @@ class BattlefieldRenderer {
         });
     }
 }
-
+</script>
+<script>
 // ========== СИСТЕМА ЛАНДШАФТОВ ==========
-
 const landscapes = {
     city: {
         name: "🏙️ Город",
@@ -1597,17 +1518,14 @@ function generateLandscape(battlefield, landscapeType) {
     const landscape = landscapes[landscapeType];
     if (!landscape) return;
 
-    // Очищаем существующие препятствия
     for (const cellId in battlefield.obstacles) {
         battlefield.removeObstacle(cellId);
     }
 
-    // Генерируем новые препятствия
     for (let q = 0; q < battlefield.width; q++) {
         for (let r = 0; r < battlefield.height; r++) {
             const cellId = battlefield.getCellId(q, r);
             
-            // Пропускаем края для размещения персонажей
             if (q < 2 || q >= battlefield.width - 2 || r < 2 || r >= battlefield.height - 2) {
                 continue;
             }
@@ -1615,7 +1533,7 @@ function generateLandscape(battlefield, landscapeType) {
             for (const obstacle of landscape.obstacles) {
                 if (Math.random() < obstacle.density) {
                     battlefield.addObstacle(cellId, obstacle.type);
-                    break; // Только одно препятствие на ячейку
+                    break;
                 }
             }
         }
@@ -1623,12 +1541,10 @@ function generateLandscape(battlefield, landscapeType) {
 }
 
 // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ СИСТЕМЫ БОЯ ==========
-
 let battlefield = null;
 let battlefieldRenderer = null;
 
 // ========== ИНТЕРФЕЙС СИСТЕМЫ БОЯ ==========
-
 function initializeCombatSystem() {
     const combatTab = document.getElementById('combat-tab');
     if (!combatTab) return;
@@ -1730,7 +1646,6 @@ function addPlayerToBattlefield() {
         return;
     }
 
-    // Размещаем игрока в левом нижнем углу
     const startCell = battlefield.getCellId(1, battlefield.height - 2);
     if (battlefield.placeCharacter('player_1', startCell, 0)) {
         battlefieldRenderer.render();
@@ -1745,7 +1660,6 @@ function addFarmerToBattlefield() {
     }
 
     const farmerId = 'farmer_' + Date.now();
-    // Размещаем фермера в правом верхнем углу
     const startCell = battlefield.getCellId(battlefield.width - 2, 1);
     if (battlefield.placeCharacter(farmerId, startCell, 3)) {
         battlefieldRenderer.render();
@@ -1760,7 +1674,6 @@ function addBanditToBattlefield() {
     }
 
     const banditId = 'bandit_' + Date.now();
-    // Размещаем разбойника в случайной позиции
     const randomQ = Math.floor(Math.random() * (battlefield.width - 4)) + 2;
     const randomR = Math.floor(Math.random() * (battlefield.height - 4)) + 2;
     const startCell = battlefield.getCellId(randomQ, randomR);
@@ -1774,7 +1687,6 @@ function addBanditToBattlefield() {
 function clearBattlefield() {
     if (!battlefield) return;
     
-    // Удаляем всех персонажей
     for (const characterId in battlefield.characters) {
         battlefield.removeCharacter(characterId);
     }
@@ -1784,1418 +1696,23 @@ function clearBattlefield() {
 }
 
 // ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ ==========
-
-function initializeSystem() {
-    console.log('🎮 Инициализация D&D системы...');
-    
-    // Если нет персонажей, создаем демо-персонажа
-    if (!currentCharacter && Object.keys(characterManager.characters).length === 0) {
-        const demoChar = characterManager.createCharacter('Новый Герой', 'human');
-        currentCharacter = demoChar;
-        console.log('✅ Создан демо-персонаж');
-    }
-    
-    // Рендерим лист персонажа
-    renderCharacterSheet();
-    
-    // Инициализируем систему боя
-    initializeCombatSystem();
-    
-    console.log(`✅ Система готова! Персонажей: ${Object.keys(characterManager.characters).length}`);
-}
-
-// Автоматическая инициализация при загрузке вкладки боя
 let combatTabInitialized = false;
+
 function openTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(tabName + '-tab').classList.add('active');
     event.currentTarget.classList.add('active');
     
-    // Инициализируем систему боя при первом открытии вкладки
     if (tabName === 'combat' && !combatTabInitialized) {
         initializeCombatSystem();
         combatTabInitialized = true;
     }
 }
-                    // ========== СИСТЕМА БОЕВОЙ МЕХАНИКИ ==========
-
-class CombatSystem {
-    constructor(battlefield) {
-        this.battlefield = battlefield;
-        this.combatants = {};
-        this.currentTurn = 0;
-        this.activeCombatant = null;
-        this.combatHistory = [];
-        this.weather = 'clear';
-        this.fog = 'none';
-        this.timeOfDay = 'day';
-        this.isCombatActive = false;
-    }
-
-    addCombatant(characterId, type, stats = {}) {
-        this.combatants[characterId] = {
-            id: characterId,
-            type: type, // 'player', 'farmer', 'bandit'
-            stats: {
-                health: stats.health || 100,
-                maxHealth: stats.maxHealth || 100,
-                skills: stats.skills || {},
-                actions: 1,
-                usedActions: 0,
-                movement: 5, // метров за ход
-                usedMovement: 0
-            },
-            conditions: [],
-            position: this.battlefield.getCharacterPosition(characterId)
-        };
-    }
-
-    startCombat() {
-        this.isCombatActive = true;
-        this.currentTurn = 1;
-        this.determineInitiative();
-        this.nextTurn();
-        
-        this.addToCombatHistory(`⚔️ Бой начался!`);
-        this.updateBattleInfo();
-    }
-
-    determineInitiative() {
-        // Простая система инициативы - игрок всегда ходит первым
-        const combatantIds = Object.keys(this.combatants);
-        this.turnOrder = combatantIds.sort((a, b) => {
-            if (a.startsWith('player')) return -1;
-            if (b.startsWith('player')) return 1;
-            return Math.random() - 0.5;
-        });
-    }
-
-    nextTurn() {
-        if (!this.isCombatActive) return;
-
-        if (!this.activeCombatant || !this.turnOrder.includes(this.activeCombatant)) {
-            this.activeCombatant = this.turnOrder[0];
-        } else {
-            const currentIndex = this.turnOrder.indexOf(this.activeCombatant);
-            this.activeCombatant = this.turnOrder[(currentIndex + 1) % this.turnOrder.length];
-        }
-
-        // Сбрасываем использованные действия и движение
-        const combatant = this.combatants[this.activeCombatant];
-        if (combatant) {
-            combatant.stats.usedActions = 0;
-            combatant.stats.usedMovement = 0;
-        }
-
-        this.addToCombatHistory(`🔄 Ход ${this.currentTurn}: ${this.getCombatantName(this.activeCombatant)}`);
-        this.updateBattleInfo();
-
-        // Если ход врага - выполняем AI
-        if (this.activeCombatant.startsWith('farmer') || this.activeCombatant.startsWith('bandit')) {
-            setTimeout(() => this.executeEnemyTurn(), 1000);
-        }
-    }
-
-    executeEnemyTurn() {
-        const enemy = this.combatants[this.activeCombatant];
-        if (!enemy) return;
-
-        const playerId = Object.keys(this.combatants).find(id => id.startsWith('player'));
-        if (!playerId) return;
-
-        // Простой AI: двигаться к игроку и атаковать
-        const enemyPos = enemy.position;
-        const playerPos = this.battlefield.getCharacterPosition(playerId);
-
-        if (enemyPos && playerPos) {
-            const distance = this.battlefield.calculateDistance(enemyPos.cellId, playerPos.cellId);
-            
-            if (distance <= 1) {
-                // Атаковать если рядом
-                this.performMeleeAttack(this.activeCombatant, playerId);
-            } else if (enemy.stats.usedMovement < enemy.stats.movement) {
-                // Двигаться к игроку
-                this.moveTowardsTarget(this.activeCombatant, playerPos.cellId);
-            }
-        }
-
-        // Завершаем ход врага
-        setTimeout(() => this.nextTurn(), 500);
-    }
-
-    moveTowardsTarget(combatantId, targetCellId) {
-        const combatant = this.combatants[combatantId];
-        if (!combatant || !combatant.position) return false;
-
-        const currentCellId = combatant.position.cellId;
-        const neighbors = this.battlefield.getNeighbors(
-            this.battlefield.getCellCoordinates(currentCellId).q,
-            this.battlefield.getCellCoordinates(currentCellId).r
-        );
-
-        // Находим ближайшую к цели ячейку
-        let bestCell = null;
-        let bestDistance = Infinity;
-
-        for (const neighborId of neighbors) {
-            if (!this.battlefield.cells[neighborId].occupied) {
-                const distance = this.battlefield.calculateDistance(neighborId, targetCellId);
-                if (distance < bestDistance) {
-                    bestDistance = distance;
-                    bestCell = neighborId;
-                }
-            }
-        }
-
-        if (bestCell && this.battlefield.moveCharacter(combatantId, bestCell)) {
-            combatant.position = this.battlefield.getCharacterPosition(combatantId);
-            combatant.stats.usedMovement += 1;
-            
-            this.addToCombatHistory(`🚶 ${this.getCombatantName(combatantId)} переместился`);
-            this.updateBattlefieldDisplay();
-            return true;
-        }
-
-        return false;
-    }
-
-    performMeleeAttack(attackerId, targetId, aimZone = 'torso') {
-        const attacker = this.combatants[attackerId];
-        const target = this.combatants[targetId];
-        
-        if (!attacker || !target) return false;
-
-        // Проверка дистанции
-        const attackerPos = attacker.position;
-        const targetPos = this.battlefield.getCharacterPosition(targetId);
-        
-        if (!attackerPos || !targetPos) return false;
-
-        const distance = this.battlefield.calculateDistance(attackerPos.cellId, targetPos.cellId);
-        if (distance > 1) {
-            this.addToCombatHistory(`❌ ${this.getCombatantName(attackerId)} не может атаковать - слишком далеко`);
-            return false;
-        }
-
-        // Бросок на попадание
-        const attackSkill = attacker.stats.skills['Одноручное оружие'] || 10;
-        const aimModifier = this.getAimModifier(aimZone);
-        const attackCheck = rollSkillCheck(attackSkill, aimModifier);
-
-        if (attackCheck.success) {
-            // Расчет урона
-            const damage = this.calculateDamage(attacker, 'slashing');
-            target.stats.health -= damage;
-
-            this.addToCombatHistory(`🗡️ ${this.getCombatantName(attackerId)} попадает по ${aimZone} и наносит ${damage} урона!`);
-
-            // Проверка смерти
-            if (target.stats.health <= 0) {
-                target.stats.health = 0;
-                this.addToCombatHistory(`💀 ${this.getCombatantName(targetId)} убит!`);
-                this.removeCombatant(targetId);
-            }
-        } else {
-            this.addToCombatHistory(`❌ ${this.getCombatantName(attackerId)} промахивается!`);
-        }
-
-        attacker.stats.usedActions += 1;
-        this.updateBattleInfo();
-        return attackCheck.success;
-    }
-
-    getAimModifier(aimZone) {
-        const modifiers = {
-            'torso': 0,
-            'head': -5,
-            'eye': -9,
-            'neck': -7,
-            'limb': -2,
-            'hand': -4,
-            'weapon': -4,
-            'organs': -5
-        };
-        return modifiers[aimZone] || 0;
-    }
-
-    calculateDamage(attacker, damageType) {
-        // Базовая система урона (упрощенная)
-        const baseDamage = rollDice(6, 2).total; // 2d6
-        let modifier = 0;
-
-        // Модификаторы от навыков
-        if (damageType === 'slashing') {
-            modifier = Math.floor((attacker.stats.skills['Одноручное оружие'] || 10) / 5);
-        }
-
-        return Math.max(1, baseDamage + modifier);
-    }
-
-    removeCombatant(combatantId) {
-        this.battlefield.removeCharacter(combatantId);
-        delete this.combatants[combatantId];
-
-        // Проверка окончания боя
-        this.checkCombatEnd();
-    }
-
-    checkCombatEnd() {
-        const players = Object.keys(this.combatants).filter(id => id.startsWith('player'));
-        const enemies = Object.keys(this.combatants).filter(id => !id.startsWith('player'));
-
-        if (players.length === 0) {
-            this.endCombat('defeat');
-        } else if (enemies.length === 0) {
-            this.endCombat('victory');
-        }
-    }
-
-    endCombat(result) {
-        this.isCombatActive = false;
-        
-        if (result === 'victory') {
-            this.addToCombatHistory(`🎉 Победа! Все враги повержены!`);
-        } else {
-            this.addToCombatHistory(`💀 Поражение! Все игроки пали...`);
-        }
-
-        this.updateBattleInfo();
-    }
-
-    getCombatantName(combatantId) {
-        if (combatantId.startsWith('player')) return 'Игрок';
-        if (combatantId.startsWith('farmer')) return 'Фермер';
-        if (combatantId.startsWith('bandit')) return 'Разбойник';
-        return combatantId;
-    }
-
-    addToCombatHistory(message) {
-        this.combatHistory.unshift({
-            turn: this.currentTurn,
-            message: message,
-            timestamp: new Date().toLocaleTimeString()
-        });
-
-        // Ограничиваем историю 50 сообщениями
-        if (this.combatHistory.length > 50) {
-            this.combatHistory.pop();
-        }
-
-        this.updateCombatHistoryDisplay();
-    }
-
-    updateCombatHistoryDisplay() {
-        const historyElement = document.getElementById('combatHistory');
-        if (!historyElement) return;
-
-        let historyHTML = '<h4 style="color: #d4af37; margin-bottom: 10px;">📜 История боя:</h4>';
-        
-        this.combatHistory.slice(0, 10).forEach(entry => {
-            historyHTML += `
-                <div style="padding: 5px 0; border-bottom: 1px solid #3d2418; font-size: 0.9em;">
-                    <span style="color: #8b7d6b;">[${entry.timestamp}]</span> ${entry.message}
-                </div>
-            `;
-        });
-
-        historyElement.innerHTML = historyHTML;
-    }
-
-    updateBattleInfo() {
-        const battleInfo = document.getElementById('battleInfo');
-        const battleStatus = document.getElementById('battleStatus');
-        
-        if (!battleInfo || !battleStatus) return;
-
-        let statusHTML = '';
-
-        if (this.isCombatActive) {
-            statusHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div><strong>Текущий ход:</strong> ${this.currentTurn}</div>
-                    <div><strong>Активный:</strong> ${this.getCombatantName(this.activeCombatant)}</div>
-                </div>
-                <div><strong>Статус:</strong> Бой активен</div>
-            `;
-        } else {
-            statusHTML = `<strong>Статус:</strong> Бой не активен`;
-        }
-
-        // Информация о комбатантах
-        statusHTML += `<div style="margin-top: 15px;"><strong>Участники:</strong></div>`;
-        
-        for (const combatantId in this.combatants) {
-            const combatant = this.combatants[combatantId];
-            const healthPercent = (combatant.stats.health / combatant.stats.maxHealth) * 100;
-            const healthColor = healthPercent > 60 ? '#27ae60' : healthPercent > 30 ? '#f39c12' : '#e74c3c';
-            
-            statusHTML += `
-                <div style="display: flex; justify-content: space-between; align-items: center; 
-                     padding: 5px 0; border-bottom: 1px solid #3d2418;">
-                    <span>${this.getCombatantName(combatantId)}</span>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 60px; height: 8px; background: #2c1810; border-radius: 4px;">
-                            <div style="width: ${healthPercent}%; height: 100%; background: ${healthColor}; border-radius: 4px;"></div>
-                        </div>
-                        <span style="font-size: 0.9em;">${combatant.stats.health}/${combatant.stats.maxHealth}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        battleStatus.innerHTML = statusHTML;
-    }
-}
-
-// ========== ИНТЕРФЕЙС УПРАВЛЕНИЯ БОЕМ ==========
-
-let combatSystem = null;
-
-function updateCombatInterface() {
-    const combatControls = document.getElementById('combatControls');
-    if (!combatControls) return;
-
-    const isPlayerTurn = combatSystem && combatSystem.activeCombatant && 
-                        combatSystem.activeCombatant.startsWith('player');
-
-    combatControls.innerHTML = `
-        <h3 style="color: #d4af37; margin-bottom: 15px;">Действия в бою</h3>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-            <button class="btn btn-roll" onclick="playerMove()" ${!isPlayerTurn ? 'disabled' : ''}>
-                🚶 Перемещение
-            </button>
-            <button class="btn btn-roll" onclick="playerAttack()" ${!isPlayerTurn ? 'disabled' : ''}>
-                ⚔️ Атака
-            </button>
-            <button class="btn btn-roll" onclick="playerAim()" ${!isPlayerTurn ? 'disabled' : ''}>
-                🎯 Прицеливание
-            </button>
-            <button class="btn btn-roll" onclick="playerBlock()" ${!isPlayerTurn ? 'disabled' : ''}>
-                🛡️ Блок
-            </button>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <button class="btn btn-plus" onclick="playerEndTurn()" ${!isPlayerTurn ? 'disabled' : ''}>
-                ✅ Завершить ход
-            </button>
-            <button class="btn btn-minus" onclick="endCombat()">
-                🏳️ Завершить бой
-            </button>
-        </div>
-        
-        <div id="combatHistory" style="margin-top: 20px; max-height: 200px; overflow-y: auto; 
-             background: #2c1810; padding: 10px; border-radius: 6px; border: 1px solid #5a3928;">
-        </div>
-    `;
-
-    if (combatSystem) {
-        combatSystem.updateCombatHistoryDisplay();
-    }
-}
-
-function playerMove() {
-    if (!combatSystem || !combatSystem.activeCombatant) return;
-
-    const combatant = combatSystem.combatants[combatSystem.activeCombatant];
-    if (!combatant || combatant.stats.usedActions >= combatant.stats.actions) {
-        alert('Вы уже использовали все действия в этом ходу!');
-        return;
-    }
-
-    alert('Выберите ячейку для перемещения на поле боя');
-    // Режим перемещения активируется через выделение ячейки
-}
-
-function playerAttack() {
-    if (!combatSystem || !combatSystem.activeCombatant) return;
-
-    const combatant = combatSystem.combatants[combatSystem.activeCombatant];
-    if (!combatant || combatant.stats.usedActions >= combatant.stats.actions) {
-        alert('Вы уже использовали все действия в этом ходу!');
-        return;
-    }
-
-    // Находим ближайшего врага
-    const enemies = Object.keys(combatSystem.combatants).filter(id => 
-        !id.startsWith('player') && combatSystem.combatants[id].stats.health > 0
-    );
-
-    if (enemies.length === 0) {
-        alert('Нет врагов для атаки!');
-        return;
-    }
-
-    // Атакуем ближайшего врага
-    const attackerPos = combatant.position;
-    let closestEnemy = null;
-    let closestDistance = Infinity;
-
-    for (const enemyId of enemies) {
-        const enemyPos = combatSystem.battlefield.getCharacterPosition(enemyId);
-        if (enemyPos) {
-            const distance = combatSystem.battlefield.calculateDistance(
-                attackerPos.cellId, enemyPos.cellId
-            );
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestEnemy = enemyId;
-            }
-        }
-    }
-
-    if (closestEnemy && closestDistance <= 1) {
-        combatSystem.performMeleeAttack(combatSystem.activeCombatant, closestEnemy, 'torso');
-        updateCombatInterface();
-    } else {
-        alert('Нет врагов в радиусе атаки!');
-    }
-}
-
-function playerAim() {
-    if (!combatSystem || !combatSystem.activeCombatant) return;
-
-    const combatant = combatSystem.combatants[combatSystem.activeCombatant];
-    if (combatant.stats.usedActions >= combatant.stats.actions) {
-        alert('Вы уже использовали все действия в этом ходу!');
-        return;
-    }
-
-    // Используем действие для прицеливания (дает бонус к следующей атаке)
-    combatant.stats.usedActions += 1;
-    combatSystem.addToCombatHistory(`🎯 ${combatSystem.getCombatantName(combatSystem.activeCombatant)} прицеливается`);
-    updateCombatInterface();
-}
-
-function playerBlock() {
-    if (!combatSystem || !combatSystem.activeCombatant) return;
-
-    const combatant = combatSystem.combatants[combatSystem.activeCombatant];
-    if (combatant.stats.usedActions >= combatant.stats.actions) {
-        alert('Вы уже использовали все действия в этом ходу!');
-        return;
-    }
-
-    // Используем действие для блокирования (дает защиту до следующего хода)
-    combatant.stats.usedActions += 1;
-    combatSystem.addToCombatHistory(`🛡️ ${combatSystem.getCombatantName(combatSystem.activeCombatant)} готовится к блокированию`);
-    updateCombatInterface();
-}
-
-function playerEndTurn() {
-    if (!combatSystem) return;
-    combatSystem.nextTurn();
-    updateCombatInterface();
-}
-
-function startCombat() {
-    if (!battlefield) {
-        alert('Сначала создайте поле боя и разместите персонажей!');
-        return;
-    }
-
-    combatSystem = new CombatSystem(battlefield);
-
-    // Добавляем всех персонажей на поле в систему боя
-    for (const characterId in battlefield.characters) {
-        const character = battlefield.characters[characterId];
-        let type = 'player';
-        let stats = { health: 100, maxHealth: 100 };
-
-        if (characterId.startsWith('farmer')) {
-            type = 'farmer';
-            stats = {
-                health: 50 + Math.floor(Math.random() * 21), // 50-70 HP
-                maxHealth: 70,
-                skills: {
-                    'Одноручное оружие': 6 + Math.floor(Math.random() * 5) // 6-10
-                }
-            };
-        } else if (characterId.startsWith('bandit')) {
-            type = 'bandit';
-            stats = {
-                health: 70 + Math.floor(Math.random() * 31), // 70-100 HP
-                maxHealth: 100,
-                skills: {
-                    'Одноручное оружие': 8 + Math.floor(Math.random() * 5) // 8-12
-                }
-            };
-        } else if (characterId.startsWith('player')) {
-            // Используем навыки текущего персонажа
-            stats = {
-                health: currentCharacter ? currentCharacter.stats.health : 100,
-                maxHealth: currentCharacter ? currentCharacter.stats.maxHealth : 100,
-                skills: currentCharacter ? currentCharacter.skills : {}
-            };
-        }
-
-        combatSystem.addCombatant(characterId, type, stats);
-    }
-
-    combatSystem.startCombat();
-    updateCombatInterface();
-
-    // Добавляем панель управления боем
-    const combatTab = document.getElementById('combat-tab');
-    const existingControls = document.getElementById('combatControls');
-    if (!existingControls) {
-        const controlsHTML = `
-            <div id="combatControls" style="background: #3d2418; padding: 20px; border-radius: 8px; 
-                 border: 2px solid #8b4513; margin-top: 20px;">
-            </div>
-        `;
-        combatTab.insertAdjacentHTML('beforeend', controlsHTML);
-    }
-
-    updateCombatInterface();
-}
-
-function endCombat() {
-    if (combatSystem) {
-        combatSystem.endCombat('manual');
-        combatSystem = null;
-    }
-    updateCombatInterface();
-}
-
-function updateBattlefieldDisplay() {
-    if (battlefieldRenderer) {
-        battlefieldRenderer.render();
-    }
-}
-
-// ========== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА БОЯ ==========
-
-function initializeCombatSystem() {
-    const combatTab = document.getElementById('combat-tab');
-    if (!combatTab) return;
-
-    combatTab.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <h2 class="section-title">⚔️ Боевая Система</h2>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div>
-                    <h3 style="color: #d4af37; margin-bottom: 10px;">Настройки боя</h3>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Ландшафт:</label>
-                        <select id="landscapeSelect" style="width: 100%; padding: 10px; border: 2px solid #8b4513; 
-                              border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-                            <option value="city">🏙️ Город</option>
-                            <option value="forest">🌲 Лес</option>
-                            <option value="road">🛣️ Дорога</option>
-                        </select>
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Размер поля:</label>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="number" id="battlefieldWidth" value="15" min="5" max="20" 
-                                   style="flex: 1; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                                   background: #1a0f0b; color: #e0d0c0;">
-                            <span style="color: #e0d0c0; line-height: 40px;">×</span>
-                            <input type="number" id="battlefieldHeight" value="10" min="5" max="15" 
-                                   style="flex: 1; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                                   background: #1a0f0b; color: #e0d0c0;">
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-plus" onclick="createBattlefield()" style="width: 100%; margin-bottom: 10px;">
-                        🎲 Создать поле боя
-                    </button>
-                    
-                    <button class="btn btn-roll" onclick="startCombat()" style="width: 100%;">
-                        ⚔️ Начать бой
-                    </button>
-                </div>
-                
-                <div>
-                    <h3 style="color: #d4af37; margin-bottom: 10px;">Управление</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                        <button class="btn btn-roll" onclick="addPlayerToBattlefield()">➕ Игрок</button>
-                        <button class="btn btn-roll" onclick="addFarmerToBattlefield()">👨‍🌾 Фермер</button>
-                        <button class="btn btn-roll" onclick="addBanditToBattlefield()">💀 Разбойник</button>
-                        <button class="btn btn-minus" onclick="clearBattlefield()">🗑️ Очистить</button>
-                    </div>
-                    
-                    <div style="background: #3d2418; padding: 15px; border-radius: 6px;">
-                        <h4 style="color: #d4af37; margin-bottom: 10px;">Легенда:</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.9em;">
-                            <div>👤 - Игрок</div>
-                            <div>👨‍🌾 - Фермер</div>
-                            <div>💀 - Разбойник</div>
-                            <div>🌲 - Дерево</div>
-                            <div>🪨 - Камень</div>
-                            <div>🏠 - Здание</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="battlefieldContainer" style="min-height: 400px; background: #1a0f0b; 
-                 border: 2px solid #5a3928; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                <p style="text-align: center; color: #8b7d6b; padding: 50px;">
-                    Создайте поле боя чтобы начать
-                </p>
-            </div>
-            
-            <div id="battleInfo" style="background: #3d2418; padding: 15px; border-radius: 6px; display: none;">
-                <h3 style="color: #d4af37; margin-bottom: 10px;">Информация о бое</h3>
-                <div id="battleStatus">Статус: Ожидание начала</div>
-            </div>
-        </div>
-    `;
-}
-
-// ========== ОБНОВЛЕНИЕ СИСТЕМЫ ПЕРЕМЕЩЕНИЯ ==========
-
-// Переопределяем метод onHexClick для поддержки боевой системы
-const originalOnHexClick = BattlefieldRenderer.prototype.onHexClick;
-BattlefieldRenderer.prototype.onHexClick = function(cellId) {
-    if (combatSystem && combatSystem.isCombatActive && 
-        combatSystem.activeCombatant && combatSystem.activeCombatant.startsWith('player')) {
-        
-        const combatant = combatSystem.combatants[combatSystem.activeCombatant];
-        if (combatant && combatant.stats.usedMovement < combatant.stats.movement) {
-            // Попытка перемещения в бою
-            if (combatSystem.moveTowardsTarget(combatSystem.activeCombatant, cellId)) {
-                updateCombatInterface();
-                return;
-            }
-        }
-    }
-    
-    // Вызываем оригинальный метод
-    originalOnHexClick.call(this, cellId);
-};
-            // ========== СИСТЕМА ПОГОДЫ И ВРЕМЕНИ ==========
-
-class WeatherTimeSystem {
-    constructor() {
-        this.weather = 'clear';
-        this.fog = 'none';
-        this.timeOfDay = 'day';
-        this.currentHour = 12; // 0-23
-        this.weatherDuration = 0;
-        this.fogDuration = 0;
-    }
-
-    // Кубик погоды
-    rollWeather() {
-        const roll = rollDice(6, 1).total;
-        const weatherTypes = {
-            1: 'clear',
-            2: 'cloudy', 
-            3: 'light_rain',
-            4: 'rain',
-            5: 'heavy_rain',
-            6: 'storm'
-        };
-        
-        this.weather = weatherTypes[roll];
-        this.weatherDuration = 2 + Math.floor(Math.random() * 4); // 2-5 часов
-        return this.weather;
-    }
-
-    // Кубик тумана
-    rollFog() {
-        const roll = rollDice(6, 1).total;
-        const fogTypes = {
-            1: 'none',
-            2: 'none',
-            3: 'light_fog',
-            4: 'light_fog', 
-            5: 'medium_fog',
-            6: 'heavy_fog'
-        };
-        
-        this.fog = fogTypes[roll];
-        this.fogDuration = 1 + Math.floor(Math.random() * 3); // 1-3 часа
-        return this.fog;
-    }
-
-    // Обновление времени
-    advanceTime(hours = 1) {
-        this.currentHour = (this.currentHour + hours) % 24;
-        
-        // Обновление времени суток
-        if (this.currentHour >= 6 && this.currentHour < 12) {
-            this.timeOfDay = 'morning';
-        } else if (this.currentHour >= 12 && this.currentHour < 18) {
-            this.timeOfDay = 'day';
-        } else if (this.currentHour >= 18 && this.currentHour < 24) {
-            this.timeOfDay = 'evening';
-        } else {
-            this.timeOfDay = 'night';
-        }
-
-        // Уменьшение длительности погодных эффектов
-        if (this.weatherDuration > 0) {
-            this.weatherDuration -= hours;
-            if (this.weatherDuration <= 0) {
-                this.weather = 'clear';
-            }
-        }
-
-        if (this.fogDuration > 0) {
-            this.fogDuration -= hours;
-            if (this.fogDuration <= 0) {
-                this.fog = 'none';
-            }
-        }
-    }
-
-    // Модификаторы восприятия
-    getPerceptionModifiers() {
-        let modifiers = {
-            perception: 0,
-            stealth: 0,
-            movement: 0,
-            shooting: 0
-        };
-
-        // Модификаторы времени суток
-        switch (this.timeOfDay) {
-            case 'morning': modifiers.perception += 0; break;
-            case 'day': modifiers.perception += 0; break;
-            case 'evening': modifiers.perception -= 1; break;
-            case 'night': modifiers.perception -= 3; break;
-        }
-
-        // Модификаторы погоды
-        switch (this.weather) {
-            case 'cloudy': modifiers.perception -= 1; break;
-            case 'light_rain': 
-                modifiers.perception -= 2;
-                modifiers.stealth += 1;
-                break;
-            case 'rain':
-                modifiers.perception -= 3;
-                modifiers.stealth += 2;
-                modifiers.movement -= 1;
-                break;
-            case 'heavy_rain':
-                modifiers.perception -= 5;
-                modifiers.stealth += 3;
-                modifiers.movement -= 2;
-                modifiers.shooting -= 2;
-                break;
-            case 'storm':
-                modifiers.perception -= 8;
-                modifiers.stealth += 5;
-                modifiers.movement -= 5;
-                modifiers.shooting -= 5;
-                break;
-        }
-
-        // Модификаторы тумана
-        switch (this.fog) {
-            case 'light_fog':
-                modifiers.perception -= 2;
-                modifiers.stealth += 1;
-                break;
-            case 'medium_fog':
-                modifiers.perception -= 3;
-                modifiers.stealth += 2;
-                modifiers.shooting -= 1;
-                break;
-            case 'heavy_fog':
-                modifiers.perception -= 5;
-                modifiers.stealth += 3;
-                modifiers.shooting -= 3;
-                break;
-        }
-
-        return modifiers;
-    }
-
-    getTimeDescription() {
-        const times = {
-            'morning': 'Утро',
-            'day': 'День',
-            'evening': 'Вечер', 
-            'night': 'Ночь'
-        };
-
-        const weathers = {
-            'clear': 'Ясно',
-            'cloudy': 'Облачно',
-            'light_rain': 'Слабый дождь',
-            'rain': 'Дождь',
-            'heavy_rain': 'Сильный дождь',
-            'storm': 'Ураган'
-        };
-
-        const fogs = {
-            'none': 'Без тумана',
-            'light_fog': 'Слабый туман',
-            'medium_fog': 'Средний туман',
-            'heavy_fog': 'Сильный туман'
-        };
-
-        return `${times[this.timeOfDay]}, ${weathers[this.weather]}, ${fogs[this.fog]}`;
-    }
-}
-
-// ========== РАСШИРЕННАЯ СИСТЕМА СКРЫТНОСТИ ==========
-
-class StealthSystem {
-    constructor(battlefield, weatherTimeSystem) {
-        this.battlefield = battlefield;
-        this.weatherTime = weatherTimeSystem;
-        this.characterStates = {};
-    }
-
-    // Расчет модификаторов скрытности для позиции
-    calculateStealthModifiers(characterId, targetCellId = null) {
-        const character = this.battlefield.characters[characterId];
-        if (!character) return { stealth: 0, perception: 0 };
-
-        let modifiers = {
-            stealth: 0,
-            perception: 0
-        };
-
-        // Базовые модификаторы от погоды и времени
-        const weatherMods = this.weatherTime.getPerceptionModifiers();
-        modifiers.stealth += weatherMods.stealth;
-        modifiers.perception += weatherMods.perception;
-
-        // Модификаторы ландшафта
-        const cell = this.battlefield.cells[character.cellId];
-        modifiers.stealth += this.getLandscapeModifier(cell);
-
-        // Модификаторы позиции относительно наблюдателей
-        if (targetCellId) {
-            modifiers.stealth += this.getPositionModifier(characterId, targetCellId);
-        }
-
-        return modifiers;
-    }
-
-    getLandscapeModifier(cell) {
-        if (cell.type === 'tree') return 8; // За деревом
-        if (cell.type === 'building') return 10; // За зданием
-        if (cell.type === 'rock') return 5; // За камнем
-        
-        // Для пустых клеток в зависимости от ландшафта вокруг
-        const neighbors = this.battlefield.getNeighbors(cell.q, cell.r);
-        let coverCount = 0;
-        
-        for (const neighborId of neighbors) {
-            const neighbor = this.battlefield.cells[neighborId];
-            if (neighbor.type !== 'empty') coverCount++;
-        }
-        
-        if (coverCount >= 3) return 3; // В густой местности
-        if (coverCount >= 1) return 1; // В редкой местности
-        return -5; // На открытой местности
-    }
-
-    getPositionModifier(characterId, observerCellId) {
-        const character = this.battlefield.characters[characterId];
-        if (!character) return 0;
-
-        const observer = this.battlefield.characters[observerCellId];
-        if (!observer) return 0;
-
-        // Определяем направление относительно наблюдателя
-        const direction = this.battlefield.getDirectionBetweenCells(observerCellId, character.cellId);
-        const observerDirection = observer.direction;
-
-        // Разница направлений (0-3, где 0 - прямо, 3 - сзади)
-        const directionDiff = Math.min(
-            Math.abs(direction - observerDirection),
-            6 - Math.abs(direction - observerDirection)
-        );
-
-        if (directionDiff === 0) return -10; // Прямо перед наблюдателем
-        if (directionDiff === 1) return -5;  // Сбоку
-        if (directionDiff === 2) return 0;   // Сбоку-сзади
-        if (directionDiff === 3) return 5;   // Прямо сзади
-
-        return 0;
-    }
-
-    // Проверка скрытности
-    performStealthCheck(hiderId, seekerId) {
-        const hider = this.battlefield.characters[hiderId];
-        const seeker = this.battlefield.characters[seekerId];
-        
-        if (!hider || !seeker) return { detected: false, margin: 0 };
-
-        // Навыки персонажей (упрощенно)
-        const hiderStealth = 10; // Базовое значение, можно брать из характеристик
-        const seekerPerception = 10;
-
-        // Модификаторы
-        const stealthMods = this.calculateStealthModifiers(hiderId, seekerId);
-        
-        // Бросок скрытности
-        const stealthCheck = rollSkillCheck(hiderStealth + stealthMods.stealth);
-        const perceptionCheck = rollSkillCheck(seekerPerception + stealthMods.perception);
-
-        // Расчет успехов (разница между броском и навыком)
-        const stealthSuccesses = stealthCheck.success ? Math.max(0, (hiderStealth + stealthMods.stealth) - stealthCheck.total) : 0;
-        const perceptionSuccesses = perceptionCheck.success ? Math.max(0, (seekerPerception + stealthMods.perception) - perceptionCheck.total) : 0;
-
-        // Успехи скрытности умножаются на 2
-        const finalStealthSuccesses = stealthSuccesses * 2;
-        
-        // Сравнение успехов
-        const detected = finalStealthSuccesses <= perceptionSuccesses;
-
-        return {
-            detected: detected,
-            margin: Math.abs(finalStealthSuccesses - perceptionSuccesses),
-            stealthRoll: stealthCheck,
-            perceptionRoll: perceptionCheck,
-            stealthSuccesses: finalStealthSuccesses,
-            perceptionSuccesses: perceptionSuccesses
-        };
-    }
-
-    // Проверка обнаружения при движении
-    checkMovementDetection(moverId) {
-        const detectors = Object.keys(this.battlefield.characters).filter(id => 
-            id !== moverId && this.battlefield.characters[id]
-        );
-
-        const results = [];
-        
-        for (const detectorId of detectors) {
-            const check = this.performStealthCheck(moverId, detectorId);
-            if (check.detected) {
-                results.push({
-                    detectorId: detectorId,
-                    margin: check.margin,
-                    stealthSuccesses: check.stealthSuccesses,
-                    perceptionSuccesses: check.perceptionSuccesses
-                });
-            }
-        }
-
-        return results;
-    }
-}
-
-// ========== РАСШИРЕННАЯ СИСТЕМА ПЕРСОНАЖЕЙ ==========
-
-class AdvancedCharacter {
-    constructor(baseCharacter) {
-        this.id = baseCharacter.id;
-        this.baseCharacter = baseCharacter;
-        this.combatStats = {
-            currentHealth: baseCharacter.stats.health,
-            conditions: [],
-            equippedWeapon: null,
-            equippedShield: false,
-            lightSource: null
-        };
-        this.stealthState = 'visible'; // visible, hidden, undetected
-    }
-
-    getStealthSkill() {
-        return this.baseCharacter.skills['Скрытность'] || 10;
-    }
-
-    getPerceptionSkill() {
-        return this.baseCharacter.skills['Восприятие'] || 10;
-    }
-
-    getAgilitySkill() {
-        return this.baseCharacter.skills['Ловкость'] || 10;
-    }
-
-    // Проверка ловкости для дополнительного действия
-    checkAgilityForExtraAction() {
-        const agilityCheck = rollSkillCheck(this.getAgilitySkill());
-        return agilityCheck.success;
-    }
-
-    // Получение модификатора движения
-    getMovementModifier() {
-        let modifier = 5; // Базовое движение 5 метров
-        
-        if (this.checkAgilityForExtraAction()) {
-            modifier += 5; // +5 метров с успешной проверкой ловкости
-        }
-
-        return modifier;
-    }
-}
-
-// ========== ИНТЕРФЕЙС ПОГОДЫ И СКРЫТНОСТИ ==========
-
-let weatherTimeSystem = new WeatherTimeSystem();
-let stealthSystem = null;
-
-function initializeWeatherStealthInterface() {
-    const combatTab = document.getElementById('combat-tab');
-    if (!combatTab) return;
-
-    // Добавляем панель погоды и времени к существующему интерфейсу
-    const weatherHTML = `
-        <div style="background: #3d2418; padding: 15px; border-radius: 8px; border: 2px solid #5a3928; margin-bottom: 20px;">
-            <h3 style="color: #d4af37; margin-bottom: 15px;">🌤️ Погода и Время</h3>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Время суток:</label>
-                    <div id="currentTime" style="padding: 8px; background: #2c1810; border-radius: 4px; 
-                         border: 1px solid #5a3928; text-align: center; font-weight: bold;">
-                        День
-                    </div>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Погода:</label>
-                    <div id="currentWeather" style="padding: 8px; background: #2c1810; border-radius: 4px; 
-                         border: 1px solid #5a3928; text-align: center; font-weight: bold;">
-                        Ясно
-                    </div>
-                </div>
-                
-                <div>
-                    <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Туман:</label>
-                    <div id="currentFog" style="padding: 8px; background: #2c1810; border-radius: 4px; 
-                         border: 1px solid #5a3928; text-align: center; font-weight: bold;">
-                        Нет
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button class="btn btn-dice" onclick="rollWeatherDice()">
-                    🌦️ Бросить погоду
-                </button>
-                <button class="btn btn-dice" onclick="rollFogDice()">
-                    🌫️ Бросить туман
-                </button>
-                <button class="btn btn-roll" onclick="advanceTime(1)">
-                    ⏰ +1 час
-                </button>
-                <button class="btn btn-roll" onclick="advanceTime(6)">
-                    ⏰ +6 часов
-                </button>
-            </div>
-            
-            <div id="weatherModifiers" style="margin-top: 15px; padding: 10px; background: #2c1810; 
-                 border-radius: 4px; border: 1px solid #5a3928; font-size: 0.9em;">
-                <strong>Модификаторы:</strong> Восприятие: 0, Скрытность: 0, Движение: 0, Стрельба: 0
-            </div>
-        </div>
-        
-        <div style="background: #3d2418; padding: 15px; border-radius: 8px; border: 2px solid #5a3928; margin-bottom: 20px;">
-            <h3 style="color: #d4af37; margin-bottom: 15px;">👻 Система Скрытности</h3>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <button class="btn btn-roll" onclick="performStealthTest()">
-                    🎭 Проверить скрытность
-                </button>
-                <button class="btn btn-roll" onclick="toggleStealthMode()">
-                    🕵️‍♂️ Режим скрытности
-                </button>
-            </div>
-            
-            <div id="stealthResults" style="min-height: 60px; padding: 10px; background: #2c1810; 
-                 border-radius: 4px; border: 1px solid #5a3928; font-size: 0.9em;">
-                Результаты проверок скрытности будут отображаться здесь
-            </div>
-        </div>
-    `;
-
-    // Добавляем панель к интерфейсу боя
-    const existingWeatherPanel = document.getElementById('weatherPanel');
-    if (!existingWeatherPanel) {
-        combatTab.insertAdjacentHTML('afterbegin', weatherHTML);
-    }
-
-    updateWeatherDisplay();
-}
-
-function updateWeatherDisplay() {
-    const timeElement = document.getElementById('currentTime');
-    const weatherElement = document.getElementById('currentWeather');
-    const fogElement = document.getElementById('currentFog');
-    const modifiersElement = document.getElementById('weatherModifiers');
-
-    if (timeElement) timeElement.textContent = getTimeDescription(weatherTimeSystem.timeOfDay);
-    if (weatherElement) weatherElement.textContent = getWeatherDescription(weatherTimeSystem.weather);
-    if (fogElement) fogElement.textContent = getFogDescription(weatherTimeSystem.fog);
-    
-    if (modifiersElement) {
-        const mods = weatherTimeSystem.getPerceptionModifiers();
-        modifiersElement.innerHTML = `
-            <strong>Модификаторы:</strong> 
-            Восприятие: ${mods.perception >= 0 ? '+' : ''}${mods.perception}, 
-            Скрытность: ${mods.stealth >= 0 ? '+' : ''}${mods.stealth}, 
-            Движение: ${mods.movement >= 0 ? '+' : ''}${mods.movement}, 
-            Стрельба: ${mods.shooting >= 0 ? '+' : ''}${mods.shooting}
-        `;
-    }
-}
-
-function getTimeDescription(time) {
-    const descriptions = {
-        'morning': '🌅 Утро',
-        'day': '☀️ День', 
-        'evening': '🌇 Вечер',
-        'night': '🌙 Ночь'
-    };
-    return descriptions[time] || time;
-}
-
-function getWeatherDescription(weather) {
-    const descriptions = {
-        'clear': '☀️ Ясно',
-        'cloudy': '☁️ Облачно',
-        'light_rain': '🌦️ Слабый дождь',
-        'rain': '🌧️ Дождь',
-        'heavy_rain': '⛈️ Сильный дождь',
-        'storm': '🌀 Ураган'
-    };
-    return descriptions[weather] || weather;
-}
-
-function getFogDescription(fog) {
-    const descriptions = {
-        'none': '🌫️ Нет тумана',
-        'light_fog': '💨 Слабый туман',
-        'medium_fog': '🌫️ Средний туман', 
-        'heavy_fog': '🔴 Сильный туман'
-    };
-    return descriptions[fog] || fog;
-}
-
-// ========== ФУНКЦИИ УПРАВЛЕНИЯ ПОГОДОЙ ==========
-
-function rollWeatherDice() {
-    const result = weatherTimeSystem.rollWeather();
-    updateWeatherDisplay();
-    
-    showPopup(
-        '🌦️ Бросок погоды',
-        `Выпало: <strong>${getWeatherDescription(result)}</strong><br>
-         Длительность: ${weatherTimeSystem.weatherDuration} часов`,
-        ['<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">OK</button>']
-    );
-}
-
-function rollFogDice() {
-    const result = weatherTimeSystem.rollFog();
-    updateWeatherDisplay();
-    
-    showPopup(
-        '🌫️ Бросок тумана', 
-        `Выпало: <strong>${getFogDescription(result)}</strong><br>
-         Длительность: ${weatherTimeSystem.fogDuration} часов`,
-        ['<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">OK</button>']
-    );
-}
-
-function advanceTime(hours) {
-    weatherTimeSystem.advanceTime(hours);
-    updateWeatherDisplay();
-    
-    showPopup(
-        '⏰ Время прошло',
-        `Прошло ${hours} ${hours === 1 ? 'час' : hours < 5 ? 'часа' : 'часов'}<br>
-         Сейчас: ${weatherTimeSystem.getTimeDescription()}`,
-        ['<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">OK</button>']
-    );
-}
-
-// ========== ФУНКЦИИ СКРЫТНОСТИ ==========
-
-function performStealthTest() {
-    if (!battlefield || !stealthSystem) {
-        alert('Сначала создайте поле боя!');
-        return;
-    }
-
-    const characters = Object.keys(battlefield.characters);
-    if (characters.length < 2) {
-        alert('Нужно как минимум 2 персонажа на поле!');
-        return;
-    }
-
-    // Выбираем случайных персонажей для теста
-    const hiderId = characters[0];
-    const seekerId = characters[1];
-    
-    const result = stealthSystem.performStealthCheck(hiderId, seekerId);
-    
-    const resultsElement = document.getElementById('stealthResults');
-    if (resultsElement) {
-        let resultHTML = `
-            <strong>Проверка скрытности:</strong><br>
-            Прячущийся: ${hiderId}<br>
-            Ищущий: ${seekerId}<br>
-            <br>
-            <strong>Броски:</strong><br>
-            Скрытность: ${result.stealthRoll.roll.join('+')} = ${result.stealthRoll.total}<br>
-            Восприятие: ${result.perceptionRoll.roll.join('+')} = ${result.perceptionRoll.total}<br>
-            <br>
-            <strong>Успехи:</strong><br>
-            Скрытность: ${result.stealthSuccesses} (×2)<br>
-            Восприятие: ${result.perceptionSuccesses}<br>
-            <br>
-        `;
-
-        if (result.detected) {
-            resultHTML += `<span style="color: #e74c3c;">❌ Обнаружен! (разница: ${result.margin})</span>`;
-        } else {
-            resultHTML += `<span style="color: #27ae60;">✅ Остался скрытым! (разница: ${result.margin})</span>`;
-        }
-
-        resultsElement.innerHTML = resultHTML;
-    }
-}
-
-function toggleStealthMode() {
-    if (!battlefield) {
-        alert('Сначала создайте поле боя!');
-        return;
-    }
-
-    const player = Object.keys(battlefield.characters).find(id => id.startsWith('player'));
-    if (!player) {
-        alert('На поле нет игрока!');
-        return;
-    }
-
-    // Проверка движения на обнаружение
-    const detectionResults = stealthSystem.checkMovementDetection(player);
-    
-    const resultsElement = document.getElementById('stealthResults');
-    if (resultsElement) {
-        if (detectionResults.length > 0) {
-            let resultHTML = `<strong>Обнаружение при движении:</strong><br>`;
-            
-            detectionResults.forEach(result => {
-                resultHTML += `
-                    ${result.detectorId} заметил вас!<br>
-                    Успехи скрытности: ${result.stealthSuccesses}<br>
-                    Успехи восприятия: ${result.perceptionSuccesses}<br>
-                    Разница: ${result.margin}<br>
-                    <br>
-                `;
-            });
-            
-            resultsElement.innerHTML = resultHTML;
-        } else {
-            resultsElement.innerHTML = `<span style="color: #27ae60;">✅ Вы перемещаетесь незамеченным!</span>`;
-        }
-    }
-}
-
-// ========== ОБНОВЛЕНИЕ СИСТЕМЫ БОЯ С УЧЕТОМ ПОГОДЫ ==========
-
-function updateCombatForWeather() {
-    if (!combatSystem) return;
-
-    const modifiers = weatherTimeSystem.getPerceptionModifiers();
-    
-    // Добавляем модификаторы к истории боя
-    combatSystem.addToCombatHistory(
-        `🌤️ Погодные условия: ${weatherTimeSystem.getTimeDescription()} ` +
-        `(Восприятие: ${modifiers.perception >= 0 ? '+' : ''}${modifiers.perception}, ` +
-        `Скрытность: ${modifiers.stealth >= 0 ? '+' : ''}${modifiers.stealth})`
-    );
-}
-
-// ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ ==========
-
-function createBattlefield() {
-    const width = parseInt(document.getElementById('battlefieldWidth').value) || 15;
-    const height = parseInt(document.getElementById('battlefieldHeight').value) || 10;
-    const landscapeType = document.getElementById('landscapeSelect').value;
-
-    battlefield = new HexagonalBattlefield(width, height);
-    battlefieldRenderer = new BattlefieldRenderer(battlefield, 'battlefieldContainer');
-    
-    // Инициализация систем погоды и скрытности
-    stealthSystem = new StealthSystem(battlefield, weatherTimeSystem);
-    
-    generateLandscape(battlefield, landscapeType);
-    battlefieldRenderer.render();
-    
-    document.getElementById('battleInfo').style.display = 'block';
-    
-    // Инициализация интерфейса погоды
-    initializeWeatherStealthInterface();
-    
-    console.log(`✅ Поле боя создано: ${width}x${height}, ландшафт: ${landscapeType}`);
-}
-
-function startCombat() {
-    if (!battlefield) {
-        alert('Сначала создайте поле боя и разместите персонажей!');
-        return;
-    }
-
-    combatSystem = new CombatSystem(battlefield);
-
-    // Добавляем всех персонажей на поле в систему боя
-    for (const characterId in battlefield.characters) {
-        const character = battlefield.characters[characterId];
-        let type = 'player';
-        let stats = { health: 100, maxHealth: 100 };
-
-        if (characterId.startsWith('farmer')) {
-            type = 'farmer';
-            stats = {
-                health: 50 + Math.floor(Math.random() * 21),
-                maxHealth: 70,
-                skills: {
-                    'Одноручное оружие': 6 + Math.floor(Math.random() * 5),
-                    'Восприятие': 8 + Math.floor(Math.random() * 3)
-                }
-            };
-        } else if (characterId.startsWith('bandit')) {
-            type = 'bandit';
-            stats = {
-                health: 70 + Math.floor(Math.random() * 31),
-                maxHealth: 100,
-                skills: {
-                    'Одноручное оружие': 8 + Math.floor(Math.random() * 5),
-                    'Скрытность': 10 + Math.floor(Math.random() * 3),
-                    'Восприятие': 10 + Math.floor(Math.random() * 3)
-                }
-            };
-        } else if (characterId.startsWith('player')) {
-            stats = {
-                health: currentCharacter ? currentCharacter.stats.health : 100,
-                maxHealth: currentCharacter ? currentCharacter.stats.maxHealth : 100,
-                skills: currentCharacter ? currentCharacter.skills : {}
-            };
-        }
-
-        combatSystem.addCombatant(characterId, type, stats);
-    }
-
-    combatSystem.startCombat();
-    updateCombatInterface();
-    updateCombatForWeather();
-
-    const combatTab = document.getElementById('combat-tab');
-    const existingControls = document.getElementById('combatControls');
-    if (!existingControls) {
-        const controlsHTML = `<div id="combatControls"></div>`;
-        combatTab.insertAdjacentHTML('beforeend', controlsHTML);
-    }
-
-    updateCombatInterface();
-}
-        // ========== СИСТЕМА ПРЕДМЕТОВ И ОРУЖИЯ ==========
-
+</script>
+<script>
+// ========== СИСТЕМА ПРЕДМЕТОВ И ОРУЖИЯ ==========
 const itemTemplates = {
-    // Оружие ближнего боя
     weapons: {
         dagger: {
             id: 'dagger',
@@ -3259,7 +1776,6 @@ const itemTemplates = {
         }
     },
 
-    // Щиты
     shields: {
         buckler: {
             id: 'buckler',
@@ -3290,7 +1806,6 @@ const itemTemplates = {
         }
     },
 
-    // Броня
     armor: {
         leather_armor: {
             id: 'leather_armor',
@@ -3321,14 +1836,13 @@ const itemTemplates = {
         }
     },
 
-    // Источники света
     light_sources: {
         torch: {
             id: 'torch',
             name: 'Факел',
             type: 'light_source',
             lightRadius: 10,
-            duration: 60, // минуты
+            duration: 60,
             weight: 1,
             value: 1,
             description: 'Простой источник света'
@@ -3345,7 +1859,6 @@ const itemTemplates = {
         }
     },
 
-    // Боеприпасы
     ammunition: {
         arrows: {
             id: 'arrows',
@@ -3369,7 +1882,6 @@ const itemTemplates = {
         }
     },
 
-    // Прочее снаряжение
     misc: {
         healing_potion: {
             id: 'healing_potion',
@@ -3395,7 +1907,7 @@ const itemTemplates = {
             id: 'rope',
             name: 'Веревка',
             type: 'tool',
-            length: 15, // метров
+            length: 15,
             weight: 2,
             value: 1,
             description: 'Прочная пеньковая веревка'
@@ -3404,7 +1916,6 @@ const itemTemplates = {
 };
 
 // ========== КЛАСС ИНВЕНТАРЯ ==========
-
 class InventorySystem {
     constructor(character) {
         this.character = character;
@@ -3420,9 +1931,8 @@ class InventorySystem {
     }
 
     calculateCarryCapacity() {
-        // Базовая грузоподъемность зависит от силы/выносливости
         const strength = this.character.getSkillValue('Выносливость') || 10;
-        return Math.max(20, strength * 2); // Минимум 20 кг
+        return Math.max(20, strength * 2);
     }
 
     getCurrentWeight() {
@@ -3455,10 +1965,8 @@ class InventorySystem {
         const existingItem = this.items.find(item => item.id === itemTemplate.id);
         
         if (existingItem && itemTemplate.type !== 'weapon' && itemTemplate.type !== 'armor') {
-            // Складываемые предметы
             existingItem.quantity += quantity;
         } else {
-            // Новый предмет
             const newItem = {
                 ...itemTemplate,
                 quantity: quantity,
@@ -3480,7 +1988,6 @@ class InventorySystem {
         if (item.quantity > quantity) {
             item.quantity -= quantity;
         } else {
-            // Если предмет экипирован - снимаем его
             if (item.equipped) {
                 this.unequipItem(itemId);
             }
@@ -3495,12 +2002,10 @@ class InventorySystem {
         const item = this.items.find(i => i.id === itemId);
         if (!item) return false;
 
-        // Проверяем требования для экипировки
         if (!this.canEquipItem(item)) {
             return false;
         }
 
-        // Снимаем текущий предмет этого типа если нужно
         if (item.type === 'weapon') {
             if (this.equipped.weapon) {
                 this.unequipItem(this.equipped.weapon.id);
@@ -3543,12 +2048,10 @@ class InventorySystem {
     }
 
     canEquipItem(item) {
-        // Проверка на двуручное оружие со щитом
         if (item.type === 'weapon' && item.hands === 2 && this.equipped.shield) {
             return false;
         }
 
-        // Проверка навыков для оружия
         if (item.type === 'weapon') {
             const requiredSkill = this.getWeaponSkill(item);
             const skillValue = this.character.getSkillValue(requiredSkill) || 5;
@@ -3579,25 +2082,20 @@ class InventorySystem {
             movement: 0
         };
 
-        // Бонусы от оружия
         if (this.equipped.weapon) {
-            // Бонус атаки от навыка владения оружием
             const weaponSkill = this.getWeaponSkill(this.equipped.weapon);
             const skillValue = this.character.getSkillValue(weaponSkill) || 5;
             modifiers.attack += Math.floor((skillValue - 5) / 2);
         }
 
-        // Бонусы от щита
         if (this.equipped.shield) {
             modifiers.armorClass += this.equipped.shield.armorBonus;
         }
 
-        // Бонусы от брони
         if (this.equipped.armor) {
             modifiers.armorClass += this.equipped.armor.armorClass;
         }
 
-        // Штрафы от перегруза
         const encumbranceMods = this.getEncumbranceModifiers();
         modifiers.movement += encumbranceMods.movement;
 
@@ -3640,7 +2138,6 @@ class InventorySystem {
                 break;
         }
 
-        // Убираем использованное зелье
         this.removeItem(potion.id, 1);
         
         this.saveInventory();
@@ -3658,7 +2155,6 @@ class InventorySystem {
     }
 
     rollDiceExpression(expression) {
-        // Простой парсер выражений типа "2d4+2"
         const match = expression.match(/(\d+)d(\d+)([+-]\d+)?/);
         if (!match) return 0;
 
@@ -3693,8 +2189,10 @@ class InventorySystem {
         this.equipped = inventoryData.equipped;
     }
 }
-
+</script>
+<script>
 // ========== ИНТЕРФЕЙС ИНВЕНТАРЯ ==========
+let inventoryTabInitialized = false;
 
 function initializeInventoryInterface() {
     const inventoryTab = document.getElementById('inventory-tab');
@@ -3779,7 +2277,6 @@ function initializeInventoryInterface() {
         </div>
     `;
 
-    // Обработчики событий
     document.getElementById('itemCategory').addEventListener('change', function() {
         updateItemOptions(this.value);
     });
@@ -3819,7 +2316,6 @@ function renderEquippedItems(inventorySystem) {
         `;
     });
 
-    // Боевые модификаторы
     const modifiers = inventorySystem.getCombatModifiers();
     html += `
         <div style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #5a3928;">
@@ -3888,8 +2384,7 @@ function renderInventoryItems(inventorySystem) {
     return html;
 }
 
-// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ИНВЕНТАРЯ ==========
 function getEncumbranceColor(level) {
     const colors = {
         'none': '#27ae60',
@@ -3922,8 +2417,6 @@ function getItemTypeText(type) {
     };
     return types[type] || type;
 }
-
-// ========== ФУНКЦИИ УПРАВЛЕНИЯ ИНВЕНТАРЕМ ==========
 
 function updateItemOptions(category) {
     const itemSelect = document.getElementById('itemSelect');
@@ -4015,7 +2508,6 @@ function showQuickEquipment() {
 
     const inventorySystem = new InventorySystem(currentCharacter);
     
-    // Добавляем стартовый набор
     const starterKit = [
         itemTemplates.weapons.shortsword,
         itemTemplates.armor.leather_armor,
@@ -4033,17 +2525,13 @@ function showQuickEquipment() {
     initializeInventoryInterface();
 }
 
-// ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ ==========
-
-let inventoryTabInitialized = false;
-
+// ========== ОБНОВЛЕНИЕ ФУНКЦИИ OPEN TAB ==========
 function openTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(tabName + '-tab').classList.add('active');
     event.currentTarget.classList.add('active');
     
-    // Инициализация систем при первом открытии вкладок
     if (tabName === 'combat' && !combatTabInitialized) {
         initializeCombatSystem();
         combatTabInitialized = true;
@@ -4054,803 +2542,15 @@ function openTab(tabName) {
         inventoryTabInitialized = true;
     }
 }
-// ========== СИСТЕМА КУБИКОВ И ГЕНЕРАТОРОВ ==========
 
-function initializeDiceSystem() {
-    const diceTab = document.getElementById('dice-tab');
-    if (!diceTab) return;
-
-    diceTab.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <h2 class="section-title">🎲 Система Кубиков</h2>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                <div>
-                    <h3 style="color: #d4af37; margin-bottom: 15px;">🎯 Стандартные кубики</h3>
-                    
-                    <div class="dice-controls" style="display: flex; gap: 10px; align-items: center; 
-                         justify-content: center; margin: 20px 0; flex-wrap: wrap;">
-                        <span style="color: #d4af37;">Количество:</span>
-                        <input type="number" id="diceCount" class="dice-count" value="1" min="1" max="10"
-                               style="width: 80px; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
-                               background: #1a0f0b; color: #e0d0c0; text-align: center; font-size: 16px;">
-                    </div>
-
-                    <div class="dice-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; 
-                         justify-content: center; align-items: center;">
-                        <button class="btn btn-dice" onclick="rollDiceUI('coin')">🪙 Монетка</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(4)">D4</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(6)">D6</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(8)">D8</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(10)">D10</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(12)">D12</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(20)">D20</button>
-                        <button class="btn btn-dice" onclick="rollDiceUI(100)">D100</button>
-                        <div style="display: flex; gap: 5px; align-items: center;">
-                            <button class="btn btn-dice" onclick="rollCustomDiceUI()">⚫ Кастомный</button>
-                            <input type="number" id="customDiceSides" class="custom-dice-input" value="6" 
-                                   min="2" max="1000" placeholder="Грани"
-                                   style="width: 80px; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
-                                   background: #1a0f0b; color: #e0d0c0; text-align: center; font-size: 16px;">
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 style="color: #d4af37; margin-bottom: 15px;">🌤️ Специальные кубики</h3>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                        <button class="btn btn-dice" onclick="rollWeatherDiceUI()">🌦️ Погода</button>
-                        <button class="btn btn-dice" onclick="rollFogDiceUI()">🌫️ Туман</button>
-                        <button class="btn btn-dice" onclick="rollEncounterDice()">👹 Случайная встреча</button>
-                        <button class="btn btn-dice" onclick="rollLootDice()">💎 Добыча</button>
-                    </div>
-                    
-                    <div style="background: #3d2418; padding: 15px; border-radius: 6px;">
-                        <h4 style="color: #d4af37; margin-bottom: 10px;">📊 История бросков</h4>
-                        <div id="diceHistory" style="max-height: 150px; overflow-y: auto; font-size: 0.9em;">
-                            <p style="color: #8b7d6b; text-align: center;">Бросков пока нет</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="diceResults" style="text-align: center; margin: 30px 0; min-height: 100px; 
-                 background: #3d2418; padding: 20px; border-radius: 8px; border: 2px solid #5a3928;">
-                <p style="color: #8b7d6b;">Результаты бросков будут отображаться здесь</p>
-            </div>
-        </div>
-    `;
-}
-
-// Глобальная история бросков
-let diceRollHistory = [];
-
-function rollDiceUI(diceType) {
-    const count = parseInt(document.getElementById('diceCount').value) || 1;
-    let results = [];
-    let total = 0;
-    let diceName = '';
-    
-    if (diceType === 'coin') {
-        for (let i = 0; i < count; i++) {
-            const result = Math.random() > 0.5 ? 'Орёл' : 'Решка';
-            results.push(result);
-        }
-        diceName = 'Монетка';
-    } else {
-        for (let i = 0; i < count; i++) {
-            const result = Math.floor(Math.random() * diceType) + 1;
-            results.push(result);
-            total += result;
-        }
-        diceName = `D${diceType}`;
-    }
-    
-    displayDiceResults(diceName, count, results, total);
-    addToDiceHistory(diceName, count, results, total);
-}
-
-function rollCustomDiceUI() {
-    const sides = parseInt(document.getElementById('customDiceSides').value) || 6;
-    if (sides < 2) {
-        alert('Количество граней должно быть не меньше 2!');
-        return;
-    }
-    rollDiceUI(sides);
-}
-
-function rollWeatherDiceUI() {
-    const result = weatherTimeSystem.rollWeather();
-    const description = getWeatherDescription(result);
-    
-    displayDiceResults('Погода', 1, [description], 0);
-    addToDiceHistory('Погода', 1, [description], 0);
-    updateWeatherDisplay();
-}
-
-function rollFogDiceUI() {
-    const result = weatherTimeSystem.rollFog();
-    const description = getFogDescription(result);
-    
-    displayDiceResults('Туман', 1, [description], 0);
-    addToDiceHistory('Туман', 1, [description], 0);
-    updateWeatherDisplay();
-}
-
-function rollEncounterDice() {
-    const encounters = [
-        "👨‍🌾 Группа фермеров",
-        "💀 Банда разбойников", 
-        "🐺 Стая волков",
-        "🐻 Медведь-шатун",
-        "🧙‍♂️ Странствующий маг",
-        "🏰 Королевский патруль",
-        "🛒 Торговый караван",
-        "🌲 Лесные духи",
-        "🏴‍☠️ Пираты",
-        "🐉 Молодой дракон"
-    ];
-    
-    const roll = rollDice(10, 1).total - 1;
-    const encounter = encounters[roll] || "Ничего необычного";
-    
-    displayDiceResults('Встреча', 1, [encounter], 0);
-    addToDiceHistory('Встреча', 1, [encounter], 0);
-}
-
-function rollLootDice() {
-    const lootTables = {
-        common: ["10 золотых", "Зелье лечения", "Кинжал", "Факел", "Веревка"],
-        uncommon: ["50 золотых", "Кольчуга", "Короткий меч", "Малое зелье маны", "Свиток заклинания"],
-        rare: ["100 золотых", "Латная броня", "Волшебный меч", "Артефакт", "Драгоценный камень"]
-    };
-    
-    const roll = rollDice(20, 1).total;
-    let loot = [];
-    
-    if (roll <= 12) {
-        loot = [lootTables.common[Math.floor(Math.random() * lootTables.common.length)]];
-    } else if (roll <= 17) {
-        loot = [lootTables.uncommon[Math.floor(Math.random() * lootTables.uncommon.length)]];
-    } else {
-        loot = [lootTables.rare[Math.floor(Math.random() * lootTables.rare.length)]];
-    }
-    
-    displayDiceResults('Добыча', 1, loot, 0);
-    addToDiceHistory('Добыча', 1, loot, 0);
-}
-
-function displayDiceResults(diceName, count, results, total) {
-    const container = document.getElementById('diceResults');
-    let resultHTML = '';
-    
-    if (diceName === 'Монетка') {
-        resultHTML = `<h3 style="color: #d4af37;">${diceName} (${count} раз):</h3>`;
-        resultHTML += `<div style="font-size: 1.5em; margin: 20px 0;">${results.join(', ')}</div>`;
-    } else if (diceName === 'Погода' || diceName === 'Туман' || diceName === 'Встреча' || diceName === 'Добыча') {
-        resultHTML = `<h3 style="color: #d4af37;">${diceName}:</h3>`;
-        resultHTML += `<div style="font-size: 1.5em; margin: 20px 0; color: #27ae60;">${results[0]}</div>`;
-    } else {
-        resultHTML = `<h3 style="color: #d4af37;">Бросок ${count}${diceName}:</h3>`;
-        resultHTML += `<div style="font-size: 1.5em; margin: 20px 0;">${results.join(' + ')}`;
-        if (count > 1) {
-            resultHTML += ` = <strong style="color: #d4af37;">${total}</strong>`;
-        }
-        resultHTML += `</div>`;
-    }
-    
-    container.innerHTML = resultHTML;
-}
-
-function addToDiceHistory(diceName, count, results, total) {
-    const timestamp = new Date().toLocaleTimeString();
-    let entry = '';
-    
-    if (diceName === 'Монетка') {
-        entry = `${timestamp} - ${diceName}: ${results.join(', ')}`;
-    } else if (diceName === 'Погода' || diceName === 'Туман' || diceName === 'Встреча' || diceName === 'Добыча') {
-        entry = `${timestamp} - ${diceName}: ${results[0]}`;
-    } else {
-        entry = `${timestamp} - ${count}${diceName}: [${results.join(', ')}]`;
-        if (count > 1) {
-            entry += ` = ${total}`;
-        }
-    }
-    
-    diceRollHistory.unshift(entry);
-    if (diceRollHistory.length > 15) diceRollHistory.pop();
-    renderDiceHistory();
-}
-
-function renderDiceHistory() {
-    const container = document.getElementById('diceHistory');
-    if (!container) return;
-
-    if (diceRollHistory.length === 0) {
-        container.innerHTML = '<p style="color: #8b7d6b; text-align: center;">Бросков пока нет</p>';
-        return;
-    }
-    
-    let historyHTML = '';
-    diceRollHistory.forEach(entry => {
-        historyHTML += `<div style="padding: 5px 0; border-bottom: 1px solid #3d2418;">${entry}</div>`;
-    });
-    
-    container.innerHTML = historyHTML;
-}
-
-// ========== СИСТЕМА ЗАМЕТОК ==========
-
-function initializeNotesSystem() {
-    const notesTab = document.getElementById('notes-tab');
-    if (!notesTab) return;
-
-    // Загружаем заметки из хранилища
-    const savedNotes = StorageSystem.get('character_notes', []);
-    
-    notesTab.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <h2 class="section-title">✍️ Система Заметок</h2>
-            
-            <div style="text-align: center; margin-bottom: 20px;">
-                <button class="btn btn-plus" onclick="showAddNotePopup()">➕ Новая заметка</button>
-                <button class="btn btn-roll" onclick="exportNotes()">💾 Экспорт заметок</button>
-                <button class="btn btn-roll" onclick="importNotes()">📥 Импорт заметок</button>
-            </div>
-            
-            <input type="text" class="search-box" id="notesSearch" placeholder="🔍 Поиск в заметках..."
-                   style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; 
-                   border-radius: 4px; background: #1a0f0b; color: #e0d0c0; font-size: 16px;">
-            
-            <div class="notes-container" id="notesContainer">
-                ${renderNotes(savedNotes)}
-            </div>
-        </div>
-    `;
-
-    // Обработчик поиска
-    document.getElementById('notesSearch').addEventListener('input', function() {
-        filterNotes(this.value, savedNotes);
-    });
-}
-
-function renderNotes(notes) {
-    if (notes.length === 0) {
-        return '<p style="color: #8b7d6b; text-align: center;">Заметок пока нет</p>';
-    }
-
-    let notesHTML = '';
-    notes.forEach((note, index) => {
-        const preview = note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content;
-        notesHTML += `
-            <div class="note-item" style="background: #3d2418; margin: 10px 0; padding: 15px; 
-                 border-radius: 6px; border-left: 4px solid #27ae60;">
-                <div class="note-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span class="note-title" style="font-weight: bold; color: #d4af37; font-size: 1.1em;">${note.title}</span>
-                    <div class="note-actions" style="display: flex; gap: 10px;">
-                        <button class="btn btn-small" onclick="editNote(${index})" style="background: #3498db;">✏️</button>
-                        <button class="btn btn-small" onclick="deleteNote(${index})" style="background: #c44536;">❌</button>
-                        <button class="btn btn-small" onclick="toggleNoteExpand(${index})" style="background: #8b4513;">
-                            ${note.expanded ? '▼' : '▶'}
-                        </button>
-                    </div>
-                </div>
-                <div class="note-preview" style="color: #b8a28a; font-size: 0.95em; line-height: 1.4;">
-                    ${note.expanded ? note.content : preview}
-                </div>
-                <div style="color: #8b7d6b; font-size: 0.8em; margin-top: 10px;">
-                    Создано: ${new Date(note.created).toLocaleDateString()}
-                </div>
-            </div>
-        `;
-    });
-
-    return notesHTML;
-}
-
-function showAddNotePopup() {
-    showPopup(
-        '✍️ Новая заметка',
-        `
-            <input type="text" id="newNoteTitle" placeholder="Заголовок заметки" 
-                   style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; 
-                   border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-            <textarea id="newNoteContent" placeholder="Текст заметки..." 
-                      style="width: 100%; height: 200px; padding: 12px; margin: 10px 0; 
-                      border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; 
-                      color: #e0d0c0; resize: vertical;"></textarea>
-        `,
-        [
-            '<button class="btn btn-plus" onclick="addNewNote()">Добавить</button>',
-            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Отмена</button>'
-        ]
-    );
-}
-
-function addNewNote() {
-    const title = document.getElementById('newNoteTitle').value.trim();
-    const content = document.getElementById('newNoteContent').value.trim();
-    
-    if (!title) {
-        alert('Введите заголовок заметки!');
-        return;
-    }
-    
-    const notes = StorageSystem.get('character_notes', []);
-    notes.unshift({
-        title,
-        content,
-        expanded: false,
-        created: new Date().toISOString()
-    });
-    
-    StorageSystem.set('character_notes', notes);
-    initializeNotesSystem();
-    closePopup(document.querySelector('.popup'));
-}
-
-function editNote(index) {
-    const notes = StorageSystem.get('character_notes', []);
-    const note = notes[index];
-    
-    showPopup(
-        '✏️ Редактировать заметку',
-        `
-            <input type="text" id="editNoteTitle" value="${note.title}" 
-                   style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; 
-                   border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-            <textarea id="editNoteContent" 
-                      style="width: 100%; height: 200px; padding: 12px; margin: 10px 0; 
-                      border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; 
-                      color: #e0d0c0; resize: vertical;">${note.content}</textarea>
-        `,
-        [
-            `<button class="btn btn-plus" onclick="saveEditedNote(${index})">Сохранить</button>`,
-            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Отмена</button>'
-        ]
-    );
-}
-
-function saveEditedNote(index) {
-    const title = document.getElementById('editNoteTitle').value.trim();
-    const content = document.getElementById('editNoteContent').value.trim();
-    
-    if (!title) {
-        alert('Введите заголовок заметки!');
-        return;
-    }
-    
-    const notes = StorageSystem.get('character_notes', []);
-    notes[index].title = title;
-    notes[index].content = content;
-    
-    StorageSystem.set('character_notes', notes);
-    initializeNotesSystem();
-    closePopup(document.querySelector('.popup'));
-}
-
-function deleteNote(index) {
-    if (confirm('Удалить эту заметку?')) {
-        const notes = StorageSystem.get('character_notes', []);
-        notes.splice(index, 1);
-        StorageSystem.set('character_notes', notes);
-        initializeNotesSystem();
-    }
-}
-
-function toggleNoteExpand(index) {
-    const notes = StorageSystem.get('character_notes', []);
-    notes[index].expanded = !notes[index].expanded;
-    StorageSystem.set('character_notes', notes);
-    initializeNotesSystem();
-}
-
-function filterNotes(searchTerm, notes) {
-    const term = searchTerm.toLowerCase();
-    const filteredNotes = notes.filter(note => 
-        note.title.toLowerCase().includes(term) || 
-        note.content.toLowerCase().includes(term)
-    );
-    
-    document.getElementById('notesContainer').innerHTML = renderNotes(filteredNotes);
-}
-
-function exportNotes() {
-    const notes = StorageSystem.get('character_notes', []);
-    const dataStr = JSON.stringify(notes, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `dnd_notes_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    alert('✅ Заметки экспортированы!');
-}
-
-function importNotes() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const importedNotes = JSON.parse(e.target.result);
-                StorageSystem.set('character_notes', importedNotes);
-                initializeNotesSystem();
-                alert('✅ Заметки импортированы!');
-            } catch (error) {
-                alert('❌ Ошибка загрузки файла!');
-            }
-        };
-        reader.readAsText(file);
-    };
-    
-    input.click();
-}
-
-// ========== СИСТЕМА УПРАВЛЕНИЯ ПЕРСОНАЖАМИ ==========
-
-function initializeCharactersManager() {
-    const charactersTab = document.getElementById('characters-tab');
-    if (!charactersTab) return;
-
-    charactersTab.innerHTML = `
-        <div style="margin-bottom: 20px;">
-            <h2 class="section-title">👥 Менеджер Персонажей</h2>
-            
-            <div style="text-align: center; margin-bottom: 20px;">
-                <button class="btn btn-plus" onclick="showCreateCharacterPopup()">➕ Создать персонажа</button>
-                <button class="btn btn-roll" onclick="showImportCharacterPopup()">📥 Импорт персонажа</button>
-                <button class="btn btn-roll" onclick="exportAllCharacters()">💾 Экспорт всех</button>
-                <button class="btn btn-minus" onclick="showClearAllPopup()">🗑️ Удалить всех</button>
-            </div>
-
-            <div class="skills-section" style="padding: 25px; border-bottom: 2px solid #5a3928;">
-                <div class="section-title">📂 Ваши персонажи</div>
-                <div id="charactersList" style="min-height: 200px;">
-                    ${renderCharactersList()}
-                </div>
-            </div>
-
-            <div class="skills-section" style="padding: 25px;">
-                <div class="section-title">📊 Статистика</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; text-align: center;">
-                    <div style="background: #3d2418; padding: 15px; border-radius: 6px;">
-                        <div style="font-size: 2em; color: #d4af37;">${Object.keys(characterManager.characters).length}</div>
-                        <div>Всего персонажей</div>
-                    </div>
-                    <div style="background: #3d2418; padding: 15px; border-radius: 6px;">
-                        <div style="font-size: 2em; color: #d4af37;">${getTotalPlayTime()}</div>
-                        <div>Общее время игры</div>
-                    </div>
-                    <div style="background: #3d2418; padding: 15px; border-radius: 6px;">
-                        <div style="font-size: 2em; color: #d4af37;">${getHighestLevel()}</div>
-                        <div>Максимальный уровень</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function renderCharactersList() {
-    const characters = characterManager.characters;
-    if (Object.keys(characters).length === 0) {
-        return '<p style="color: #8b7d6b; text-align: center;">Персонажей пока нет</p>';
-    }
-
-    let html = '';
-    Object.values(characters).forEach(character => {
-        const isCurrent = characterManager.currentCharacterId === character.id;
-        const raceInfo = races[character.info.race] || { name: 'Неизвестно' };
-        
-        html += `
-            <div class="character-item" style="background: #3d2418; padding: 15px; margin: 10px 0; 
-                 border-radius: 6px; border-left: 4px solid ${isCurrent ? '#27ae60' : '#8b4513'}; 
-                 ${isCurrent ? 'background: #2c4d2c;' : ''}">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: bold; color: #d4af37; font-size: 1.1em;">${character.info.name}</div>
-                        <div style="color: #b8a28a; font-size: 0.9em; margin-top: 5px;">
-                            ${raceInfo.name} | Ур. ${character.level.current} | Опыт: ${character.level.exp}
-                        </div>
-                        <div style="color: #8b7d6b; font-size: 0.8em; margin-top: 5px;">
-                            Создан: ${new Date(character.createdAt).toLocaleDateString()}
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 5px; margin-left: 10px;">
-                        ${!isCurrent ? 
-                            `<button class="btn btn-small" onclick="switchCharacter('${character.id}')" 
-                                     style="background: #27ae60;">🎯 Выбрать</button>` : 
-                            `<button class="btn btn-small" disabled 
-                                     style="background: #5a3928;">✅ Активен</button>`
-                        }
-                        <button class="btn btn-small" onclick="exportSingleCharacter('${character.id}')" 
-                                style="background: #3498db;">💾 Экспорт</button>
-                        <button class="btn btn-small" onclick="showRenameCharacterPopup('${character.id}')" 
-                                style="background: #f39c12;">✏️ Переименовать</button>
-                        <button class="btn btn-small" onclick="showDeleteCharacterPopup('${character.id}')" 
-                                style="background: #c44536;">❌ Удалить</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    return html;
-}
-
-function showCreateCharacterPopup() {
-    showPopup(
-        '👤 Создание нового персонажа',
-        `
-            <input type="text" id="newCharacterName" placeholder="Имя персонажа" 
-                   style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #8b4513; 
-                   border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-            <select id="newCharacterRace" style="width: 100%; padding: 12px; margin: 10px 0; 
-                    border: 2px solid #8b4513; border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-                <option value="">Выберите расу</option>
-                ${Object.entries(races).map(([id, race]) => 
-                    `<option value="${id}">${race.name}</option>`
-                ).join('')}
-            </select>
-        `,
-        [
-            '<button class="btn btn-plus" onclick="createNewCharacter()">Создать</button>',
-            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Отмена</button>'
-        ]
-    );
-}
-
-function createNewCharacter() {
-    const name = document.getElementById('newCharacterName').value.trim();
-    const race = document.getElementById('newCharacterRace').value;
-    
-    if (!name) {
-        alert('Введите имя персонажа!');
-        return;
-    }
-    if (!race) {
-        alert('Выберите расу персонажа!');
-        return;
-    }
-
-    characterManager.createCharacter(name, race);
-    currentCharacter = characterManager.getCurrentCharacter();
-    
-    // Создаем стартовый инвентарь
-    const inventorySystem = new InventorySystem(currentCharacter);
-    const starterKit = [
-        itemTemplates.weapons.dagger,
-        itemTemplates.armor.leather_armor,
-        itemTemplates.misc.healing_potion
-    ];
-    starterKit.forEach(item => inventorySystem.addItem(item));
-    
-    initializeCharactersManager();
-    renderCharacterSheet();
-    closePopup(document.querySelector('.popup'));
-    
-    alert(`✅ Персонаж "${name}" создан!`);
-}
-
-function switchCharacter(characterId) {
-    characterManager.switchCharacter(characterId);
-    currentCharacter = characterManager.getCurrentCharacter();
-    initializeCharactersManager();
-    renderCharacterSheet();
-    alert(`✅ Переключен на персонажа: ${currentCharacter.info.name}`);
-}
-
-function showRenameCharacterPopup(characterId) {
-    const character = characterManager.characters[characterId];
-    const newName = prompt('Введите новое имя персонажа:', character.info.name);
-    
-    if (newName && newName.trim()) {
-        character.info.name = newName.trim();
-        character.updatedAt = new Date().toISOString();
-        characterManager.saveCharacters();
-        initializeCharactersManager();
-        if (characterId === characterManager.currentCharacterId) {
-            renderCharacterSheet();
-        }
-        alert('✅ Имя персонажа изменено!');
-    }
-}
-
-function showDeleteCharacterPopup(characterId) {
-    if (Object.keys(characterManager.characters).length <= 1) {
-        alert('❌ Нельзя удалить последнего персонажа!');
-        return;
-    }
-
-    const character = characterManager.characters[characterId];
-    if (confirm(`Удалить персонажа "${character.info.name}"? Это действие нельзя отменить!`)) {
-        characterManager.deleteCharacter(characterId);
-        currentCharacter = characterManager.getCurrentCharacter();
-        initializeCharactersManager();
-        if (characterId === characterManager.currentCharacterId) {
-            renderCharacterSheet();
-        }
-        alert('✅ Персонаж удален!');
-    }
-}
-
-function showClearAllPopup() {
-    if (Object.keys(characterManager.characters).length === 0) {
-        alert('Нет персонажей для удаления!');
-        return;
-    }
-
-    if (confirm(`❌ ВЫ УВЕРЕНЫ?\n\nЭто удалит ВСЕХ персонажей (${Object.keys(characterManager.characters).length} шт.)!\nЭто действие нельзя отменить!`)) {
-        characterManager.characters = {};
-        characterManager.currentCharacterId = null;
-        characterManager.saveCharacters();
-        location.reload();
-    }
-}
-
-function exportSingleCharacter(characterId) {
-    const character = characterManager.characters[characterId];
-    const dataStr = JSON.stringify(character, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `character_${character.info.name || 'unknown'}.json`;
-    link.click();
-    
-    alert(`✅ Персонаж "${character.info.name}" экспортирован!`);
-}
-
-function exportAllCharacters() {
-    if (Object.keys(characterManager.characters).length === 0) {
-        alert('Нет персонажей для экспорта!');
-        return;
-    }
-
-    const dataStr = JSON.stringify(characterManager.characters, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `dnd_characters_backup_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    alert(`✅ Все персонажи (${Object.keys(characterManager.characters).length} шт.) экспортированы!`);
-}
-
-function showImportCharacterPopup() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const characterData = JSON.parse(e.target.result);
-                importCharacterData(characterData);
-            } catch (error) {
-                alert('❌ Ошибка загрузки файла!');
-            }
-        };
-        reader.readAsText(file);
-    };
-    
-    input.click();
-}
-
-function importCharacterData(characterData) {
-    if (characterData.info && characterData.info.name) {
-        // Одиночный персонаж
-        const newId = 'char_import_' + Date.now();
-        characterManager.characters[newId] = characterData;
-        characterManager.characters[newId].id = newId;
-        characterManager.characters[newId].updatedAt = new Date().toISOString();
-        
-        characterManager.saveCharacters();
-        initializeCharactersManager();
-        alert(`✅ Персонаж "${characterData.info.name}" импортирован!`);
-    } else {
-        // Несколько персонажей
-        let importedCount = 0;
-        Object.values(characterData).forEach(char => {
-            if (char.info && char.info.name) {
-                const newId = 'char_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                characterManager.characters[newId] = char;
-                characterManager.characters[newId].id = newId;
-                characterManager.characters[newId].updatedAt = new Date().toISOString();
-                importedCount++;
-            }
-        });
-        
-        characterManager.saveCharacters();
-        initializeCharactersManager();
-        alert(`✅ Импортировано ${importedCount} персонажей!`);
-    }
-}
-
-function getTotalPlayTime() {
-    const characters = Object.values(characterManager.characters);
-    if (characters.length === 0) return '0ч';
-    
-    const totalMs = characters.reduce((total, char) => {
-        const created = new Date(char.createdAt);
-        const updated = new Date(char.updatedAt);
-        return total + (updated - created);
-    }, 0);
-    
-    const hours = Math.floor(totalMs / (1000 * 60 * 60));
-    return hours > 0 ? `${hours}ч` : '<1ч';
-}
-
-function getHighestLevel() {
-    const characters = Object.values(characterManager.characters);
-    if (characters.length === 0) return '0';
-    
-    const maxLevel = Math.max(...characters.map(char => char.level.current));
-    return maxLevel.toString();
-}
-
-// ========== ФИНАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ==========
-
-let diceTabInitialized = false;
-let notesTabInitialized = false;
-let charactersTabInitialized = false;
-
-function openTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName + '-tab').classList.add('active');
-    event.currentTarget.classList.add('active');
-    
-    // Инициализация систем при первом открытии вкладок
-    if (tabName === 'combat' && !combatTabInitialized) {
-        initializeCombatSystem();
-        combatTabInitialized = true;
-    }
-    
-    if (tabName === 'inventory' && !inventoryTabInitialized) {
-        initializeInventoryInterface();
-        inventoryTabInitialized = true;
-    }
-    
-    if (tabName === 'dice' && !diceTabInitialized) {
-        initializeDiceSystem();
-        diceTabInitialized = true;
-    }
-    
-    if (tabName === 'notes' && !notesTabInitialized) {
-        initializeNotesSystem();
-        notesTabInitialized = true;
-    }
-    
-    if (tabName === 'characters' && !charactersTabInitialized) {
-        initializeCharactersManager();
-        charactersTabInitialized = true;
-    }
-}
-
+// ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ СИСТЕМЫ ==========
 function initializeSystem() {
     console.log('🎮 Инициализация D&D системы...');
     
-    // Если нет персонажей, создаем демо-персонажа
     if (!currentCharacter && Object.keys(characterManager.characters).length === 0) {
         const demoChar = characterManager.createCharacter('Новый Герой', 'human');
         currentCharacter = demoChar;
         
-        // Добавляем стартовый инвентарь
         const inventorySystem = new InventorySystem(currentCharacter);
         const starterKit = [
             itemTemplates.weapons.dagger,
@@ -4863,38 +2563,12 @@ function initializeSystem() {
         console.log('✅ Создан демо-персонаж со стартовым снаряжением');
     }
     
-    // Рендерим лист персонажа
     renderCharacterSheet();
     
     console.log(`✅ Система готова! Персонажей: ${Object.keys(characterManager.characters).length}`);
 }
 
-// Автозапуск системы
 document.addEventListener('DOMContentLoaded', initializeSystem);
-
-// ========== ГЛОБАЛЬНЫЕ УТИЛИТЫ ==========
-
-// Функция для отладки - сброс всех данных
-function resetAllData() {
-    if (confirm('❌ ВЫ УВЕРЕНЫ?\n\nЭто удалит ВСЕ данные всех персонажей!\nЭто действие нельзя отменить!')) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-// Функция для быстрого доступа к текущему персонажу в консоли
-window.getCurrentCharacter = function() {
-    return currentCharacter;
-};
-
-// Функция для быстрого доступа к системе боя
-window.getCombatSystem = function() {
-    return combatSystem;
-};
-
-console.log(`🎉 D&D Расширенная Боевая Система загружена!
-Доступные команды:
-- getCurrentCharacter() - получить текущего персонажа
-- getCombatSystem() - получить систему боя
-- resetAllData() - сбросить все данные
-`);            
+</script>
+</body>
+</html>
