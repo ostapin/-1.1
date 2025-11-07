@@ -633,6 +633,10 @@
                     <input type="number" id="freePoints" class="stat-input" value="0">
                     <button class="btn btn-roll" onclick="editFreePoints()">✏️ Изменить</button>
                 </div>
+                <div style="text-align: center; margin-top: 20px; padding: 10px; background: #3d2418; border-radius: 6px;">
+    <button class="btn btn-roll" onclick="debugSkills()">🐛 Дебаг навыков</button>
+    <button class="btn btn-roll" onclick="repairSkills()">🔧 Восстановить навыки</button>
+</div>
             </div>
 
             <div id="skillsContainer"></div>
@@ -2578,6 +2582,91 @@ let diceHistory = [];
 let lockedSkills = {};
 let customCategories = [];
 let skillRollHistory = {};
+        // ========== ДОБАВИМ НЕДОСТАЮЩИЕ ФУНКЦИИ ==========
+
+function updateUI() {
+    const freePoints = getFreePoints();
+    
+    document.querySelectorAll('.skill-row').forEach(row => {
+        const skillName = row.querySelector('.skill-name span:nth-child(2)').textContent;
+        const skillValue = getSkillValue(skillName);
+        const isLocked = isSkillLocked(skillName);
+        const minusBtn = row.querySelector('.btn-minus');
+        const plusBtn = row.querySelector('.btn-plus');
+        const rollBtn = row.querySelector('.btn-roll');
+        
+        row.querySelector('.skill-value').textContent = skillValue;
+        
+        if (isLocked) {
+            minusBtn.disabled = true;
+            plusBtn.disabled = true;
+            rollBtn.disabled = true;
+            row.classList.add('skill-locked');
+        } else {
+            minusBtn.disabled = skillValue <= 5;
+            plusBtn.disabled = freePoints <= 0;
+            rollBtn.disabled = false;
+            row.classList.remove('skill-locked');
+        }
+    });
+    
+    updateMagicSkillsDisplay();
+    document.getElementById('freePoints').value = freePoints;
+}
+
+function updateMagicSkillsDisplay() {
+    const magicSkills = skillsStructure["🔮 МАГИЯ"];
+    magicSkills.forEach(skill => {
+        const skillElement = document.getElementById(`skill-${skill}`);
+        if (skillElement) {
+            const skillRow = skillElement.closest('.skill-row');
+            const isAvailable = availableMagicSchools[skill] || getSkillValue(skill) > 5;
+            if (skillRow) {
+                skillRow.classList.toggle('skill-disabled', !isAvailable);
+                
+                if (!isAvailable && getSkillValue(skill) <= 5) {
+                    const minusBtn = skillRow.querySelector('.btn-minus');
+                    const plusBtn = skillRow.querySelector('.btn-plus');
+                    const rollBtn = skillRow.querySelector('.btn-roll');
+                    
+                    minusBtn.disabled = true;
+                    plusBtn.disabled = true;
+                    rollBtn.disabled = true;
+                }
+            }
+        }
+    });
+}
+
+function forceRenderSkills() {
+    const container = document.getElementById('skillsContainer');
+    if (!container) return;
+    renderSkills();
+}
+
+function debugSkills() {
+    console.log('🔍 ДЕБАГ НАВЫКОВ:');
+    Object.values(skillsStructure).forEach((skillGroup, groupIndex) => {
+        console.log(`Группа ${groupIndex + 1}:`);
+        skillGroup.forEach(skill => {
+            const value = getSkillValue(skill);
+            console.log(`  ${skill}: ${value}`);
+        });
+    });
+}
+
+function repairSkills() {
+    Object.values(skillsStructure).forEach(skillGroup => {
+        skillGroup.forEach(skill => {
+            const currentValue = getSkillValue(skill);
+            if (currentValue < 5 || isNaN(currentValue)) {
+                setSkillValue(skill, 5);
+            }
+        });
+    });
+    renderSkills();
+    updateUI();
+}
 </script>
 <script>
 // ========== ФУНКЦИИ ЗАГРУЗКИ И СОХРАНЕНИЯ ДАННЫХ ==========
@@ -4846,6 +4935,7 @@ function getAllSkills() {
 </script>
 </body>
 </html>
+
 
 
 
