@@ -4797,13 +4797,15 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSkills();
     
     // Рендер всех компонентов
-    renderSkills(); // ← ЭТА СТРОЧКА ОЧЕНЬ ВАЖНА!
+setTimeout(() => {
+    renderSkills();
     renderInventory();
     renderNotes();
     updateUI();
     updateLevelDisplay();
     updateMagicSkillsDisplay();
     renderCharactersList();
+}, 100);
     
     console.log('✅ D&D Character Sheet загружен!');
 });
@@ -4844,6 +4846,7 @@ function getAllSkills() {
 </script>
 </body>
 </html>
+
 
 
 
