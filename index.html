@@ -4776,7 +4776,37 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(`🎯 Текущий персонаж: ${characters[currentCharacterId].info.name}`);
     }
 });
-
+// ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем систему персонажей
+    loadCharacters();
+    setupAutoSave();
+    
+    // Загружаем текущего персонажа
+    loadCurrentCharacter();
+    
+    // Загружаем остальные данные
+    loadNotes();
+    loadInventory();
+    loadSpells();
+    loadLockedSkills();
+    loadCustomCategories();
+    loadSkillRollHistory();
+    
+    // Инициализируем навыки
+    initializeSkills();
+    
+    // Рендер всех компонентов
+    renderSkills(); // ← ЭТА СТРОЧКА ОЧЕНЬ ВАЖНА!
+    renderInventory();
+    renderNotes();
+    updateUI();
+    updateLevelDisplay();
+    updateMagicSkillsDisplay();
+    renderCharactersList();
+    
+    console.log('✅ D&D Character Sheet загружен!');
+});
 // ========== ГЛОБАЛЬНЫЕ ФУНКЦИИ ДОСТУПНЫЕ В КОНСОЛИ ==========
 
 // Для отладки - сброс всех данных
@@ -4814,6 +4844,7 @@ function getAllSkills() {
 </script>
 </body>
 </html>
+
 
 
 
