@@ -4,159 +4,807 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D&D Расширенная Боевая Система</title>
-    <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-        }
-        
-        body { 
-            font-family: 'Times New Roman', serif; 
-            background: #1a0f0b; 
-            color: #e0d0c0; 
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .tabs {
-            display: flex;
-            background: linear-gradient(to bottom, #5a3928, #3d2418);
-            border-bottom: 2px solid #8b4513;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            flex: 1;
-            min-width: 120px;
-            padding: 15px 10px;
-            border: none;
-            background: transparent;
-            color: #e0d0c0;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-right: 1px solid #8b4513;
-            font-family: 'Times New Roman', serif;
-        }
-
-        .tab-btn:last-child { border-right: none; }
-        .tab-btn.active { 
-            background: #8b4513; 
-            text-shadow: 0 0 5px #ffd700;
-        }
-
-        .tab-content { 
-            display: none; 
-            padding: 20px; 
-            background: #2c1810;
-            border: 2px solid #8b4513;
-            border-top: none;
-        }
-
-        .tab-content.active { display: block; }
-
-        .btn {
-            padding: 12px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.3s;
-            min-height: 44px;
-            font-family: 'Times New Roman', serif;
-        }
-
-        .btn-plus { background: #27ae60; color: white; }
-        .btn-minus { background: #c44536; color: white; }
-        .btn-roll { background: #8b4513; color: white; }
-        .btn-dice { background: #3498db; color: white; margin: 5px; }
-
-        .section-title {
-            font-size: 1.5em;
-            color: #d4af37;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #8b4513;
-        }
-
-        @media (max-width: 768px) {
-            .tabs { flex-direction: column; }
-            .tab-btn { min-width: 100%; }
-            .container { padding: 10px; }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
+        <!-- ВКЛАДКИ -->
         <div class="tabs">
             <button class="tab-btn active" onclick="openTab('character')">🧙 Персонаж</button>
             <button class="tab-btn" onclick="openTab('combat')">⚔️ Бой</button>
-            <button class="tab-btn" onclick="openTab('generator')">🎲 Генератор</button>
             <button class="tab-btn" onclick="openTab('inventory')">🎒 Инвентарь</button>
             <button class="tab-btn" onclick="openTab('dice')">🎲 Кубики</button>
             <button class="tab-btn" onclick="openTab('notes')">✍️ Заметки</button>
-            <button class="tab-btn" onclick="openTab('characters')">👥 Персонажи</button>
         </div>
 
+        <!-- СОДЕРЖИМОЕ ВКЛАДОК -->
         <div id="character-tab" class="tab-content active">
             <h2 class="section-title">🧙 Лист персонажа</h2>
+            <div id="character-container"></div>
         </div>
 
         <div id="combat-tab" class="tab-content">
             <h2 class="section-title">⚔️ Боевая система</h2>
-        </div>
-
-        <div id="generator-tab" class="tab-content">
-            <h2 class="section-title">🎲 Генераторы</h2>
+            <div id="combat-container"></div>
         </div>
 
         <div id="inventory-tab" class="tab-content">
             <h2 class="section-title">🎒 Инвентарь</h2>
+            <div id="inventory-container"></div>
         </div>
 
         <div id="dice-tab" class="tab-content">
             <h2 class="section-title">🎲 Система кубиков</h2>
+            <div id="dice-container"></div>
         </div>
 
         <div id="notes-tab" class="tab-content">
             <h2 class="section-title">✍️ Заметки</h2>
-        </div>
-
-        <div id="characters-tab" class="tab-content">
-            <h2 class="section-title">👥 Менеджер персонажей</h2>
+            <div id="notes-container"></div>
         </div>
     </div>
+
+    <!-- ПОДКЛЮЧАЕМ ВСЕ СИСТЕМЫ -->
+    <script src="character.js"></script>
+    <script src="combat.js"></script>
+    <script src="inventory.js"></script>
+    <script src="dice.js"></script>
+    <script src="notes.js"></script>
+    
+    <!-- ОСНОВНОЙ СКРИПТ -->
     <script>
-// ========== БАЗОВЫЕ ФУНКЦИИ ДЛЯ ВКЛАДОК ==========
-function openTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName + '-tab').classList.add('active');
-    event.currentTarget.classList.add('active');
+        // БАЗОВЫЕ ФУНКЦИИ ДЛЯ ВКЛАДОК
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            // Загружаем содержимое вкладки при первом открытии
+            if (tabName === 'character' && !window.characterLoaded) {
+                renderCharacterSheet();
+                window.characterLoaded = true;
+            }
+            if (tabName === 'inventory' && !window.inventoryLoaded) {
+                initializeInventoryInterface();
+                window.inventoryLoaded = true;
+            }
+            if (tabName === 'dice' && !window.diceLoaded) {
+                initializeDiceSystem();
+                window.diceLoaded = true;
+            }
+        }
+
+        // ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ
+        function initializeSystem() {
+            console.log('🎮 D&D Система загружена!');
+            // Персонаж загружается первым
+            renderCharacterSheet();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeSystem);
+    </script>
+</body>
+</html>
+/* styles.css - Полный файл стилей для D&D системы */
+
+/* БАЗОВЫЕ СТИЛИ */
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
 }
 
-// ========== БАЗОВЫЕ СИСТЕМЫ И КОНСТАНТЫ ==========
+body { 
+    font-family: 'Times New Roman', serif; 
+    background: #1a0f0b; 
+    color: #e0d0c0; 
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* СТИЛИ ВКЛАДОК */
+.tabs {
+    display: flex;
+    background: linear-gradient(to bottom, #5a3928, #3d2418);
+    border-bottom: 2px solid #8b4513;
+    flex-wrap: wrap;
+    border-radius: 8px 8px 0 0;
+}
+
+.tab-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 15px 10px;
+    border: none;
+    background: transparent;
+    color: #e0d0c0;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-right: 1px solid #8b4513;
+    font-family: 'Times New Roman', serif;
+}
+
+.tab-btn:last-child { 
+    border-right: none; 
+}
+
+.tab-btn:hover {
+    background: #6b4423;
+    text-shadow: 0 0 8px #ffd700;
+}
+
+.tab-btn.active { 
+    background: #8b4513; 
+    text-shadow: 0 0 10px #ffd700;
+    font-weight: bold;
+}
+
+.tab-content { 
+    display: none; 
+    padding: 25px; 
+    background: #2c1810;
+    border: 2px solid #8b4513;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    min-height: 600px;
+}
+
+.tab-content.active { 
+    display: block; 
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ОБЩИЕ СТИЛИ КНОПОК */
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-height: 44px;
+    font-family: 'Times New Roman', serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-plus { 
+    background: linear-gradient(145deg, #27ae60, #2ecc71);
+    color: white; 
+    border: 1px solid #229954;
+}
+
+.btn-plus:hover {
+    background: linear-gradient(145deg, #229954, #27ae60);
+}
+
+.btn-minus { 
+    background: linear-gradient(145deg, #c44536, #e74c3c);
+    color: white; 
+    border: 1px solid #c0392b;
+}
+
+.btn-minus:hover {
+    background: linear-gradient(145deg, #e74c3c, #c44536);
+}
+
+.btn-roll { 
+    background: linear-gradient(145deg, #8b4513, #a0522d);
+    color: white; 
+    border: 1px solid #654321;
+}
+
+.btn-roll:hover {
+    background: linear-gradient(145deg, #a0522d, #8b4513);
+}
+
+.btn-dice { 
+    background: linear-gradient(145deg, #3498db, #2980b9);
+    color: white; 
+    margin: 5px;
+    border: 1px solid #2471a3;
+}
+
+.btn-dice:hover {
+    background: linear-gradient(145deg, #2980b9, #3498db);
+}
+
+.btn-small {
+    padding: 8px 12px;
+    font-size: 12px;
+    min-height: 36px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ЗАГОЛОВКИ СЕКЦИЙ */
+.section-title {
+    font-size: 1.8em;
+    color: #d4af37;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px solid #8b4513;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: #d4af37;
+}
+
+.skills-section {
+    padding: 25px;
+    border-bottom: 2px solid #5a3928;
+    background: linear-gradient(145deg, #3d2418, #2c1810);
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* ФОРМЫ И ИНПУТЫ */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #d4af37;
+    font-size: 1.1em;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #8b4513;
+    border-radius: 6px;
+    font-size: 16px;
+    background: #1a0f0b;
+    color: #e0d0c0;
+    transition: all 0.3s ease;
+    font-family: 'Times New Roman', serif;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    background: #2c1810;
+}
+
+/* СТАТУСНЫЕ ПАНЕЛИ */
+.stat-panel {
+    background: linear-gradient(145deg, #3d2418, #2c1810);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #5a3928;
+    margin-bottom: 20px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #3d2418;
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    flex: 1;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #d4af37;
+    font-size: 1.1em;
+}
+
+.stat-input {
+    width: 100px;
+    padding: 12px;
+    border: 2px solid #8b4513;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 16px;
+    background: #1a0f0b;
+    color: #e0d0c0;
+    font-weight: bold;
+}
+
+/* НАВЫКИ */
+.skill-row {
+    display: flex;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #3d2418;
+    transition: background-color 0.3s ease;
+}
+
+.skill-row:hover {
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 4px;
+}
+
+.skill-row:last-child {
+    border-bottom: none;
+}
+
+.skill-name {
+    flex: 2;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.1em;
+}
+
+.skill-controls {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.skill-value {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #d4af37;
+    min-width: 50px;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* ИНВЕНТАРЬ */
+.inventory-item {
+    background: #2c1810;
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #d4af37;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.inventory-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* ПОПАПЫ И МОДАЛЬНЫЕ ОКНА */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 15, 11, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.popup-content {
+    background: #2c1810;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 95%;
+    width: 500px;
+    border: 3px solid #8b4513;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    animation: popupAppear 0.3s ease;
+}
+
+@keyframes popupAppear {
+    from { 
+        opacity: 0; 
+        transform: scale(0.8) translateY(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: scale(1) translateY(0); 
+    }
+}
+
+/* КУБИКИ */
+.dice-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 25px 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.dice {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(145deg, #8b4513, #a0522d);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #1a0f0b;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    border: 2px solid #654321;
+    transition: transform 0.3s ease;
+}
+
+.dice:hover {
+    transform: rotate(10deg) scale(1.1);
+}
+
+.dice-rolls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+}
+
+/* ПОЛЕ БОЯ */
+.battlefield-container {
+    min-height: 500px;
+    background: #1a0f0b;
+    border: 3px solid #5a3928;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+.battlefield-hex {
+    position: absolute;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #e0d0c0;
+}
+
+.battlefield-hex:hover {
+    filter: brightness(1.3);
+    transform: scale(1.05);
+    z-index: 100;
+}
+
+.battlefield-character {
+    position: absolute;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #1a0f0b;
+    transition: all 0.3s ease;
+}
+
+.battlefield-character:hover {
+    transform: scale(1.2);
+    z-index: 200;
+}
+
+/* ЗАМЕТКИ */
+.note-item {
+    background: #3d2418;
+    margin: 15px 0;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #27ae60;
+    transition: all 0.3s ease;
+}
+
+.note-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.note-title {
+    font-weight: bold;
+    color: #d4af37;
+    font-size: 1.2em;
+}
+
+.note-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.note-preview {
+    color: #b8a28a;
+    font-size: 1em;
+    line-height: 1.6;
+}
+
+/* ПОИСК И ФИЛЬТРЫ */
+.search-box {
+    width: 100%;
+    padding: 14px 20px;
+    margin: 15px 0;
+    border: 2px solid #8b4513;
+    border-radius: 25px;
+    background: #1a0f0b;
+    color: #e0d0c0;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* СКРОЛЛБАРЫ */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2c1810;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8b4513;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0522d;
+}
+
+/* АДАПТИВНОСТЬ */
+@media (max-width: 768px) {
+    .tabs { 
+        flex-direction: column; 
+    }
+    
+    .tab-btn { 
+        min-width: 100%; 
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .container { 
+        padding: 10px; 
+    }
+    
+    .tab-content {
+        padding: 15px;
+    }
+    
+    .section-title {
+        font-size: 1.5em;
+    }
+    
+    .skill-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .skill-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .stat-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .popup-content {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+    }
+    
+    .tab-content {
+        padding: 10px;
+    }
+    
+    .section-title {
+        font-size: 1.3em;
+    }
+    
+    .dice {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5em;
+    }
+}
+
+/* УТИЛИТЫ */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+
+.p-10 { padding: 10px; }
+.p-20 { padding: 20px; }
+
+.hidden { display: none; }
+.flex { display: flex; }
+.grid { display: grid; }
+
+.success { color: #27ae60; }
+.warning { color: #f39c12; }
+.error { color: #e74c3c; }
+.info { color: #3498db; }
+
+/* АНИМАЦИИ */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease;
+}
+
+/* ТЕМНЫЙ РЕЖИМ (уже темный, но для контрастов) */
+.highlight {
+    background: linear-gradient(145deg, #8b4513, #a0522d);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.glow {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+/* ЗАГРУЗОЧНЫЕ СОСТОЯНИЯ */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #d4af37;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+// character.js - Полная система персонажей D&D
+
+// ========== КОНСТАНТЫ И ДАННЫЕ ==========
+
 const races = {
-    atski: { name: "🔥 Ацки", description: "50% защита от огня", lifespan: "350 лет" },
-    knofi: { name: "🗣️ Кнофы", description: "+1 к красноречию", lifespan: "400 лет" },
-    vorki: { name: "❄️ Ворки", description: "50% защита от льда", lifespan: "250 лет" },
-    minci: { name: "🎯 Минцы", description: "+1 к древковому", lifespan: "350 лет" },
-    kaei: { name: "⚒️ Каэйцы", description: "Магия металла", lifespan: "300 лет" },
-    forest_elf: { name: "🌿 Лесные эльфы", description: "Магия природы", lifespan: "700 лет" },
-    high_elf: { name: "✨ Высшие эльфы", description: "Две стихии", lifespan: "2000 лет" },
-    dark_elf: { name: "🌑 Темные эльфы", description: "Магия тьмы", lifespan: "700 лет" },
-    dwarf: { name: "⛰️ Дварфы", description: "Кузнечное дело", lifespan: "600 лет" },
-    gnome: { name: "🔮 Гномы", description: "Ремесло", lifespan: "800 лет" },
-    orc: { name: "💀 Орки", description: "Тяжелая броня", lifespan: "400 лет" },
-    goblin: { name: "👹 Гоблины", description: "Быстрое обучение", lifespan: "25 лет" }
+    human: { 
+        name: "👤 Человек", 
+        description: "Универсальная раса, быстрая адаптация", 
+        lifespan: "80 лет",
+        bonuses: { freePoints: 2 }
+    },
+    elf: { 
+        name: "🌿 Эльф", 
+        description: "Магия природы, изящество и мудрость", 
+        lifespan: "700 лет",
+        bonuses: { magic: 2, perception: 1 }
+    },
+    dwarf: { 
+        name: "⛰️ Дварф", 
+        description: "Кузнечное дело, стойкость и сила", 
+        lifespan: "400 лет",
+        bonuses: { endurance: 2, strength: 1 }
+    },
+    orc: { 
+        name: "💪 Орк", 
+        description: "Сила, выносливость и боевой дух", 
+        lifespan: "50 лет",
+        bonuses: { strength: 2, endurance: 1 }
+    },
+    gnome: {
+        name: "🔮 Гном",
+        description: "Ремесло, магия и изобретательность",
+        lifespan: "500 лет",
+        bonuses: { craft: 2, magic: 1 }
+    }
 };
 
 const skillsStructure = {
@@ -166,7 +814,7 @@ const skillsStructure = {
         "Древковое", "Рукопашный бой", "Метание"
     ],
     "🎭 ОБЩИЕ НАВЫКИ": [
-        "Скрытность", "Красноречию", "Ловкость", "Выносливость",
+        "Скрытность", "Красноречие", "Ловкость", "Выносливость",
         "Взлом", "Восприятие", "Удача", "Карманные кражи"
     ],
     "⚗️ РЕМЕСЛА": [
@@ -175,8 +823,7 @@ const skillsStructure = {
     "🔮 МАГИЯ": [
         "Магия воды", "Магия земли", "Магия воздуха", "Магия крови",
         "Магия огня", "Магия металла", "Магия природы", "Магия света",
-        "Магия тьмы", "Магия инферно", "Магия хаоса", "Магия разума",
-        "Магия Жизни", "Магия смерти", "Магия пустоты", "Магия Энергии"
+        "Магия тьмы", "Магия инферно", "Магия хаоса", "Магия разума"
     ]
 };
 
@@ -193,40 +840,8 @@ const levelTable = {
     9: { expRequired: 100000, hp: 1000, mana: 1000, stamina: 1000, points: 200 }
 };
 
-// ========== СИСТЕМА КУБИКОВ ==========
-function rollDice(sides, count = 1) {
-    let results = [];
-    let total = 0;
-    
-    for (let i = 0; i < count; i++) {
-        const result = Math.floor(Math.random() * sides) + 1;
-        results.push(result);
-        total += result;
-    }
-    
-    return { results, total };
-}
+// ========== СИСТЕМА ХРАНЕНИЯ ==========
 
-function roll3d6() {
-    return rollDice(6, 3);
-}
-
-function rollSkillCheck(skillValue, modifiers = 0) {
-    const roll = roll3d6();
-    const totalRoll = roll.total + modifiers;
-    const success = totalRoll <= skillValue;
-    const successes = success ? Math.max(0, skillValue - totalRoll) : 0;
-    
-    return {
-        roll: roll.results,
-        total: totalRoll,
-        success: success,
-        successes: successes,
-        critical: roll.total === 3 ? 'success' : (roll.total === 18 ? 'failure' : 'normal')
-    };
-}
-
-// ========== СИСТЕМА ХРАНЕНИЯ ДАННЫХ ==========
 class StorageSystem {
     static set(key, value) {
         try {
@@ -259,19 +874,21 @@ class StorageSystem {
     }
 }
 
-// ========== БАЗОВЫЙ КЛАСС ПЕРСОНАЖА ==========
+// ========== КЛАСС ПЕРСОНАЖА ==========
+
 class Character {
     constructor(id = null) {
         this.id = id || 'char_' + Date.now();
         this.info = {
-            name: '',
+            name: 'Новый Герой',
             surname: '',
             title: '',
-            race: '',
+            race: 'human',
             heritage: '',
             height: '',
             weight: '',
-            age: ''
+            age: '',
+            background: ''
         };
         this.level = {
             current: 0,
@@ -284,29 +901,36 @@ class Character {
             maxMana: 100,
             stamina: 100,
             maxStamina: 100,
-            freePoints: 0
+            freePoints: 20
         };
         this.skills = {};
         this.lockedSkills = {};
         this.availableMagicSchools = {};
-        this.inventory = {
-            weapons: [], armor: [], potions: [], scrolls: [],
-            resources: [], valuables: [], tools: [], other: []
-        };
-        this.customCategories = [];
+        this.inventory = [];
         this.notes = [];
         this.createdAt = new Date().toISOString();
         this.updatedAt = new Date().toISOString();
         
         this.initializeSkills();
+        this.applyRaceBonuses();
     }
 
     initializeSkills() {
         Object.values(skillsStructure).forEach(skillGroup => {
             skillGroup.forEach(skill => {
-                this.skills[skill] = 5;
+                this.skills[skill] = 5; // Базовое значение
             });
         });
+    }
+
+    applyRaceBonuses() {
+        const race = races[this.info.race];
+        if (race && race.bonuses) {
+            if (race.bonuses.freePoints) {
+                this.stats.freePoints += race.bonuses.freePoints;
+            }
+            // Можно добавить другие бонусы расы
+        }
     }
 
     getSkillValue(skillName) {
@@ -314,7 +938,7 @@ class Character {
     }
 
     setSkillValue(skillName, value) {
-        this.skills[skillName] = value;
+        this.skills[skillName] = Math.max(5, Math.min(100, value));
         this.updatedAt = new Date().toISOString();
     }
 
@@ -337,6 +961,7 @@ class Character {
             this.stats.maxStamina += levelData.stamina;
             this.stats.freePoints += levelData.points;
             
+            // Восстанавливаем характеристики при повышении уровня
             this.stats.health = this.stats.maxHealth;
             this.stats.mana = this.stats.maxMana;
             this.stats.stamina = this.stats.maxStamina;
@@ -344,7 +969,27 @@ class Character {
             this.level.exp -= requiredExp;
             
             console.log(`🎉 Уровень повышен до ${this.level.current}!`);
+            return true;
         }
+        return false;
+    }
+
+    changeRace(newRace) {
+        if (races[newRace]) {
+            // Убираем старые бонусы расы
+            const oldRace = races[this.info.race];
+            if (oldRace && oldRace.bonuses) {
+                if (oldRace.bonuses.freePoints) {
+                    this.stats.freePoints -= oldRace.bonuses.freePoints;
+                }
+            }
+            
+            this.info.race = newRace;
+            this.applyRaceBonuses();
+            this.updatedAt = new Date().toISOString();
+            return true;
+        }
+        return false;
     }
 
     save() {
@@ -359,9 +1004,27 @@ class Character {
         Object.assign(character, data);
         return character;
     }
+
+    exportToJSON() {
+        return JSON.stringify(this, null, 2);
+    }
+
+    static importFromJSON(jsonData) {
+        try {
+            const data = JSON.parse(jsonData);
+            const character = new Character();
+            Object.assign(character, data);
+            character.updatedAt = new Date().toISOString();
+            return character;
+        } catch (error) {
+            console.error('Ошибка импорта персонажа:', error);
+            return null;
+        }
+    }
 }
 
 // ========== СИСТЕМА УПРАВЛЕНИЯ ПЕРСОНАЖАМИ ==========
+
 class CharacterManager {
     constructor() {
         this.characters = {};
@@ -379,7 +1042,7 @@ class CharacterManager {
         StorageSystem.set('current_character_id', this.currentCharacterId);
     }
 
-    createCharacter(name, race) {
+    createCharacter(name, race = 'human') {
         const character = new Character();
         character.info.name = name;
         character.info.race = race;
@@ -409,6 +1072,9 @@ class CharacterManager {
 
     deleteCharacter(characterId) {
         if (this.characters[characterId]) {
+            // Удаляем инвентарь персонажа
+            StorageSystem.remove(`inventory_${characterId}`);
+            
             delete this.characters[characterId];
             
             if (this.currentCharacterId === characterId) {
@@ -421,199 +1087,210 @@ class CharacterManager {
         }
         return false;
     }
+
+    getCharacterList() {
+        return Object.values(this.characters).map(char => ({
+            id: char.id,
+            name: char.info.name,
+            race: char.info.race,
+            level: char.level.current,
+            createdAt: char.createdAt
+        }));
+    }
+
+    exportAllCharacters() {
+        return JSON.stringify(this.characters, null, 2);
+    }
+
+    importCharacters(jsonData) {
+        try {
+            const importedChars = JSON.parse(jsonData);
+            let importedCount = 0;
+            
+            Object.values(importedChars).forEach(charData => {
+                if (charData.info && charData.info.name) {
+                    const newId = 'char_import_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    this.characters[newId] = charData;
+                    this.characters[newId].id = newId;
+                    this.characters[newId].updatedAt = new Date().toISOString();
+                    importedCount++;
+                }
+            });
+            
+            this.saveCharacters();
+            return importedCount;
+        } catch (error) {
+            console.error('Ошибка импорта персонажей:', error);
+            return 0;
+        }
+    }
 }
 
 // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+
 let characterManager = new CharacterManager();
 let currentCharacter = characterManager.getCurrentCharacter();
 
-// ========== УТИЛИТЫ ==========
-function showPopup(title, content, buttons = []) {
-    const popup = document.createElement('div');
-    popup.className = 'popup';
-    popup.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-        background: rgba(26, 15, 11, 0.95); display: flex; 
-        justify-content: center; align-items: center; z-index: 1000;
-    `;
-    
-    let buttonsHTML = '';
-    if (buttons.length > 0) {
-        buttonsHTML = `<div style="display: flex; gap: 10px; margin-top: 20px;">${buttons.join('')}</div>`;
-    }
-    
-    popup.innerHTML = `
-        <div class="popup-content" style="background: #2c1810; padding: 25px; border-radius: 8px; 
-               max-width: 95%; width: 500px; border: 3px solid #8b4513;">
-            <h2 style="color: #d4af37; margin-bottom: 15px;">${title}</h2>
-            <div>${content}</div>
-            ${buttonsHTML}
-        </div>
-    `;
-    
-    document.body.appendChild(popup);
-    return popup;
-}
+// ========== ОСНОВНЫЕ ФУНКЦИИ ОТОБРАЖЕНИЯ ==========
 
-function closePopup(popup) {
-    if (popup && popup.parentNode) {
-        popup.parentNode.removeChild(popup);
-    }
-}
-</script>
-<script>
-// ========== СИСТЕМА ОТОБРАЖЕНИЯ ПЕРСОНАЖА ==========
 function renderCharacterSheet() {
-    const container = document.getElementById('character-tab');
-    if (!container || !currentCharacter) return;
+    const container = document.getElementById('character-container');
+    if (!container) return;
+
+    if (!currentCharacter) {
+        container.innerHTML = `
+            <div class="text-center" style="padding: 50px;">
+                <h3 style="color: #8b7d6b;">Персонаж не выбран</h3>
+                <button class="btn btn-plus" onclick="createNewCharacter()">Создать нового персонажа</button>
+            </div>
+        `;
+        return;
+    }
 
     container.innerHTML = `
-        <div class="header" style="background: linear-gradient(to bottom, #3d2418, #2c1810); 
-              color: #e0d0c0; padding: 25px; text-align: center; border-bottom: 3px solid #8b4513;">
-            <h1 style="font-size: 2.2em; color: #d4af37; margin-bottom: 20px;">⚔️ D&D Character Sheet</h1>
+        <div class="stat-panel">
+            <div class="header" style="background: linear-gradient(to bottom, #3d2418, #2c1810); 
+                  color: #e0d0c0; padding: 25px; text-align: center; border-bottom: 3px solid #8b4513;">
+                <h1 style="font-size: 2.2em; color: #d4af37; margin-bottom: 20px;">🧙 ${currentCharacter.info.name}</h1>
+                
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;">
+                    <div class="input-group">
+                        <label>Имя персонажа:</label>
+                        <input type="text" id="characterName" value="${currentCharacter.info.name}" 
+                               placeholder="Введите имя" class="stat-input" style="width: 200px;">
+                    </div>
+                    <div class="input-group">
+                        <label>Раса:</label>
+                        <select id="characterRace" class="stat-input" style="width: 200px;">
+                            ${Object.entries(races).map(([id, race]) => 
+                                `<option value="${id}" ${currentCharacter.info.race === id ? 'selected' : ''}>${race.name}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;">
+                    <div class="input-group">
+                        <label>Уровень:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span id="currentLevel" style="font-size: 1.3em; font-weight: bold; color: #d4af37;">${currentCharacter.level.current}</span>
+                            <button class="btn btn-roll" onclick="editLevel()">✏️</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Опыт:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="currentExp" class="stat-input" value="${currentCharacter.level.exp}" 
+                                   style="width: 120px;">
+                            <span style="color: #d4af37; font-weight: bold;">/ 
+                                <span id="requiredExp">${currentCharacter.level.current < 9 ? levelTable[currentCharacter.level.current].expRequired : 'MAX'}</span>
+                            </span>
+                            <button class="btn btn-plus" onclick="addExperience()">➕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-panel">
+            <h3 style="color: #d4af37; margin-bottom: 20px;">❤️ Основные характеристики</h3>
             
-            <div class="character-info" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;">
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Имя персонажа:</label>
-                    <input type="text" id="characterName" value="${currentCharacter.info.name}" 
-                           placeholder="Введите имя" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                           border-radius: 4px; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Фамилия:</label>
-                    <input type="text" id="characterSurname" value="${currentCharacter.info.surname}" 
-                           placeholder="Введите фамилию" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                           border-radius: 4px; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Титул:</label>
-                    <input type="text" id="characterTitle" value="${currentCharacter.info.title}" 
-                           placeholder="Введите титул" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                           border-radius: 4px; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-            </div>
-
-            <div class="character-info" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;">
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Раса:</label>
-                    <select id="characterRace" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                            border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-                        <option value="">Выберите расу</option>
-                        ${Object.entries(races).map(([id, race]) => 
-                            `<option value="${id}" ${currentCharacter.info.race === id ? 'selected' : ''}>${race.name}</option>`
-                        ).join('')}
-                    </select>
-                </div>
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Наследие:</label>
-                    <input type="text" id="characterHeritage" value="${currentCharacter.info.heritage}" 
-                           placeholder="Особое наследие" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                           border-radius: 4px; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-            </div>
-
-            <div class="character-info" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;">
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Рост (см):</label>
-                    <input type="number" id="characterHeight" value="${currentCharacter.info.height}" 
-                           style="width: 100%; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
-                           font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Вес (кг):</label>
-                    <input type="number" id="characterWeight" value="${currentCharacter.info.weight}" 
-                           placeholder="Вес" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                           border-radius: 4px; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-                <div class="input-group" style="flex: 1; min-width: 200px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #d4af37;">Возраст (лет):</label>
-                    <input type="number" id="characterAge" value="${currentCharacter.info.age}" 
-                           placeholder="Возраст" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
-                           border-radius: 4px; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                </div>
-            </div>
-        </div>
-
-        <div class="level-system" style="background: #3d2418; padding: 20px; border-bottom: 2px solid #8b4513;">
-            <div class="level-display" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <div class="level-info" style="font-size: 1.3em; font-weight: bold; color: #d4af37; display: flex; align-items: center; gap: 10px;">
-                    Уровень: <span id="currentLevel">${currentCharacter.level.current}</span>
-                    <button class="btn btn-roll" onclick="editLevel()">✏️ Изменить</button>
-                    <button class="btn btn-roll" onclick="showLevelsTable()">📊 Таблица</button>
-                </div>
-                <div class="exp-display" style="display: flex; align-items: center; gap: 10px;">
-                    <input type="number" id="currentExp" class="exp-input" value="${currentCharacter.level.exp}" 
-                           style="width: 120px; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                           font-size: 16px; text-align: center; background: #1a0f0b; color: #e0d0c0;">
-                    <span style="color: #d4af37; font-weight: bold;">/ 
-                        <span id="requiredExp">${currentCharacter.level.current < 9 ? levelTable[currentCharacter.level.current].expRequired : 'MAX'}</span> XP
-                    </span>
-                    <button class="btn btn-plus" onclick="addExperience()">➕ Опыт</button>
-                    <button class="btn btn-roll" id="convertBtn" onclick="convertExpToPoints()" 
-                            style="${currentCharacter.level.current >= 9 ? '' : 'display: none;'}">💎 Конвертировать</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="stats-panel" style="padding: 20px; background: #2c1810; border-bottom: 2px solid #5a3928;">
-            <div class="stat-row" style="display: flex; align-items: center; padding: 12px 0; gap: 15px; border-bottom: 1px solid #3d2418;">
-                <div class="stat-label" style="flex: 1; font-weight: bold; display: flex; align-items: center; gap: 10px; color: #d4af37;">
-                    ❤️ Здоровье:
-                </div>
+            <div class="stat-row">
+                <div class="stat-label">❤️ Здоровье:</div>
                 <input type="number" class="stat-input" id="health" value="${currentCharacter.stats.health}" 
-                       style="width: 100px; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                       text-align: center; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                <button class="btn btn-minus" onclick="changeStat('health', -5)">-5</button>
-                <button class="btn btn-plus" onclick="changeStat('health', 5)">+5</button>
+                       min="0" max="${currentCharacter.stats.maxHealth}">
+                <button class="btn btn-minus" onclick="changeStat('health', -10)">-10</button>
+                <button class="btn btn-plus" onclick="changeStat('health', 10)">+10</button>
+                <span style="color: #8b7d6b;">/ ${currentCharacter.stats.maxHealth}</span>
             </div>
-            <div class="stat-row" style="display: flex; align-items: center; padding: 12px 0; gap: 15px; border-bottom: 1px solid #3d2418;">
-                <div class="stat-label" style="flex: 1; font-weight: bold; display: flex; align-items: center; gap: 10px; color: #d4af37;">
-                    🔮 Мана:
-                </div>
+
+            <div class="stat-row">
+                <div class="stat-label">🔮 Мана:</div>
                 <input type="number" class="stat-input" id="mana" value="${currentCharacter.stats.mana}" 
-                       style="width: 100px; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                       text-align: center; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                <button class="btn btn-minus" onclick="changeStat('mana', -5)">-5</button>
-                <button class="btn btn-plus" onclick="changeStat('mana', 5)">+5</button>
+                       min="0" max="${currentCharacter.stats.maxMana}">
+                <button class="btn btn-minus" onclick="changeStat('mana', -10)">-10</button>
+                <button class="btn btn-plus" onclick="changeStat('mana', 10)">+10</button>
+                <span style="color: #8b7d6b;">/ ${currentCharacter.stats.maxMana}</span>
             </div>
-            <div class="stat-row" style="display: flex; align-items: center; padding: 12px 0; gap: 15px;">
-                <div class="stat-label" style="flex: 1; font-weight: bold; display: flex; align-items: center; gap: 10px; color: #d4af37;">
-                    ⚡ Выносливость:
-                </div>
+
+            <div class="stat-row">
+                <div class="stat-label">⚡ Выносливость:</div>
                 <input type="number" class="stat-input" id="stamina" value="${currentCharacter.stats.stamina}" 
-                       style="width: 100px; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                       text-align: center; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                <button class="btn btn-minus" onclick="changeStat('stamina', -5)">-5</button>
-                <button class="btn btn-plus" onclick="changeStat('stamina', 5)">+5</button>
+                       min="0" max="${currentCharacter.stats.maxStamina}">
+                <button class="btn btn-minus" onclick="changeStat('stamina', -10)">-10</button>
+                <button class="btn btn-plus" onclick="changeStat('stamina', 10)">+10</button>
+                <span style="color: #8b7d6b;">/ ${currentCharacter.stats.maxStamina}</span>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-label">🎯 Свободные очки:</div>
+                <input type="number" class="stat-input" id="freePoints" value="${currentCharacter.stats.freePoints}" 
+                       min="0" style="width: 80px;">
+                <button class="btn btn-roll" onclick="saveFreePoints()">Сохранить</button>
             </div>
         </div>
 
-        <div class="points-panel" style="padding: 20px; background: #3d2418; border-bottom: 2px solid #8b4513;">
-            <div class="points-display" style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-                <span style="font-size: 1.3em; font-weight: bold; color: #d4af37;">Свободные очки навыков:</span>
-                <input type="number" id="freePoints" class="stat-input" value="${currentCharacter.stats.freePoints}" 
-                       style="width: 100px; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
-                       text-align: center; font-size: 16px; background: #1a0f0b; color: #e0d0c0;">
-                <button class="btn btn-roll" onclick="editFreePoints()">✏️ Изменить</button>
+        <div class="skills-section">
+            <h3 class="section-title">🎯 Навыки персонажа</h3>
+            <div id="skillsContainer">
+                ${renderSkills()}
             </div>
         </div>
 
-        <div id="skillsContainer"></div>
-
-        <div class="export-import" style="display: flex; gap: 10px; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
-            <button class="btn btn-plus" onclick="exportCharacter()">💾 Экспорт персонажа</button>
-            <button class="btn btn-roll" onclick="importCharacter()">📥 Импорт персонажа</button>
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn btn-plus" onclick="saveCharacterData()">💾 Сохранить персонажа</button>
+            <button class="btn btn-roll" onclick="exportCharacter()">📤 Экспорт</button>
+            <button class="btn btn-roll" onclick="showLevelsTable()">📊 Таблица уровней</button>
         </div>
     `;
 
     setupCharacterEventListeners();
-    renderSkills();
 }
 
+function renderSkills() {
+    if (!currentCharacter) return '';
+
+    let skillsHTML = '';
+    for (const [groupName, skills] of Object.entries(skillsStructure)) {
+        skillsHTML += `<h4 style="color: #d4af37; margin: 20px 0 15px 0; font-size: 1.2em;">${groupName}</h4>`;
+        
+        skills.forEach(skill => {
+            const skillValue = currentCharacter.getSkillValue(skill);
+            const isLocked = currentCharacter.lockedSkills[skill] || false;
+            const lockBtnText = isLocked ? '🔓' : '🔒';
+            const lockBtnClass = isLocked ? 'btn-lock locked' : 'btn-lock';
+
+            skillsHTML += `
+                <div class="skill-row" style="${isLocked ? 'opacity: 0.6;' : ''}">
+                    <div class="skill-name">
+                        <span>🎯</span>
+                        <span>${skill}</span>
+                    </div>
+                    <div class="skill-controls">
+                        <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" 
+                                ${isLocked || skillValue <= 5 ? 'disabled' : ''}>-</button>
+                        <span class="skill-value">${skillValue}</span>
+                        <button class="btn btn-plus" onclick="increaseSkill('${skill}')" 
+                                ${isLocked || currentCharacter.stats.freePoints <= 0 ? 'disabled' : ''}>+</button>
+                        <button class="btn ${lockBtnClass}" onclick="toggleSkillLock('${skill}')" 
+                                style="background: #95a5a6; ${isLocked ? 'background: #e74c3c;' : ''}">
+                            ${lockBtnText}
+                        </button>
+                        <button class="btn btn-roll" onclick="rollSkill('${skill}')" ${isLocked ? 'disabled' : ''}>
+                            🎲 Бросок
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    return skillsHTML;
+}
+
+// ========== ФУНКЦИИ УПРАВЛЕНИЯ ==========
+
 function setupCharacterEventListeners() {
-    const inputs = ['characterName', 'characterSurname', 'characterTitle', 'characterRace', 
-                   'characterHeritage', 'characterHeight', 'characterWeight', 'characterAge',
-                   'health', 'mana', 'stamina', 'freePoints', 'currentExp'];
+    const inputs = ['characterName', 'characterRace', 'health', 'mana', 'stamina', 'freePoints', 'currentExp'];
     
     inputs.forEach(inputId => {
         const element = document.getElementById(inputId);
@@ -627,114 +1304,77 @@ function setupCharacterEventListeners() {
 function saveCharacterData() {
     if (!currentCharacter) return;
 
+    // Сохраняем основную информацию
     currentCharacter.info.name = document.getElementById('characterName').value;
-    currentCharacter.info.surname = document.getElementById('characterSurname').value;
-    currentCharacter.info.title = document.getElementById('characterTitle').value;
-    currentCharacter.info.race = document.getElementById('characterRace').value;
-    currentCharacter.info.heritage = document.getElementById('characterHeritage').value;
-    currentCharacter.info.height = document.getElementById('characterHeight').value;
-    currentCharacter.info.weight = document.getElementById('characterWeight').value;
-    currentCharacter.info.age = document.getElementById('characterAge').value;
+    const newRace = document.getElementById('characterRace').value;
+    if (newRace !== currentCharacter.info.race) {
+        currentCharacter.changeRace(newRace);
+    }
 
+    // Сохраняем характеристики
     currentCharacter.stats.health = parseInt(document.getElementById('health').value) || 0;
     currentCharacter.stats.mana = parseInt(document.getElementById('mana').value) || 0;
     currentCharacter.stats.stamina = parseInt(document.getElementById('stamina').value) || 0;
-    currentCharacter.stats.freePoints = parseInt(document.getElementById('freePoints').value) || 0;
 
+    // Сохраняем опыт
     currentCharacter.level.exp = parseInt(document.getElementById('currentExp').value) || 0;
     currentCharacter.checkLevelUp();
 
+    // Обновляем отображение
     updateLevelDisplay();
+    
+    // Сохраняем в хранилище
     currentCharacter.save();
     characterManager.saveCharacters();
 }
 
-// ========== СИСТЕМА НАВЫКОВ ==========
-function renderSkills() {
-    const container = document.getElementById('skillsContainer');
-    if (!container || !currentCharacter) return;
+function saveFreePoints() {
+    if (!currentCharacter) return;
+    const newPoints = parseInt(document.getElementById('freePoints').value) || 0;
+    currentCharacter.stats.freePoints = newPoints;
+    currentCharacter.save();
+    characterManager.saveCharacters();
+    renderCharacterSheet();
+}
 
-    let skillsHTML = '';
-
-    for (const [groupName, skills] of Object.entries(skillsStructure)) {
-        skillsHTML += `
-            <div class="skills-section" style="padding: 25px; border-bottom: 2px solid #5a3928;">
-                <div class="section-title">${groupName}</div>
-        `;
-
-        skills.forEach(skill => {
-            const skillValue = currentCharacter.getSkillValue(skill);
-            const isLocked = currentCharacter.lockedSkills[skill] || false;
-            const lockBtnText = isLocked ? '🔓' : '🔒';
-            const lockBtnClass = isLocked ? 'btn-lock locked' : 'btn-lock';
-
-            skillsHTML += `
-                <div class="skill-row" style="display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid #3d2418;
-                      ${isLocked ? 'opacity: 0.6; color: #8b7d6b; background: #3d2418;' : ''}">
-                    <div class="skill-name" style="flex: 2; font-weight: 500; display: flex; align-items: center; gap: 12px;">
-                        <span>🎯</span>
-                        <span>${skill}</span>
-                        ${groupName === "🔮 МАГИЯ" ? `<span class="spell-icon" onclick="showSpells('${skill}')" title="Просмотреть заклинания" style="cursor: pointer; margin-left: 10px; font-size: 1.2em;">🔮</span>` : ''}
-                    </div>
-                    <div class="skill-controls" style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 12px;">
-                        <button class="btn btn-minus" onclick="decreaseSkill('${skill}')" 
-                                ${isLocked || skillValue <= 5 ? 'disabled' : ''}>-</button>
-                        <span class="skill-value" style="font-size: 1.3em; font-weight: bold; color: #d4af37; min-width: 40px; text-align: center;">
-                            ${skillValue}
-                        </span>
-                        <button class="btn btn-plus" onclick="increaseSkill('${skill}')" 
-                                ${isLocked || currentCharacter.stats.freePoints <= 0 ? 'disabled' : ''}>+</button>
-                        <button class="btn ${lockBtnClass}" onclick="toggleSkillLock('${skill}')" 
-                                style="background: #95a5a6; color: white; padding: 10px 12px; ${isLocked ? 'background: #e74c3c;' : ''}">
-                            ${lockBtnText}
-                        </button>
-                        <button class="btn btn-roll" onclick="rollSkill('${skill}')" ${isLocked ? 'disabled' : ''}>Бросок</button>
-                    </div>
-                </div>
-            `;
-        });
-
-        skillsHTML += `</div>`;
-    }
-
-    container.innerHTML = skillsHTML;
+function changeStat(stat, value) {
+    if (!currentCharacter) return;
+    
+    const input = document.getElementById(stat);
+    let currentValue = parseInt(input.value) || 0;
+    let newValue = currentValue + value;
+    
+    // Ограничиваем значения
+    const maxStat = currentCharacter.stats['max' + stat.charAt(0).toUpperCase() + stat.slice(1)];
+    if (newValue < 0) newValue = 0;
+    if (newValue > maxStat) newValue = maxStat;
+    
+    input.value = newValue;
+    currentCharacter.stats[stat] = newValue;
+    currentCharacter.save();
 }
 
 function increaseSkill(skillName) {
     if (!currentCharacter) return;
-
-    const isLocked = currentCharacter.lockedSkills[skillName];
-    if (isLocked) {
-        alert('❌ Этот навык заблокирован!');
-        return;
-    }
 
     if (currentCharacter.stats.freePoints > 0) {
         const currentValue = currentCharacter.getSkillValue(skillName);
         currentCharacter.setSkillValue(skillName, currentValue + 1);
         currentCharacter.stats.freePoints--;
         currentCharacter.save();
-        renderSkills();
-        updateUI();
+        renderCharacterSheet();
     }
 }
 
 function decreaseSkill(skillName) {
     if (!currentCharacter) return;
 
-    const isLocked = currentCharacter.lockedSkills[skillName];
-    if (isLocked) {
-        alert('❌ Этот навык заблокирован!');
-        return;
-    }
-
     const currentValue = currentCharacter.getSkillValue(skillName);
     if (currentValue > 5) {
         currentCharacter.setSkillValue(skillName, currentValue - 1);
         currentCharacter.stats.freePoints++;
         currentCharacter.save();
-        renderSkills();
-        updateUI();
+        renderCharacterSheet();
     }
 }
 
@@ -744,26 +1384,27 @@ function toggleSkillLock(skillName) {
     const currentlyLocked = currentCharacter.lockedSkills[skillName] || false;
     
     if (currentlyLocked) {
-        const unlock = confirm(`🔓 Разблокировать навык "${skillName}"?`);
-        if (unlock) {
-            currentCharacter.lockedSkills[skillName] = false;
-            currentCharacter.save();
-            renderSkills();
-            alert(`✅ Навык "${skillName}" разблокирован!`);
-        }
+        currentCharacter.lockedSkills[skillName] = false;
+        currentCharacter.save();
+        renderCharacterSheet();
     } else {
-        const lock = confirm(`🔒 Заблокировать навык "${skillName}"?`);
-        if (lock) {
-            currentCharacter.lockedSkills[skillName] = true;
-            currentCharacter.save();
-            renderSkills();
-            alert(`✅ Навык "${skillName}" заблокирован!`);
-        }
+        currentCharacter.lockedSkills[skillName] = true;
+        currentCharacter.save();
+        renderCharacterSheet();
     }
 }
-</script>
-<script>
-// ========== ФУНКЦИИ УПРАВЛЕНИЯ УРОВНЕМ И СТАТАМИ ==========
+
+function addExperience() {
+    if (!currentCharacter) return;
+    
+    const expToAdd = prompt('Сколько опыта добавить?', '1000');
+    if (expToAdd && !isNaN(expToAdd)) {
+        currentCharacter.addExperience(parseInt(expToAdd));
+        updateLevelDisplay();
+        renderCharacterSheet();
+    }
+}
+
 function editLevel() {
     if (!currentCharacter) return;
     
@@ -773,6 +1414,7 @@ function editLevel() {
         updateStatsForLevel();
         updateLevelDisplay();
         currentCharacter.save();
+        renderCharacterSheet();
     }
 }
 
@@ -795,185 +1437,21 @@ function updateStatsForLevel() {
     currentCharacter.stats.stamina = totalStamina;
 }
 
-function addExperience() {
-    if (!currentCharacter) return;
-    
-    const expToAdd = prompt('Сколько опыта добавить?');
-    if (expToAdd && !isNaN(expToAdd)) {
-        currentCharacter.addExperience(parseInt(expToAdd));
-        updateLevelDisplay();
-        renderCharacterSheet();
-    }
-}
-
-function convertExpToPoints() {
-    if (!currentCharacter || currentCharacter.level.current < 9) return;
-    
-    const currentExp = currentCharacter.level.exp;
-    const availablePoints = Math.floor(currentExp / 1000);
-    
-    if (availablePoints > 0) {
-        currentCharacter.level.exp -= availablePoints * 1000;
-        currentCharacter.stats.freePoints += availablePoints;
-        currentCharacter.save();
-        
-        alert(`💎 Конвертировано ${availablePoints} очков навыков!`);
-        updateLevelDisplay();
-        renderCharacterSheet();
-    }
-}
-
 function updateLevelDisplay() {
     if (!currentCharacter) return;
     
     const levelElement = document.getElementById('currentLevel');
     const expElement = document.getElementById('currentExp');
     const requiredElement = document.getElementById('requiredExp');
-    const convertBtn = document.getElementById('convertBtn');
     
     if (levelElement) levelElement.textContent = currentCharacter.level.current;
     if (expElement) expElement.value = currentCharacter.level.exp;
     
     if (currentCharacter.level.current < 9) {
         if (requiredElement) requiredElement.textContent = levelTable[currentCharacter.level.current].expRequired;
-        if (convertBtn) convertBtn.style.display = 'none';
     } else {
         if (requiredElement) requiredElement.textContent = 'MAX';
-        if (convertBtn) convertBtn.style.display = 'block';
     }
-}
-
-function changeStat(stat, value) {
-    if (!currentCharacter) return;
-    
-    const input = document.getElementById(stat);
-    let currentValue = parseInt(input.value) || 0;
-    let newValue = currentValue + value;
-    
-    if (newValue < 0) newValue = 0;
-    if (newValue > currentCharacter.stats['max' + stat.charAt(0).toUpperCase() + stat.slice(1)]) {
-        newValue = currentCharacter.stats['max' + stat.charAt(0).toUpperCase() + stat.slice(1)];
-    }
-    
-    input.value = newValue;
-    currentCharacter.stats[stat] = newValue;
-    currentCharacter.save();
-}
-
-function editFreePoints() {
-    if (!currentCharacter) return;
-    
-    const newPoints = prompt('Введите количество свободных очков:', currentCharacter.stats.freePoints);
-    if (newPoints && !isNaN(newPoints)) {
-        currentCharacter.stats.freePoints = parseInt(newPoints);
-        currentCharacter.save();
-        renderCharacterSheet();
-    }
-}
-
-function updateUI() {
-    if (!currentCharacter) return;
-    
-    const freePointsElement = document.getElementById('freePoints');
-    if (freePointsElement) {
-        freePointsElement.value = currentCharacter.stats.freePoints;
-    }
-}
-
-// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-function showLevelsTable() {
-    if (!currentCharacter) return;
-    
-    let tableHTML = `
-        <h3 style="color: #d4af37; margin-bottom: 15px;">📊 Таблица уровней</h3>
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-            <tr>
-                <th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Ур.</th>
-                <th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Опыт</th>
-                <th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">ХП</th>
-                <th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Мана</th>
-                <th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Стамина</th>
-                <th style="padding: 8px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Очки</th>
-            </tr>
-    `;
-    
-    for (let level = 0; level <= 9; level++) {
-        const data = levelTable[level];
-        const isCurrent = level === currentCharacter.level.current;
-        
-        tableHTML += `
-            <tr style="${isCurrent ? 'background: #8b4513; font-weight: bold;' : ''}">
-                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">${level}</td>
-                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">${data.expRequired || 'MAX'}</td>
-                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.hp}</td>
-                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.mana}</td>
-                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.stamina}</td>
-                <td style="padding: 8px; border: 1px solid #5a3928; text-align: center;">+${data.points}</td>
-            </tr>
-        `;
-    }
-    
-    tableHTML += `</table>`;
-    
-    showPopup('Таблица уровней', tableHTML, [
-        '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Закрыть</button>'
-    ]);
-}
-
-function showSpells(schoolName) {
-    alert(`🔮 Система заклинаний для "${schoolName}" будет реализована в следующих версиях!`);
-}
-
-function exportCharacter() {
-    if (!currentCharacter) return;
-    
-    const dataStr = JSON.stringify(currentCharacter, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(dataBlob);
-    link.download = `character_${currentCharacter.info.name || 'unknown'}.json`;
-    link.click();
-    
-    alert(`✅ Персонаж "${currentCharacter.info.name}" экспортирован!`);
-}
-
-function importCharacter() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    
-    input.onchange = function(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const characterData = JSON.parse(e.target.result);
-                
-                const newCharacter = new Character();
-                Object.assign(newCharacter, characterData);
-                newCharacter.id = 'char_import_' + Date.now();
-                newCharacter.updatedAt = new Date().toISOString();
-                
-                characterManager.characters[newCharacter.id] = newCharacter;
-                characterManager.currentCharacterId = newCharacter.id;
-                characterManager.saveCharacters();
-                
-                currentCharacter = newCharacter;
-                renderCharacterSheet();
-                
-                alert(`✅ Персонаж "${newCharacter.info.name}" импортирован!`);
-            } catch (error) {
-                alert('❌ Ошибка загрузки файла!');
-                console.error(error);
-            }
-        };
-        reader.readAsText(file);
-    };
-    
-    input.click();
 }
 
 function rollSkill(skillName) {
@@ -988,63 +1466,161 @@ function rollSkill(skillName) {
         resultClass = "success";
     } else if (check.critical === 'failure') {
         resultText = "💥 КРИТИЧЕСКИЙ ПРОВАЛ!";
-        resultClass = "failure";
+        resultClass = "error";
     } else if (check.success) {
         resultText = "✅ УСПЕХ!";
         resultClass = "success";
     } else {
         resultText = "❌ НЕУДАЧА!";
-        resultClass = "failure";
+        resultClass = "error";
     }
 
     showRollResult(skillName, skillValue, check.roll, check.total, resultText, resultClass);
 }
 
 function showRollResult(skillName, skillValue, dice, total, resultText, resultClass) {
-    const popup = showPopup(
-        `Бросок на "${skillName}" (${skillValue})`,
-        `
-            <div class="dice-rolls" style="display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
-                <div class="dice" style="width: 50px; height: 50px; background: #8b4513; border-radius: 8px; 
-                     display: flex; justify-content: center; align-items: center; font-size: 1.5em; 
-                     font-weight: bold; color: #1a0f0b;">${dice[0]}</div>
-                <div class="dice" style="width: 50px; height: 50px; background: #8b4513; border-radius: 8px; 
-                     display: flex; justify-content: center; align-items: center; font-size: 1.5em; 
-                     font-weight: bold; color: #1a0f0b;">${dice[1]}</div>
-                <div class="dice" style="width: 50px; height: 50px; background: #8b4513; border-radius: 8px; 
-                     display: flex; justify-content: center; align-items: center; font-size: 1.5em; 
-                     font-weight: bold; color: #1a0f0b;">${dice[2]}</div>
+    const popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            <h2 style="color: #d4af37; margin-bottom: 20px;">Бросок на "${skillName}" (${skillValue})</h2>
+            
+            <div class="dice-rolls">
+                <div class="dice">${dice[0]}</div>
             </div>
-            <div style="font-size: 1.5em; margin: 20px 0; color: #e0d0c0;">${dice.join(' + ')} = ${total}</div>
-            <div class="${resultClass}" style="${resultClass === 'success' ? 'color: #27ae60;' : 'color: #e74c3c;'} 
-                  font-weight: bold; font-size: 1.3em;">${resultText}</div>
-        `,
-        [
-            '<button class="btn btn-roll" onclick="rollSkill(\'' + skillName + '\'); closePopup(this.closest(\'.popup\'));">🎲 Кинуть еще</button>',
-            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Закрыть</button>'
-        ]
-    );
+            
+            <div style="font-size: 1.5em; margin: 20px 0; color: #e0d0c0;">
+                Результат: <strong>${total}</strong>
+            </div>
+            
+            <div class="${resultClass}" style="font-weight: bold; font-size: 1.3em; margin: 20px 0;">
+                ${resultText}
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn btn-roll" onclick="rollSkill('${skillName}'); this.closest('.popup').remove();">🎲 Кинуть еще</button>
+                <button class="btn btn-roll" onclick="this.closest('.popup').remove();">Закрыть</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
 }
 
-// ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ ==========
-function initializeSystem() {
-    console.log('🎮 Инициализация D&D системы...');
+function showLevelsTable() {
+    if (!currentCharacter) return;
     
-    if (!currentCharacter && Object.keys(characterManager.characters).length === 0) {
-        const demoChar = characterManager.createCharacter('Новый Герой', 'human');
-        currentCharacter = demoChar;
-        console.log('✅ Создан демо-персонаж');
+    let tableHTML = `
+        <h3 style="color: #d4af37; margin-bottom: 15px;">📊 Таблица уровней</h3>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+            <tr>
+                <th style="padding: 10px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Ур.</th>
+                <th style="padding: 10px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Опыт</th>
+                <th style="padding: 10px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">ХП</th>
+                <th style="padding: 10px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Мана</th>
+                <th style="padding: 10px; border: 1px solid #5a3928; background: #3d2418; color: #d4af37;">Очки</th>
+            </tr>
+    `;
+    
+    for (let level = 0; level <= 9; level++) {
+        const data = levelTable[level];
+        const isCurrent = level === currentCharacter.level.current;
+        
+        tableHTML += `
+            <tr style="${isCurrent ? 'background: #8b4513; font-weight: bold;' : ''}">
+                <td style="padding: 10px; border: 1px solid #5a3928; text-align: center;">${level}</td>
+                <td style="padding: 10px; border: 1px solid #5a3928; text-align: center;">${data.expRequired || 'MAX'}</td>
+                <td style="padding: 10px; border: 1px solid #5a3928; text-align: center;">+${data.hp}</td>
+                <td style="padding: 10px; border: 1px solid #5a3928; text-align: center;">+${data.mana}</td>
+                <td style="padding: 10px; border: 1px solid #5a3928; text-align: center;">+${data.points}</td>
+            </tr>
+        `;
     }
     
-    renderCharacterSheet();
+    tableHTML += `</table>`;
     
-    console.log(`✅ Система готова! Персонажей: ${Object.keys(characterManager.characters).length}`);
+    const popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.innerHTML = `
+        <div class="popup-content">
+            ${tableHTML}
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-roll" onclick="this.closest('.popup').remove();">Закрыть</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
 }
 
-document.addEventListener('DOMContentLoaded', initializeSystem);
-</script>
-<script>
-// ========== СИСТЕМА ГЕКСАГОНАЛЬНОГО ПОЛЯ ==========
+function exportCharacter() {
+    if (!currentCharacter) return;
+    
+    const dataStr = currentCharacter.exportToJSON();
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `character_${currentCharacter.info.name || 'unknown'}.json`;
+    link.click();
+}
+
+function createNewCharacter() {
+    const name = prompt('Введите имя нового персонажа:', 'Новый Герой');
+    if (name && name.trim()) {
+        const character = characterManager.createCharacter(name.trim());
+        currentCharacter = character;
+        renderCharacterSheet();
+    }
+}
+
+// ========== СИСТЕМА КУБИКОВ ДЛЯ ПЕРСОНАЖА ==========
+
+function rollSkillCheck(skillValue, modifiers = 0) {
+    const roll = rollDice(20, 1);
+    const totalRoll = roll.total + modifiers;
+    const success = totalRoll >= skillValue;
+    
+    let critical = 'normal';
+    if (roll.total === 20) critical = 'success';
+    if (roll.total === 1) critical = 'failure';
+    
+    return {
+        roll: roll.results,
+        total: totalRoll,
+        success: success,
+        critical: critical
+    };
+}
+
+function rollDice(sides, count = 1) {
+    let results = [];
+    let total = 0;
+    
+    for (let i = 0; i < count; i++) {
+        const result = Math.floor(Math.random() * sides) + 1;
+        results.push(result);
+        total += result;
+    }
+    
+    return { results, total };
+}
+
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+// Глобальные флаги для отслеживания загрузки
+window.characterLoaded = false;
+
+// Функция для отладки
+window.getCurrentCharacter = function() {
+    return currentCharacter;
+};
+
+console.log('✅ character.js загружен!');
+        // combat.js - Полная боевая система D&D
+
+// ========== ГЕКСАГОНАЛЬНОЕ ПОЛЕ БОЯ ==========
+
 class HexagonalBattlefield {
     constructor(width = 15, height = 10) {
         this.width = width;
@@ -1065,8 +1641,7 @@ class HexagonalBattlefield {
                     r: r,
                     type: 'empty',
                     occupied: false,
-                    visible: true,
-                    explored: false
+                    visible: true
                 };
             }
         }
@@ -1085,31 +1660,6 @@ class HexagonalBattlefield {
         const x = this.hexSize * Math.sqrt(3) * (q + r / 2);
         const y = this.hexSize * 3/2 * r;
         return { x, y };
-    }
-
-    pixelToHex(x, y) {
-        const q = (x * Math.sqrt(3)/3 - y / 3) / this.hexSize;
-        const r = y * 2/3 / this.hexSize;
-        return this.roundHex(q, r);
-    }
-
-    roundHex(q, r) {
-        const s = -q - r;
-        let rq = Math.round(q);
-        let rr = Math.round(r);
-        let rs = Math.round(s);
-
-        const q_diff = Math.abs(rq - q);
-        const r_diff = Math.abs(rr - r);
-        const s_diff = Math.abs(rs - s);
-
-        if (q_diff > r_diff && q_diff > s_diff) {
-            rq = -rr - rs;
-        } else if (r_diff > s_diff) {
-            rr = -rq - rs;
-        }
-
-        return { q: rq, r: rr };
     }
 
     getNeighbors(q, r) {
@@ -1158,14 +1708,13 @@ class HexagonalBattlefield {
         }
     }
 
-    placeCharacter(characterId, cellId, direction = 0) {
+    placeCharacter(characterId, cellId) {
         if (this.cells[cellId] && !this.cells[cellId].occupied) {
             this.removeCharacter(characterId);
             
             this.cells[cellId].occupied = true;
             this.characters[characterId] = {
                 cellId: cellId,
-                direction: direction,
                 characterId: characterId
             };
             return true;
@@ -1198,77 +1747,16 @@ class HexagonalBattlefield {
     getCharacterPosition(characterId) {
         return this.characters[characterId];
     }
-
-    getCellAtDirection(cellId, direction, distance = 1) {
-        const coords = this.getCellCoordinates(cellId);
-        let targetQ = coords.q;
-        let targetR = coords.r;
-
-        const directionVectors = [
-            [1, 0], [1, -1], [0, -1],
-            [-1, 0], [-1, 1], [0, 1]
-        ];
-
-        if (direction >= 0 && direction < 6) {
-            const [dq, dr] = directionVectors[direction];
-            targetQ += dq * distance;
-            targetR += dr * distance;
-        }
-
-        const targetCellId = this.getCellId(targetQ, targetR);
-        return this.isValidCell(targetQ, targetR) ? targetCellId : null;
-    }
-
-    getFieldOfView(characterId, range = 10) {
-        const character = this.characters[characterId];
-        if (!character) return [];
-
-        const visibleCells = new Set();
-        const centerCoords = this.getCellCoordinates(character.cellId);
-        
-        for (let q = -range; q <= range; q++) {
-            for (let r = -range; r <= range; r++) {
-                const targetQ = centerCoords.q + q;
-                const targetR = centerCoords.r + r;
-                
-                if (this.isValidCell(targetQ, targetR)) {
-                    const distance = this.calculateDistance(character.cellId, this.getCellId(targetQ, targetR));
-                    if (distance <= range) {
-                        visibleCells.add(this.getCellId(targetQ, targetR));
-                    }
-                }
-            }
-        }
-
-        return Array.from(visibleCells);
-    }
-
-    getDirectionBetweenCells(fromCellId, toCellId) {
-        const from = this.getCellCoordinates(fromCellId);
-        const to = this.getCellCoordinates(toCellId);
-        
-        const dq = to.q - from.q;
-        const dr = to.r - from.r;
-        
-        if (dq > 0 && dr === 0) return 0;
-        if (dq > 0 && dr < 0) return 1;
-        if (dq === 0 && dr < 0) return 2;
-        if (dq < 0 && dr === 0) return 3;
-        if (dq < 0 && dr > 0) return 4;
-        if (dq === 0 && dr > 0) return 5;
-        
-        return 0;
-    }
 }
 
-// ========== СИСТЕМА ВИЗУАЛИЗАЦИИ ПОЛЯ БОЯ ==========
+// ========== ВИЗУАЛИЗАЦИЯ ПОЛЯ БОЯ ==========
+
 class BattlefieldRenderer {
     constructor(battlefield, containerId) {
         this.battlefield = battlefield;
         this.container = document.getElementById(containerId);
         this.selectedCell = null;
         this.selectedCharacter = null;
-        this.setupEventListeners();
     }
 
     render() {
@@ -1375,10 +1863,7 @@ class BattlefieldRenderer {
             color: #1a0f0b;
         `;
 
-        const charSymbol = characterId.startsWith('player') ? '👤' : 
-                          characterId.startsWith('farmer') ? '👨‍🌾' : 
-                          characterId.startsWith('bandit') ? '💀' : '⚔️';
-        
+        const charSymbol = this.getCharacterSymbol(characterId);
         charElement.innerHTML = charSymbol;
         charElement.title = `Персонаж: ${characterId}`;
         
@@ -1390,17 +1875,22 @@ class BattlefieldRenderer {
         this.container.appendChild(charElement);
     }
 
+    getCharacterSymbol(characterId) {
+        if (characterId.startsWith('player')) return '👤';
+        if (characterId.startsWith('farmer')) return '👨‍🌾';
+        if (characterId.startsWith('bandit')) return '💀';
+        if (characterId.startsWith('archer')) return '🏹';
+        if (characterId.startsWith('mage')) return '🧙‍♂️';
+        return '⚔️';
+    }
+
     onHexClick(cellId) {
-        console.log('Выбрана ячейка:', cellId);
-        
         if (this.selectedCharacter) {
             if (this.battlefield.moveCharacter(this.selectedCharacter, cellId)) {
-                console.log(`Персонаж ${this.selectedCharacter} перемещен в ${cellId}`);
                 this.render();
-            } else {
-                console.log('Невозможно переместить персонажа в эту ячейку');
             }
             this.selectedCharacter = null;
+            this.resetHighlights();
         } else {
             this.selectedCell = cellId;
             this.highlightCell(cellId);
@@ -1417,7 +1907,6 @@ class BattlefieldRenderer {
 
     onCharacterClick(characterId) {
         this.selectedCharacter = characterId;
-        console.log('Выбран персонаж:', characterId);
         this.highlightPossibleMoves(characterId);
     }
 
@@ -1470,47 +1959,34 @@ class BattlefieldRenderer {
             hex.style.borderColor = '#5a3928';
         });
     }
-
-    setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            if (!this.container.contains(e.target)) {
-                this.selectedCell = null;
-                this.selectedCharacter = null;
-                this.resetHighlights();
-            }
-        });
-    }
 }
-</script>
-<script>
+
 // ========== СИСТЕМА ЛАНДШАФТОВ ==========
+
 const landscapes = {
-    city: {
-        name: "🏙️ Город",
-        obstacles: [
-            { type: 'building', density: 0.3 },
-            { type: 'tree', density: 0.1 },
-            { type: 'rock', density: 0.05 }
-        ],
-        description: "Узкие улицы, много укрытий"
-    },
     forest: {
         name: "🌲 Лес", 
         obstacles: [
             { type: 'tree', density: 0.4 },
-            { type: 'rock', density: 0.1 },
-            { type: 'building', density: 0.02 }
+            { type: 'rock', density: 0.1 }
         ],
-        description: "Плотная растительность, ограниченный обзор"
+        description: "Плотная растительность"
     },
-    road: {
-        name: "🛣️ Дорога",
+    city: {
+        name: "🏙️ Город",
         obstacles: [
-            { type: 'tree', density: 0.1 },
-            { type: 'rock', density: 0.05 },
-            { type: 'building', density: 0.01 }
+            { type: 'building', density: 0.3 },
+            { type: 'tree', density: 0.1 }
         ],
-        description: "Открытое пространство, хороший обзор"
+        description: "Узкие улицы"
+    },
+    plains: {
+        name: "🌾 Равнины",
+        obstacles: [
+            { type: 'tree', density: 0.05 },
+            { type: 'rock', density: 0.02 }
+        ],
+        description: "Открытая местность"
     }
 };
 
@@ -1540,11 +2016,287 @@ function generateLandscape(battlefield, landscapeType) {
     }
 }
 
-// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ СИСТЕМЫ БОЯ ==========
+// ========== СИСТЕМА БОЯ ==========
+
+class CombatSystem {
+    constructor(battlefield) {
+        this.battlefield = battlefield;
+        this.combatants = {};
+        this.currentTurn = 0;
+        this.activeCombatant = null;
+        this.combatHistory = [];
+        this.isCombatActive = false;
+    }
+
+    addCombatant(characterId, type, stats = {}) {
+        this.combatants[characterId] = {
+            id: characterId,
+            type: type,
+            stats: {
+                health: stats.health || 100,
+                maxHealth: stats.maxHealth || 100,
+                skills: stats.skills || {}
+            },
+            position: this.battlefield.getCharacterPosition(characterId)
+        };
+    }
+
+    startCombat() {
+        this.isCombatActive = true;
+        this.currentTurn = 1;
+        this.determineInitiative();
+        this.nextTurn();
+        
+        this.addToCombatHistory(`⚔️ Бой начался!`);
+        this.updateBattleInfo();
+    }
+
+    determineInitiative() {
+        const combatantIds = Object.keys(this.combatants);
+        this.turnOrder = combatantIds.sort((a, b) => {
+            if (a.startsWith('player')) return -1;
+            if (b.startsWith('player')) return 1;
+            return Math.random() - 0.5;
+        });
+    }
+
+    nextTurn() {
+        if (!this.isCombatActive) return;
+
+        if (!this.activeCombatant || !this.turnOrder.includes(this.activeCombatant)) {
+            this.activeCombatant = this.turnOrder[0];
+        } else {
+            const currentIndex = this.turnOrder.indexOf(this.activeCombatant);
+            this.activeCombatant = this.turnOrder[(currentIndex + 1) % this.turnOrder.length];
+        }
+
+        this.addToCombatHistory(`🔄 Ход ${this.currentTurn}: ${this.getCombatantName(this.activeCombatant)}`);
+        this.updateBattleInfo();
+
+        if (this.activeCombatant.startsWith('bandit') || this.activeCombatant.startsWith('farmer')) {
+            setTimeout(() => this.executeEnemyTurn(), 1000);
+        }
+    }
+
+    executeEnemyTurn() {
+        const enemy = this.combatants[this.activeCombatant];
+        if (!enemy) return;
+
+        const playerId = Object.keys(this.combatants).find(id => id.startsWith('player'));
+        if (!playerId) return;
+
+        const enemyPos = enemy.position;
+        const playerPos = this.battlefield.getCharacterPosition(playerId);
+
+        if (enemyPos && playerPos) {
+            const distance = this.battlefield.calculateDistance(enemyPos.cellId, playerPos.cellId);
+            
+            if (distance <= 1) {
+                this.performAttack(this.activeCombatant, playerId);
+            } else {
+                this.moveTowardsTarget(this.activeCombatant, playerPos.cellId);
+            }
+        }
+
+        setTimeout(() => this.nextTurn(), 1000);
+    }
+
+    moveTowardsTarget(combatantId, targetCellId) {
+        const combatant = this.combatants[combatantId];
+        if (!combatant || !combatant.position) return false;
+
+        const currentCellId = combatant.position.cellId;
+        const neighbors = this.battlefield.getNeighbors(
+            this.battlefield.getCellCoordinates(currentCellId).q,
+            this.battlefield.getCellCoordinates(currentCellId).r
+        );
+
+        let bestCell = null;
+        let bestDistance = Infinity;
+
+        for (const neighborId of neighbors) {
+            if (!this.battlefield.cells[neighborId].occupied) {
+                const distance = this.battlefield.calculateDistance(neighborId, targetCellId);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestCell = neighborId;
+                }
+            }
+        }
+
+        if (bestCell && this.battlefield.moveCharacter(combatantId, bestCell)) {
+            combatant.position = this.battlefield.getCharacterPosition(combatantId);
+            this.addToCombatHistory(`🚶 ${this.getCombatantName(combatantId)} переместился`);
+            this.updateBattlefieldDisplay();
+            return true;
+        }
+
+        return false;
+    }
+
+    performAttack(attackerId, targetId) {
+        const attacker = this.combatants[attackerId];
+        const target = this.combatants[targetId];
+        
+        if (!attacker || !target) return false;
+
+        const attackerPos = attacker.position;
+        const targetPos = this.battlefield.getCharacterPosition(targetId);
+        
+        if (!attackerPos || !targetPos) return false;
+
+        const distance = this.battlefield.calculateDistance(attackerPos.cellId, targetPos.cellId);
+        if (distance > 1) {
+            this.addToCombatHistory(`❌ ${this.getCombatantName(attackerId)} не может атаковать - слишком далеко`);
+            return false;
+        }
+
+        const attackSkill = attacker.stats.skills['Одноручное оружие'] || 10;
+        const attackCheck = rollDice(20, 1);
+
+        if (attackCheck.total >= 10) {
+            const damage = this.calculateDamage(attacker);
+            target.stats.health -= damage;
+
+            this.addToCombatHistory(`🗡️ ${this.getCombatantName(attackerId)} наносит ${damage} урона!`);
+
+            if (target.stats.health <= 0) {
+                target.stats.health = 0;
+                this.addToCombatHistory(`💀 ${this.getCombatantName(targetId)} убит!`);
+                this.removeCombatant(targetId);
+            }
+        } else {
+            this.addToCombatHistory(`❌ ${this.getCombatantName(attackerId)} промахивается!`);
+        }
+
+        this.updateBattleInfo();
+        return true;
+    }
+
+    calculateDamage(attacker) {
+        const baseDamage = rollDice(6, 1).total;
+        const skillBonus = Math.floor((attacker.stats.skills['Одноручное оружие'] || 10) / 5);
+        return Math.max(1, baseDamage + skillBonus);
+    }
+
+    removeCombatant(combatantId) {
+        this.battlefield.removeCharacter(combatantId);
+        delete this.combatants[combatantId];
+        this.checkCombatEnd();
+    }
+
+    checkCombatEnd() {
+        const players = Object.keys(this.combatants).filter(id => id.startsWith('player'));
+        const enemies = Object.keys(this.combatants).filter(id => !id.startsWith('player'));
+
+        if (players.length === 0) {
+            this.endCombat('defeat');
+        } else if (enemies.length === 0) {
+            this.endCombat('victory');
+        }
+    }
+
+    endCombat(result) {
+        this.isCombatActive = false;
+        
+        if (result === 'victory') {
+            this.addToCombatHistory(`🎉 Победа! Все враги повержены!`);
+        } else {
+            this.addToCombatHistory(`💀 Поражение!`);
+        }
+
+        this.updateBattleInfo();
+    }
+
+    getCombatantName(combatantId) {
+        if (combatantId.startsWith('player')) return 'Игрок';
+        if (combatantId.startsWith('farmer')) return 'Фермер';
+        if (combatantId.startsWith('bandit')) return 'Разбойник';
+        return combatantId;
+    }
+
+    addToCombatHistory(message) {
+        this.combatHistory.unshift({
+            turn: this.currentTurn,
+            message: message,
+            timestamp: new Date().toLocaleTimeString()
+        });
+
+        if (this.combatHistory.length > 20) {
+            this.combatHistory.pop();
+        }
+
+        this.updateCombatHistoryDisplay();
+    }
+
+    updateCombatHistoryDisplay() {
+        const historyElement = document.getElementById('combatHistory');
+        if (!historyElement) return;
+
+        let historyHTML = '<h4 style="color: #d4af37; margin-bottom: 10px;">📜 История боя:</h4>';
+        
+        this.combatHistory.slice(0, 10).forEach(entry => {
+            historyHTML += `
+                <div style="padding: 5px 0; border-bottom: 1px solid #3d2418; font-size: 0.9em;">
+                    <span style="color: #8b7d6b;">[${entry.timestamp}]</span> ${entry.message}
+                </div>
+            `;
+        });
+
+        historyElement.innerHTML = historyHTML;
+    }
+
+    updateBattleInfo() {
+        const battleStatus = document.getElementById('battleStatus');
+        if (!battleStatus) return;
+
+        let statusHTML = '';
+
+        if (this.isCombatActive) {
+            statusHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div><strong>Текущий ход:</strong> ${this.currentTurn}</div>
+                    <div><strong>Активный:</strong> ${this.getCombatantName(this.activeCombatant)}</div>
+                </div>
+                <div><strong>Статус:</strong> Бой активен</div>
+            `;
+        } else {
+            statusHTML = `<strong>Статус:</strong> Бой не активен`;
+        }
+
+        statusHTML += `<div style="margin-top: 15px;"><strong>Участники:</strong></div>`;
+        
+        for (const combatantId in this.combatants) {
+            const combatant = this.combatants[combatantId];
+            const healthPercent = (combatant.stats.health / combatant.stats.maxHealth) * 100;
+            const healthColor = healthPercent > 60 ? '#27ae60' : healthPercent > 30 ? '#f39c12' : '#e74c3c';
+            
+            statusHTML += `
+                <div style="display: flex; justify-content: space-between; align-items: center; 
+                     padding: 5px 0; border-bottom: 1px solid #3d2418;">
+                    <span>${this.getCombatantName(combatantId)}</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 60px; height: 8px; background: #2c1810; border-radius: 4px;">
+                            <div style="width: ${healthPercent}%; height: 100%; background: ${healthColor}; border-radius: 4px;"></div>
+                        </div>
+                        <span style="font-size: 0.9em;">${combatant.stats.health}/${combatant.stats.maxHealth}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        battleStatus.innerHTML = statusHTML;
+    }
+}
+
+// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+
 let battlefield = null;
 let battlefieldRenderer = null;
+let combatSystem = null;
 
-// ========== ИНТЕРФЕЙС СИСТЕМЫ БОЯ ==========
+// ========== ОСНОВНЫЕ ФУНКЦИИ ==========
+
 function initializeCombatSystem() {
     const combatTab = document.getElementById('combat-tab');
     if (!combatTab) return;
@@ -1561,27 +2313,31 @@ function initializeCombatSystem() {
                         <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Ландшафт:</label>
                         <select id="landscapeSelect" style="width: 100%; padding: 10px; border: 2px solid #8b4513; 
                               border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
-                            <option value="city">🏙️ Город</option>
                             <option value="forest">🌲 Лес</option>
-                            <option value="road">🛣️ Дорога</option>
+                            <option value="city">🏙️ Город</option>
+                            <option value="plains">🌾 Равнины</option>
                         </select>
                     </div>
                     
                     <div style="margin-bottom: 15px;">
                         <label style="display: block; margin-bottom: 5px; color: #e0d0c0;">Размер поля:</label>
                         <div style="display: flex; gap: 10px;">
-                            <input type="number" id="battlefieldWidth" value="15" min="5" max="20" 
+                            <input type="number" id="battlefieldWidth" value="12" min="5" max="20" 
                                    style="flex: 1; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
                                    background: #1a0f0b; color: #e0d0c0;">
                             <span style="color: #e0d0c0; line-height: 40px;">×</span>
-                            <input type="number" id="battlefieldHeight" value="10" min="5" max="15" 
+                            <input type="number" id="battlefieldHeight" value="8" min="5" max="15" 
                                    style="flex: 1; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
                                    background: #1a0f0b; color: #e0d0c0;">
                         </div>
                     </div>
                     
-                    <button class="btn btn-plus" onclick="createBattlefield()" style="width: 100%;">
+                    <button class="btn btn-plus" onclick="createBattlefield()" style="width: 100%; margin-bottom: 10px;">
                         🎲 Создать поле боя
+                    </button>
+                    
+                    <button class="btn btn-roll" onclick="startCombat()" style="width: 100%;">
+                        ⚔️ Начать бой
                     </button>
                 </div>
                 
@@ -1590,8 +2346,8 @@ function initializeCombatSystem() {
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                         <button class="btn btn-roll" onclick="addPlayerToBattlefield()">➕ Игрок</button>
-                        <button class="btn btn-roll" onclick="addFarmerToBattlefield()">👨‍🌾 Фермер</button>
                         <button class="btn btn-roll" onclick="addBanditToBattlefield()">💀 Разбойник</button>
+                        <button class="btn btn-roll" onclick="addFarmerToBattlefield()">👨‍🌾 Фермер</button>
                         <button class="btn btn-minus" onclick="clearBattlefield()">🗑️ Очистить</button>
                     </div>
                     
@@ -1599,8 +2355,8 @@ function initializeCombatSystem() {
                         <h4 style="color: #d4af37; margin-bottom: 10px;">Легенда:</h4>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.9em;">
                             <div>👤 - Игрок</div>
-                            <div>👨‍🌾 - Фермер</div>
                             <div>💀 - Разбойник</div>
+                            <div>👨‍🌾 - Фермер</div>
                             <div>🌲 - Дерево</div>
                             <div>🪨 - Камень</div>
                             <div>🏠 - Здание</div>
@@ -1609,7 +2365,7 @@ function initializeCombatSystem() {
                 </div>
             </div>
             
-            <div id="battlefieldContainer" style="min-height: 400px; background: #1a0f0b; 
+            <div id="battlefieldContainer" style="min-height: 500px; background: #1a0f0b; 
                  border: 2px solid #5a3928; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
                 <p style="text-align: center; color: #8b7d6b; padding: 50px;">
                     Создайте поле боя чтобы начать
@@ -1620,13 +2376,17 @@ function initializeCombatSystem() {
                 <h3 style="color: #d4af37; margin-bottom: 10px;">Информация о бое</h3>
                 <div id="battleStatus">Статус: Ожидание начала</div>
             </div>
+
+            <div id="combatControls" style="display: none;">
+                <!-- Боевое управление будет добавляться динамически -->
+            </div>
         </div>
     `;
 }
 
 function createBattlefield() {
-    const width = parseInt(document.getElementById('battlefieldWidth').value) || 15;
-    const height = parseInt(document.getElementById('battlefieldHeight').value) || 10;
+    const width = parseInt(document.getElementById('battlefieldWidth').value) || 12;
+    const height = parseInt(document.getElementById('battlefieldHeight').value) || 8;
     const landscapeType = document.getElementById('landscapeSelect').value;
 
     battlefield = new HexagonalBattlefield(width, height);
@@ -1647,23 +2407,9 @@ function addPlayerToBattlefield() {
     }
 
     const startCell = battlefield.getCellId(1, battlefield.height - 2);
-    if (battlefield.placeCharacter('player_1', startCell, 0)) {
+    if (battlefield.placeCharacter('player_1', startCell)) {
         battlefieldRenderer.render();
         console.log('✅ Игрок добавлен на поле боя');
-    }
-}
-
-function addFarmerToBattlefield() {
-    if (!battlefield) {
-        alert('Сначала создайте поле боя!');
-        return;
-    }
-
-    const farmerId = 'farmer_' + Date.now();
-    const startCell = battlefield.getCellId(battlefield.width - 2, 1);
-    if (battlefield.placeCharacter(farmerId, startCell, 3)) {
-        battlefieldRenderer.render();
-        console.log('✅ Фермер добавлен на поле боя');
     }
 }
 
@@ -1678,9 +2424,23 @@ function addBanditToBattlefield() {
     const randomR = Math.floor(Math.random() * (battlefield.height - 4)) + 2;
     const startCell = battlefield.getCellId(randomQ, randomR);
     
-    if (battlefield.placeCharacter(banditId, startCell, Math.floor(Math.random() * 6))) {
+    if (battlefield.placeCharacter(banditId, startCell)) {
         battlefieldRenderer.render();
         console.log('✅ Разбойник добавлен на поле боя');
+    }
+}
+
+function addFarmerToBattlefield() {
+    if (!battlefield) {
+        alert('Сначала создайте поле боя!');
+        return;
+    }
+
+    const farmerId = 'farmer_' + Date.now();
+    const startCell = battlefield.getCellId(battlefield.width - 2, 1);
+    if (battlefield.placeCharacter(farmerId, startCell)) {
+        battlefieldRenderer.render();
+        console.log('✅ Фермер добавлен на поле боя');
     }
 }
 
@@ -1695,24 +2455,178 @@ function clearBattlefield() {
     console.log('✅ Поле боя очищено');
 }
 
-// ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ ==========
-let combatTabInitialized = false;
+function startCombat() {
+    if (!battlefield) {
+        alert('Сначала создайте поле боя и разместите персонажей!');
+        return;
+    }
 
-function openTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName + '-tab').classList.add('active');
-    event.currentTarget.classList.add('active');
-    
-    if (tabName === 'combat' && !combatTabInitialized) {
-        initializeCombatSystem();
-        combatTabInitialized = true;
+    combatSystem = new CombatSystem(battlefield);
+
+    for (const characterId in battlefield.characters) {
+        let type = 'player';
+        let stats = { health: 100, maxHealth: 100 };
+
+        if (characterId.startsWith('bandit')) {
+            type = 'bandit';
+            stats = {
+                health: 80,
+                maxHealth: 80,
+                skills: { 'Одноручное оружие': 12 }
+            };
+        } else if (characterId.startsWith('farmer')) {
+            type = 'farmer';
+            stats = {
+                health: 60,
+                maxHealth: 60,
+                skills: { 'Одноручное оружие': 8 }
+            };
+        } else if (characterId.startsWith('player')) {
+            if (window.currentCharacter) {
+                stats = {
+                    health: currentCharacter.stats.health,
+                    maxHealth: currentCharacter.stats.maxHealth,
+                    skills: currentCharacter.skills
+                };
+            }
+        }
+
+        combatSystem.addCombatant(characterId, type, stats);
+    }
+
+    combatSystem.startCombat();
+    updateCombatInterface();
+
+    const combatTab = document.getElementById('combat-tab');
+    const existingControls = document.getElementById('combatControls');
+    if (!existingControls) {
+        const controlsHTML = `
+            <div id="combatControls" style="background: #3d2418; padding: 20px; border-radius: 8px; 
+                 border: 2px solid #8b4513; margin-top: 20px;">
+            </div>
+        `;
+        combatTab.insertAdjacentHTML('beforeend', controlsHTML);
+    }
+
+    updateCombatInterface();
+}
+
+function updateCombatInterface() {
+    const combatControls = document.getElementById('combatControls');
+    if (!combatControls) return;
+
+    const isPlayerTurn = combatSystem && combatSystem.activeCombatant && 
+                        combatSystem.activeCombatant.startsWith('player');
+
+    combatControls.style.display = 'block';
+    combatControls.innerHTML = `
+        <h3 style="color: #d4af37; margin-bottom: 15px;">Действия в бою</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <button class="btn btn-roll" onclick="playerAttack()" ${!isPlayerTurn ? 'disabled' : ''}>
+                ⚔️ Атака
+            </button>
+            <button class="btn btn-roll" onclick="playerEndTurn()" ${!isPlayerTurn ? 'disabled' : ''}>
+                ✅ Завершить ход
+            </button>
+        </div>
+        
+        <button class="btn btn-minus" onclick="endCombat()" style="width: 100%;">
+            🏳️ Завершить бой
+        </button>
+        
+        <div id="combatHistory" style="margin-top: 20px; max-height: 200px; overflow-y: auto; 
+             background: #2c1810; padding: 10px; border-radius: 6px; border: 1px solid #5a3928;">
+        </div>
+    `;
+
+    if (combatSystem) {
+        combatSystem.updateCombatHistoryDisplay();
     }
 }
-</script>
-<script>
-// ========== СИСТЕМА ПРЕДМЕТОВ И ОРУЖИЯ ==========
+
+function playerAttack() {
+    if (!combatSystem || !combatSystem.activeCombatant) return;
+
+    const enemies = Object.keys(combatSystem.combatants).filter(id => 
+        !id.startsWith('player') && combatSystem.combatants[id].stats.health > 0
+    );
+
+    if (enemies.length === 0) {
+        alert('Нет врагов для атаки!');
+        return;
+    }
+
+    const attackerId = combatSystem.activeCombatant;
+    let closestEnemy = null;
+    let closestDistance = Infinity;
+
+    for (const enemyId of enemies) {
+        const attackerPos = combatSystem.combatants[attackerId].position;
+        const enemyPos = combatSystem.battlefield.getCharacterPosition(enemyId);
+        if (attackerPos && enemyPos) {
+            const distance = combatSystem.battlefield.calculateDistance(
+                attackerPos.cellId, enemyPos.cellId
+            );
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestEnemy = enemyId;
+            }
+        }
+    }
+
+    if (closestEnemy && closestDistance <= 1) {
+        combatSystem.performAttack(attackerId, closestEnemy);
+        updateCombatInterface();
+    } else {
+        alert('Нет врагов в радиусе атаки!');
+    }
+}
+
+function playerEndTurn() {
+    if (!combatSystem) return;
+    combatSystem.nextTurn();
+    updateCombatInterface();
+}
+
+function endCombat() {
+    if (combatSystem) {
+        combatSystem.endCombat('manual');
+        combatSystem = null;
+    }
+    updateCombatInterface();
+}
+
+function updateBattlefieldDisplay() {
+    if (battlefieldRenderer) {
+        battlefieldRenderer.render();
+    }
+}
+
+// ========== СИСТЕМА КУБИКОВ ==========
+
+function rollDice(sides, count = 1) {
+    let results = [];
+    let total = 0;
+    
+    for (let i = 0; i < count; i++) {
+        const result = Math.floor(Math.random() * sides) + 1;
+        results.push(result);
+        total += result;
+    }
+    
+    return { results, total };
+}
+
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+console.log('✅ combat.js загружен! Боевая система готова.');
+        // inventory.js - Полная система инвентаря D&D
+
+// ========== КОНСТАНТЫ ПРЕДМЕТОВ ==========
+
 const itemTemplates = {
+    // Оружие ближнего боя
     weapons: {
         dagger: {
             id: 'dagger',
@@ -1737,6 +2651,18 @@ const itemTemplates = {
             weight: 2,
             value: 25,
             description: 'Сбалансированный одноручный меч'
+        },
+        longsword: {
+            id: 'longsword',
+            name: 'Длинный меч',
+            type: 'weapon',
+            subtype: 'one_handed',
+            damageType: 'slashing',
+            damage: '1d8',
+            hands: 1,
+            weight: 3,
+            value: 40,
+            description: 'Надежный боевой меч'
         },
         axe: {
             id: 'axe',
@@ -1776,6 +2702,7 @@ const itemTemplates = {
         }
     },
 
+    // Щиты
     shields: {
         buckler: {
             id: 'buckler',
@@ -1806,6 +2733,7 @@ const itemTemplates = {
         }
     },
 
+    // Броня
     armor: {
         leather_armor: {
             id: 'leather_armor',
@@ -1836,6 +2764,7 @@ const itemTemplates = {
         }
     },
 
+    // Источники света
     light_sources: {
         torch: {
             id: 'torch',
@@ -1859,6 +2788,7 @@ const itemTemplates = {
         }
     },
 
+    // Боеприпасы
     ammunition: {
         arrows: {
             id: 'arrows',
@@ -1882,7 +2812,8 @@ const itemTemplates = {
         }
     },
 
-    misc: {
+    // Зелья
+    potions: {
         healing_potion: {
             id: 'healing_potion',
             name: 'Зелье лечения',
@@ -1903,6 +2834,20 @@ const itemTemplates = {
             value: 75,
             description: 'Восстанавливает ману'
         },
+        stamina_potion: {
+            id: 'stamina_potion',
+            name: 'Зелье выносливости',
+            type: 'potion',
+            effect: 'restore_stamina',
+            power: '2d4+2',
+            weight: 0.5,
+            value: 40,
+            description: 'Восстанавливает выносливость'
+        }
+    },
+
+    // Прочее снаряжение
+    misc: {
         rope: {
             id: 'rope',
             name: 'Веревка',
@@ -1911,11 +2856,38 @@ const itemTemplates = {
             weight: 2,
             value: 1,
             description: 'Прочная пеньковая веревка'
+        },
+        lockpicks: {
+            id: 'lockpicks',
+            name: 'Отмычки',
+            type: 'tool',
+            quality: 'basic',
+            weight: 0.5,
+            value: 25,
+            description: 'Набор инструментов для взлома'
+        },
+        bedroll: {
+            id: 'bedroll',
+            name: 'Спальный мешок',
+            type: 'camping',
+            weight: 3,
+            value: 5,
+            description: 'Компактный спальный мешок'
+        },
+        rations: {
+            id: 'rations',
+            name: 'Сухой паек',
+            type: 'food',
+            quantity: 5,
+            weight: 1,
+            value: 2,
+            description: 'Неприхотливая походная еда'
         }
     }
 };
 
 // ========== КЛАСС ИНВЕНТАРЯ ==========
+
 class InventorySystem {
     constructor(character) {
         this.character = character;
@@ -1936,7 +2908,9 @@ class InventorySystem {
     }
 
     getCurrentWeight() {
-        return this.items.reduce((total, item) => total + (item.weight * (item.quantity || 1)), 0);
+        return this.items.reduce((total, item) => {
+            return total + (item.weight * (item.quantity || 1));
+        }, 0);
     }
 
     getEncumbranceLevel() {
@@ -1964,7 +2938,7 @@ class InventorySystem {
     addItem(itemTemplate, quantity = 1) {
         const existingItem = this.items.find(item => item.id === itemTemplate.id);
         
-        if (existingItem && itemTemplate.type !== 'weapon' && itemTemplate.type !== 'armor') {
+        if (existingItem && this.isStackable(itemTemplate)) {
             existingItem.quantity += quantity;
         } else {
             const newItem = {
@@ -1996,6 +2970,10 @@ class InventorySystem {
 
         this.saveInventory();
         return true;
+    }
+
+    isStackable(item) {
+        return item.type !== 'weapon' && item.type !== 'armor' && item.type !== 'shield';
     }
 
     equipItem(itemId) {
@@ -2111,6 +3089,8 @@ class InventorySystem {
                 return this.usePotion(item);
             case 'ammunition':
                 return this.useAmmunition(item);
+            case 'food':
+                return this.useFood(item);
             default:
                 return false;
         }
@@ -2118,30 +3098,38 @@ class InventorySystem {
 
     usePotion(potion) {
         let effect = '';
+        let amount = 0;
         
         switch (potion.effect) {
             case 'heal':
-                const healAmount = this.rollDiceExpression(potion.power);
+                amount = this.rollDiceExpression(potion.power);
                 this.character.stats.health = Math.min(
-                    this.character.stats.health + healAmount,
+                    this.character.stats.health + amount,
                     this.character.stats.maxHealth
                 );
-                effect = `восстанавливает ${healAmount} здоровья`;
+                effect = `восстанавливает ${amount} здоровья`;
                 break;
             case 'restore_mana':
-                const manaAmount = this.rollDiceExpression(potion.power);
+                amount = this.rollDiceExpression(potion.power);
                 this.character.stats.mana = Math.min(
-                    this.character.stats.mana + manaAmount,
+                    this.character.stats.mana + amount,
                     this.character.stats.maxMana
                 );
-                effect = `восстанавливает ${manaAmount} маны`;
+                effect = `восстанавливает ${amount} маны`;
+                break;
+            case 'restore_stamina':
+                amount = this.rollDiceExpression(potion.power);
+                this.character.stats.stamina = Math.min(
+                    this.character.stats.stamina + amount,
+                    this.character.stats.maxStamina
+                );
+                effect = `восстанавливает ${amount} выносливости`;
                 break;
         }
 
         this.removeItem(potion.id, 1);
-        
         this.saveInventory();
-        return effect;
+        return { effect, amount };
     }
 
     useAmmunition(ammo) {
@@ -2149,6 +3137,16 @@ class InventorySystem {
         ammo.quantity--;
         if (ammo.quantity <= 0) {
             this.removeItem(ammo.id);
+        }
+        this.saveInventory();
+        return true;
+    }
+
+    useFood(food) {
+        if (food.quantity <= 0) return false;
+        food.quantity--;
+        if (food.quantity <= 0) {
+            this.removeItem(food.id);
         }
         this.saveInventory();
         return true;
@@ -2162,8 +3160,11 @@ class InventorySystem {
         const sides = parseInt(match[2]);
         const modifier = match[3] ? parseInt(match[3]) : 0;
 
-        const roll = rollDice(sides, count);
-        return roll.total + modifier;
+        let total = 0;
+        for (let i = 0; i < count; i++) {
+            total += Math.floor(Math.random() * sides) + 1;
+        }
+        return total + modifier;
     }
 
     saveInventory() {
@@ -2188,11 +3189,19 @@ class InventorySystem {
         this.items = inventoryData.items;
         this.equipped = inventoryData.equipped;
     }
+
+    getItemCount() {
+        return this.items.reduce((total, item) => total + (item.quantity || 1), 0);
+    }
+
+    getTotalValue() {
+        return this.items.reduce((total, item) => {
+            return total + (item.value * (item.quantity || 1));
+        }, 0);
+    }
 }
-</script>
-<script>
+
 // ========== ИНТЕРФЕЙС ИНВЕНТАРЯ ==========
-let inventoryTabInitialized = false;
 
 function initializeInventoryInterface() {
     const inventoryTab = document.getElementById('inventory-tab');
@@ -2243,6 +3252,7 @@ function initializeInventoryInterface() {
                             <option value="armor">🥋 Броня</option>
                             <option value="light_sources">💡 Источники света</option>
                             <option value="ammunition">🏹 Боеприпасы</option>
+                            <option value="potions">🧪 Зелья</option>
                             <option value="misc">🎒 Прочее</option>
                         </select>
                         
@@ -2259,17 +3269,29 @@ function initializeInventoryInterface() {
                         </div>
                     </div>
                     
-                    <button class="btn btn-roll" onclick="showQuickEquipment()" style="width: 100%;">
+                    <button class="btn btn-roll" onclick="showQuickEquipment()" style="width: 100%; margin-bottom: 10px;">
                         🎁 Быстрая экипировка
+                    </button>
+                    
+                    <button class="btn btn-roll" onclick="clearInventory()" style="width: 100%;">
+                        🗑️ Очистить инвентарь
                     </button>
                 </div>
             </div>
             
             <div style="background: #3d2418; padding: 20px; border-radius: 8px; border: 2px solid #5a3928;">
-                <h3 style="color: #d4af37; margin-bottom: 15px;">🎒 Содержимое инвентаря</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #d4af37; margin: 0;">🎒 Содержимое инвентаря</h3>
+                    <div style="color: #8b7d6b;">
+                        Предметов: ${inventorySystem.getItemCount()} | 
+                        Стоимость: ${inventorySystem.getTotalValue()} зол.
+                    </div>
+                </div>
+                
                 <input type="text" id="inventorySearch" placeholder="🔍 Поиск предметов..." 
                        style="width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #8b4513; 
                        border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                
                 <div id="inventoryItems">
                     ${renderInventoryItems(inventorySystem)}
                 </div>
@@ -2309,7 +3331,9 @@ function renderEquippedItems(inventorySystem) {
                     ${item ? `
                         <span>${item.name}</span>
                         <button class="btn btn-small" onclick="unequipItem('${item.id}')" 
-                                style="background: #c44536; margin-left: 10px;">Снять</button>
+                                style="background: #c44536; margin-left: 10px; padding: 5px 8px; font-size: 12px;">
+                            Снять
+                        </button>
                     ` : '<span style="color: #8b7d6b;">Не экипировано</span>'}
                 </div>
             </div>
@@ -2320,10 +3344,10 @@ function renderEquippedItems(inventorySystem) {
     html += `
         <div style="margin-top: 15px; padding-top: 10px; border-top: 2px solid #5a3928;">
             <h5 style="color: #d4af37; margin-bottom: 5px;">Боевые модификаторы:</h5>
-            <div style="font-size: 0.9em;">
-                Атака: ${modifiers.attack >= 0 ? '+' : ''}${modifiers.attack} |
-                Защита: +${modifiers.armorClass} |
-                Движение: ${modifiers.movement >= 0 ? '+' : ''}${modifiers.movement}
+            <div style="font-size: 0.9em; display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                <div>Атака: ${modifiers.attack >= 0 ? '+' : ''}${modifiers.attack}</div>
+                <div>Защита: +${modifiers.armorClass}</div>
+                <div>Движение: ${modifiers.movement >= 0 ? '+' : ''}${modifiers.movement}</div>
             </div>
         </div>
     `;
@@ -2342,34 +3366,46 @@ function renderItemOptions(category) {
 
 function renderInventoryItems(inventorySystem) {
     if (inventorySystem.items.length === 0) {
-        return '<p style="text-align: center; color: #8b7d6b;">Инвентарь пуст</p>';
+        return '<p style="text-align: center; color: #8b7d6b; padding: 20px;">Инвентарь пуст</p>';
     }
 
     let html = '';
     inventorySystem.items.forEach(item => {
         const weight = (item.weight * (item.quantity || 1)).toFixed(1);
         html += `
-            <div class="inventory-item" style="background: #2c1810; margin: 10px 0; padding: 15px; 
-                 border-radius: 6px; border-left: 4px solid #d4af37;">
+            <div class="inventory-item" data-name="${item.name.toLowerCase()}" data-type="${item.type}">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                    <div>
+                    <div style="flex: 1;">
                         <strong style="color: #d4af37;">${item.name}</strong>
-                        ${item.quantity > 1 ? `<span style="background: #8b4513; color: #e0d0c0; padding: 2px 8px; 
-                            border-radius: 4px; font-size: 0.9em; margin-left: 10px;">×${item.quantity}</span>` : ''}
+                        ${item.quantity > 1 ? `
+                            <span style="background: #8b4513; color: #e0d0c0; padding: 2px 8px; 
+                                  border-radius: 4px; font-size: 0.9em; margin-left: 10px;">×${item.quantity}</span>
+                        ` : ''}
+                        ${item.equipped ? `<span style="color: #27ae60; margin-left: 10px;">[Экипировано]</span>` : ''}
                         <div style="color: #b8a28a; font-size: 0.9em; margin-top: 5px;">${item.description}</div>
                     </div>
                     <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                         ${!item.equipped ? `
                             <button class="btn btn-small" onclick="equipItem('${item.id}')" 
-                                    style="background: #27ae60;">Экипировать</button>
+                                    style="background: #27ae60; padding: 5px 8px; font-size: 12px;">
+                                Экипировать
+                            </button>
                         ` : `
                             <button class="btn btn-small" onclick="unequipItem('${item.id}')" 
-                                    style="background: #c44536;">Снять</button>
+                                    style="background: #c44536; padding: 5px 8px; font-size: 12px;">
+                                Снять
+                            </button>
                         `}
-                        <button class="btn btn-small" onclick="useItem('${item.id}')" 
-                                style="background: #3498db;">Использовать</button>
+                        ${item.type === 'potion' || item.type === 'food' ? `
+                            <button class="btn btn-small" onclick="useItem('${item.id}')" 
+                                    style="background: #3498db; padding: 5px 8px; font-size: 12px;">
+                                Использовать
+                            </button>
+                        ` : ''}
                         <button class="btn btn-small" onclick="removeItem('${item.id}')" 
-                                style="background: #e74c3c;">Выбросить</button>
+                                style="background: #e74c3c; padding: 5px 8px; font-size: 12px;">
+                            Выбросить
+                        </button>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; color: #8b7d6b; font-size: 0.8em;">
@@ -2384,7 +3420,8 @@ function renderInventoryItems(inventorySystem) {
     return html;
 }
 
-// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ИНВЕНТАРЯ ==========
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+
 function getEncumbranceColor(level) {
     const colors = {
         'none': '#27ae60',
@@ -2413,10 +3450,14 @@ function getItemTypeText(type) {
         'light_source': 'Источник света',
         'ammunition': 'Боеприпасы',
         'potion': 'Зелье',
-        'tool': 'Инструмент'
+        'tool': 'Инструмент',
+        'food': 'Еда',
+        'camping': 'Кемпинг'
     };
     return types[type] || type;
 }
+
+// ========== ФУНКЦИИ УПРАВЛЕНИЯ ИНВЕНТАРЕМ ==========
 
 function updateItemOptions(category) {
     const itemSelect = document.getElementById('itemSelect');
@@ -2453,7 +3494,7 @@ function equipItem(itemId) {
         alert('✅ Предмет экипирован!');
         initializeInventoryInterface();
     } else {
-        alert('❌ Не удалось экипировать предмет!');
+        alert('❌ Не удалось экипировать предмет! Проверьте требования.');
     }
 }
 
@@ -2471,10 +3512,14 @@ function useItem(itemId) {
     if (!currentCharacter) return;
 
     const inventorySystem = new InventorySystem(currentCharacter);
-    const effect = inventorySystem.useItem(itemId);
+    const result = inventorySystem.useItem(itemId);
     
-    if (effect) {
-        alert(`✅ Использовано: ${effect}`);
+    if (result) {
+        if (typeof result === 'object') {
+            alert(`✅ Использовано: ${result.effect}`);
+        } else {
+            alert('✅ Предмет использован!');
+        }
         initializeInventoryInterface();
     } else {
         alert('❌ Не удалось использовать предмет!');
@@ -2498,8 +3543,10 @@ function filterInventoryItems(searchTerm) {
     const term = searchTerm.toLowerCase();
     
     items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(term) ? 'block' : 'none';
+        const itemName = item.getAttribute('data-name');
+        const itemType = item.getAttribute('data-type');
+        const matches = itemName.includes(term) || itemType.includes(term);
+        item.style.display = matches ? 'block' : 'none';
     });
 }
 
@@ -2513,8 +3560,9 @@ function showQuickEquipment() {
         itemTemplates.armor.leather_armor,
         itemTemplates.shields.buckler,
         itemTemplates.light_sources.torch,
-        itemTemplates.misc.healing_potion,
-        itemTemplates.misc.rope
+        itemTemplates.potions.healing_potion,
+        itemTemplates.misc.rope,
+        itemTemplates.misc.rations
     ];
 
     starterKit.forEach(item => {
@@ -2525,50 +3573,1335 @@ function showQuickEquipment() {
     initializeInventoryInterface();
 }
 
-// ========== ОБНОВЛЕНИЕ ФУНКЦИИ OPEN TAB ==========
-function openTab(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName + '-tab').classList.add('active');
-    event.currentTarget.classList.add('active');
-    
-    if (tabName === 'combat' && !combatTabInitialized) {
-        initializeCombatSystem();
-        combatTabInitialized = true;
-    }
-    
-    if (tabName === 'inventory' && !inventoryTabInitialized) {
-        initializeInventoryInterface();
-        inventoryTabInitialized = true;
-    }
-}
+function clearInventory() {
+    if (!currentCharacter) return;
 
-// ========== ОБНОВЛЕНИЕ ИНИЦИАЛИЗАЦИИ СИСТЕМЫ ==========
-function initializeSystem() {
-    console.log('🎮 Инициализация D&D системы...');
-    
-    if (!currentCharacter && Object.keys(characterManager.characters).length === 0) {
-        const demoChar = characterManager.createCharacter('Новый Герой', 'human');
-        currentCharacter = demoChar;
-        
+    if (confirm('❌ Вы уверены, что хотите очистить весь инвентарь? Это действие нельзя отменить!')) {
         const inventorySystem = new InventorySystem(currentCharacter);
-        const starterKit = [
-            itemTemplates.weapons.dagger,
-            itemTemplates.armor.leather_armor,
-            itemTemplates.misc.healing_potion,
-            itemTemplates.misc.rope
-        ];
-        starterKit.forEach(item => inventorySystem.addItem(item));
-        
-        console.log('✅ Создан демо-персонаж со стартовым снаряжением');
+        inventorySystem.items = [];
+        inventorySystem.equipped = {
+            weapon: null,
+            shield: null,
+            armor: null,
+            light_source: null
+        };
+        inventorySystem.saveInventory();
+        alert('✅ Инвентарь очищен!');
+        initializeInventoryInterface();
     }
-    
-    renderCharacterSheet();
-    
-    console.log(`✅ Система готова! Персонажей: ${Object.keys(characterManager.characters).length}`);
 }
 
-document.addEventListener('DOMContentLoaded', initializeSystem);
-</script>
-</body>
-</html>
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+console.log('✅ inventory.js загружен! Система инвентаря готова.');
+            // dice.js - Полная система кубиков и генераторов D&D
+
+// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+
+let diceRollHistory = [];
+
+// ========== ОСНОВНАЯ СИСТЕМА КУБИКОВ ==========
+
+function rollDice(sides, count = 1) {
+    let results = [];
+    let total = 0;
+    
+    for (let i = 0; i < count; i++) {
+        const result = Math.floor(Math.random() * sides) + 1;
+        results.push(result);
+        total += result;
+    }
+    
+    return { results, total };
+}
+
+function rollSkillCheck(skillValue, modifiers = 0) {
+    const roll = rollDice(20, 1);
+    const totalRoll = roll.total + modifiers;
+    const success = totalRoll >= skillValue;
+    
+    let critical = 'normal';
+    if (roll.total === 20) critical = 'success';
+    if (roll.total === 1) critical = 'failure';
+    
+    return {
+        roll: roll.results,
+        total: totalRoll,
+        success: success,
+        critical: critical
+    };
+}
+
+// ========== ИНТЕРФЕЙС СИСТЕМЫ КУБИКОВ ==========
+
+function initializeDiceSystem() {
+    const diceTab = document.getElementById('dice-tab');
+    if (!diceTab) return;
+
+    diceTab.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h2 class="section-title">🎲 Система Кубиков</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">🎯 Стандартные кубики</h3>
+                    
+                    <div style="display: flex; gap: 10px; align-items: center; justify-content: center; margin: 20px 0; flex-wrap: wrap;">
+                        <span style="color: #d4af37;">Количество:</span>
+                        <input type="number" id="diceCount" value="1" min="1" max="10"
+                               style="width: 80px; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
+                               background: #1a0f0b; color: #e0d0c0; text-align: center; font-size: 16px;">
+                    </div>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; justify-content: center; align-items: center;">
+                        <button class="btn btn-dice" onclick="rollDiceUI('coin')">🪙 Монетка</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(4)">D4</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(6)">D6</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(8)">D8</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(10)">D10</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(12)">D12</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(20)">D20</button>
+                        <button class="btn btn-dice" onclick="rollDiceUI(100)">D100</button>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <button class="btn btn-dice" onclick="rollCustomDiceUI()">⚫ Кастомный</button>
+                            <input type="number" id="customDiceSides" value="6" 
+                                   min="2" max="1000" placeholder="Грани"
+                                   style="width: 80px; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
+                                   background: #1a0f0b; color: #e0d0c0; text-align: center; font-size: 16px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">🌤️ Специальные кубики</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <button class="btn btn-dice" onclick="rollWeatherDiceUI()">🌦️ Погода</button>
+                        <button class="btn btn-dice" onclick="rollFogDiceUI()">🌫️ Туман</button>
+                        <button class="btn btn-dice" onclick="rollEncounterDice()">👹 Случайная встреча</button>
+                        <button class="btn btn-dice" onclick="rollLootDice()">💎 Добыча</button>
+                        <button class="btn btn-dice" onclick="rollNPCdice()">👤 Случайный NPC</button>
+                        <button class="btn btn-dice" onclick="rollLocationDice()">🏰 Локация</button>
+                        <button class="btn btn-dice" onclick="rollQuestDice()">📜 Квест</button>
+                        <button class="btn btn-dice" onclick="rollMagicItemDice()">✨ Магический предмет</button>
+                    </div>
+                    
+                    <div style="background: #3d2418; padding: 15px; border-radius: 6px;">
+                        <h4 style="color: #d4af37; margin-bottom: 10px;">📊 История бросков</h4>
+                        <div id="diceHistory" style="max-height: 150px; overflow-y: auto; font-size: 0.9em;">
+                            <p style="color: #8b7d6b; text-align: center;">Бросков пока нет</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="diceResults" style="text-align: center; margin: 30px 0; min-height: 100px; 
+                 background: #3d2418; padding: 20px; border-radius: 8px; border: 2px solid #5a3928;">
+                <p style="color: #8b7d6b;">Результаты бросков будут отображаться здесь</p>
+            </div>
+
+            <div style="background: #3d2418; padding: 20px; border-radius: 8px; border: 2px solid #5a3928;">
+                <h3 style="color: #d4af37; margin-bottom: 15px;">🎲 Быстрые броски навыков</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                    <button class="btn btn-roll" onclick="quickSkillCheck('Атака')">⚔️ Атака</button>
+                    <button class="btn btn-roll" onclick="quickSkillCheck('Защита')">🛡️ Защита</button>
+                    <button class="btn btn-roll" onclick="quickSkillCheck('Скрытность')">👻 Скрытность</button>
+                    <button class="btn btn-roll" onclick="quickSkillCheck('Восприятие')">👁️ Восприятие</button>
+                    <button class="btn btn-roll" onclick="quickSkillCheck('Красноречие')">💬 Красноречие</button>
+                    <button class="btn btn-roll" onclick="quickSkillCheck('Магия')">🔮 Магия</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ========== ОСНОВНЫЕ ФУНКЦИИ БРОСКОВ ==========
+
+function rollDiceUI(diceType) {
+    const count = parseInt(document.getElementById('diceCount').value) || 1;
+    let results = [];
+    let total = 0;
+    let diceName = '';
+    
+    if (diceType === 'coin') {
+        for (let i = 0; i < count; i++) {
+            const result = Math.random() > 0.5 ? 'Орёл' : 'Решка';
+            results.push(result);
+        }
+        diceName = 'Монетка';
+    } else {
+        for (let i = 0; i < count; i++) {
+            const result = Math.floor(Math.random() * diceType) + 1;
+            results.push(result);
+            total += result;
+        }
+        diceName = `D${diceType}`;
+    }
+    
+    displayDiceResults(diceName, count, results, total);
+    addToDiceHistory(diceName, count, results, total);
+}
+
+function rollCustomDiceUI() {
+    const sides = parseInt(document.getElementById('customDiceSides').value) || 6;
+    if (sides < 2) {
+        alert('Количество граней должно быть не меньше 2!');
+        return;
+    }
+    rollDiceUI(sides);
+}
+
+function displayDiceResults(diceName, count, results, total) {
+    const container = document.getElementById('diceResults');
+    let resultHTML = '';
+    
+    if (diceName === 'Монетка') {
+        resultHTML = `<h3 style="color: #d4af37;">${diceName} (${count} раз):</h3>`;
+        resultHTML += `<div style="font-size: 1.5em; margin: 20px 0;">${results.join(', ')}</div>`;
+    } else {
+        resultHTML = `<h3 style="color: #d4af37;">Бросок ${count}${diceName}:</h3>`;
+        resultHTML += `<div style="font-size: 1.5em; margin: 20px 0;">${results.join(' + ')}`;
+        if (count > 1) {
+            resultHTML += ` = <strong style="color: #d4af37;">${total}</strong>`;
+        }
+        resultHTML += `</div>`;
+        
+        // Анимация кубиков
+        resultHTML += `<div class="dice-rolls">`;
+        results.forEach((result, index) => {
+            resultHTML += `<div class="dice" style="animation-delay: ${index * 0.1}s;">${result}</div>`;
+        });
+        resultHTML += `</div>`;
+    }
+    
+    container.innerHTML = resultHTML;
+}
+
+function addToDiceHistory(diceName, count, results, total) {
+    const timestamp = new Date().toLocaleTimeString();
+    let entry = '';
+    
+    if (diceName === 'Монетка') {
+        entry = `${timestamp} - ${diceName}: ${results.join(', ')}`;
+    } else {
+        entry = `${timestamp} - ${count}${diceName}: [${results.join(', ')}]`;
+        if (count > 1) {
+            entry += ` = ${total}`;
+        }
+    }
+    
+    diceRollHistory.unshift(entry);
+    if (diceRollHistory.length > 15) diceRollHistory.pop();
+    renderDiceHistory();
+}
+
+function renderDiceHistory() {
+    const container = document.getElementById('diceHistory');
+    if (!container) return;
+
+    if (diceRollHistory.length === 0) {
+        container.innerHTML = '<p style="color: #8b7d6b; text-align: center;">Бросков пока нет</p>';
+        return;
+    }
+    
+    let historyHTML = '';
+    diceRollHistory.forEach(entry => {
+        historyHTML += `<div style="padding: 5px 0; border-bottom: 1px solid #3d2418;">${entry}</div>`;
+    });
+    
+    container.innerHTML = historyHTML;
+}
+
+// ========== СПЕЦИАЛЬНЫЕ ГЕНЕРАТОРЫ ==========
+
+function rollWeatherDiceUI() {
+    const weatherTypes = [
+        { name: "☀️ Ясно", description: "Отличная видимость" },
+        { name: "🌤️ Слабая облачность", description: "Хорошая видимость" },
+        { name: "☁️ Облачно", description: "Нормальная видимость" },
+        { name: "🌦️ Слабый дождь", description: "Небольшой штраф к восприятию" },
+        { name: "🌧️ Дождь", description: "Штраф к восприятию и стрельбе" },
+        { name: "⛈️ Гроза", description: "Сильный штраф к восприятию и стрельбе" },
+        { name: "🌫️ Туман", description: "Сильно ограниченная видимость" },
+        { name: "❄️ Снегопад", description: "Ограниченная видимость и сложное перемещение" }
+    ];
+    
+    const roll = rollDice(weatherTypes.length, 1).total - 1;
+    const weather = weatherTypes[roll];
+    
+    displaySpecialResult('Погода', weather.name, weather.description);
+    addToDiceHistory('Погода', 1, [weather.name], 0);
+}
+
+function rollFogDiceUI() {
+    const fogTypes = [
+        { name: "🌫️ Легкий туман", description: "-2 к восприятию" },
+        { name: "🌫️️ Средний туман", description: "-4 к восприятию" },
+        { name: "🔴 Густой туман", description: "-6 к восприятию, ограничение видимости" },
+        { name: "❌ Туман отсутствует", description: "Нормальная видимость" }
+    ];
+    
+    const roll = rollDice(fogTypes.length, 1).total - 1;
+    const fog = fogTypes[roll];
+    
+    displaySpecialResult('Туман', fog.name, fog.description);
+    addToDiceHistory('Туман', 1, [fog.name], 0);
+}
+
+function rollEncounterDice() {
+    const encounters = {
+        peaceful: [
+            "👨‍🌾 Группа фермеров",
+            "🛒 Торговый караван", 
+            "🧙‍♂️ Странствующий маг",
+            "🏰 Королевский патруль",
+            "🚶‍♂️ Путники",
+            "🎭 Бродячие артисты"
+        ],
+        hostile: [
+            "💀 Банда разбойников",
+            "🐺 Стая волков",
+            "🐻 Медведь-шатун",
+            "🏴‍☠️ Пираты",
+            "👹 Гоблины",
+            "🐉 Молодой дракон"
+        ],
+        mysterious: [
+            "🌲 Лесные духи",
+            "👻 Призраки",
+            "🔮 Таинственный незнакомец",
+            "🏛️ Древние руины",
+            "💎 Загадочный артефакт",
+            "🌌 Портал в другое измерение"
+        ]
+    };
+    
+    const encounterTypeRoll = rollDice(3, 1).total;
+    let encounterType, encounterPool;
+    
+    if (encounterTypeRoll === 1) {
+        encounterType = "Мирная";
+        encounterPool = encounters.peaceful;
+    } else if (encounterTypeRoll === 2) {
+        encounterType = "Враждебная";
+        encounterPool = encounters.hostile;
+    } else {
+        encounterType = "Загадочная";
+        encounterPool = encounters.mysterious;
+    }
+    
+    const encounterRoll = rollDice(encounterPool.length, 1).total - 1;
+    const encounter = encounterPool[encounterRoll];
+    
+    displaySpecialResult(`Случайная встреча (${encounterType})`, encounter, "");
+    addToDiceHistory('Встреча', 1, [encounter], 0);
+}
+
+function rollLootDice() {
+    const lootTables = {
+        common: [
+            "10 золотых монет",
+            "Простое зелье лечения", 
+            "Кинжал",
+            "Факел",
+            "Веревка (15м)",
+            "Сухой паек"
+        ],
+        uncommon: [
+            "50 золотых монет",
+            "Кольчуга",
+            "Короткий меч",
+            "Малое зелье маны",
+            "Свиток заклинания",
+            "Драгоценный камень"
+        ],
+        rare: [
+            "100 золотых монет",
+            "Латная броня",
+            "Волшебный меч",
+            "Сильное зелье лечения",
+            "Магический артефакт",
+            "Древняя реликвия"
+        ]
+    };
+    
+    const rarityRoll = rollDice(100, 1).total;
+    let lootTable, rarity;
+    
+    if (rarityRoll <= 60) {
+        lootTable = lootTables.common;
+        rarity = "Обычная";
+    } else if (rarityRoll <= 90) {
+        lootTable = lootTables.uncommon;
+        rarity = "Необычная";
+    } else {
+        lootTable = lootTables.rare;
+        rarity = "Редкая";
+    }
+    
+    const lootRoll = rollDice(lootTable.length, 1).total - 1;
+    const loot = lootTable[lootRoll];
+    
+    displaySpecialResult(`Добыча (${rarity})`, loot, "");
+    addToDiceHistory('Добыча', 1, [loot], 0);
+}
+
+function rollNPCdice() {
+    const personalities = [
+        "Дружелюбный", "Подозрительный", "Веселый", "Угрюмый", "Мудрый", 
+        "Глупый", "Храбрый", "Трусливый", "Честный", "Лживый"
+    ];
+    
+    const occupations = [
+        "Кузнец", "Торговец", "Стражник", "Крестьянин", "Маг", 
+        "Жрец", "Вор", "Аристократ", "Наемник", "Путешественник"
+    ];
+    
+    const goals = [
+        "Ищет помощь", "Продает товары", "Дает задание", "Просит милостыню",
+        "Рассказывает историю", "Предупреждает об опасности", "Ищет информацию",
+        "Скрывается от преследователей", "Ищет спутников", "Отдыхает"
+    ];
+    
+    const personality = personalities[rollDice(personalities.length, 1).total - 1];
+    const occupation = occupations[rollDice(occupations.length, 1).total - 1];
+    const goal = goals[rollDice(goals.length, 1).total - 1];
+    
+    const npcDescription = `${personality} ${occupation.toLowerCase()}. ${goal}.`;
+    
+    displaySpecialResult("Случайный NPC", npcDescription, "");
+    addToDiceHistory('NPC', 1, [npcDescription], 0);
+}
+
+function rollLocationDice() {
+    const locations = [
+        { name: "🏰 Заброшенный замок", description: "Полон опасностей и сокровищ" },
+        { name: "🌲 Таинственный лес", description: "Древние деревья и магические существа" },
+        { name: "🏔️ Горный перевал", description: "Сложный путь с прекрасными видами" },
+        { name: "🏘️ Деревня", description: "Мирные жители и простые услуги" },
+        { name: "🌊 Прибрежные пещеры", description: "Скрытые гроты и морские чудовища" },
+        { name: "⚒️ Заброшенная шахта", description: "Богатства и подземные ужасы" },
+        { name: "🏛️ Древний храм", description: "Реликвии и загадочные ритуалы" },
+        { name: "🛤️ Проселочная дорога", description: "Встречи с путниками и разбойниками" }
+    ];
+    
+    const roll = rollDice(locations.length, 1).total - 1;
+    const location = locations[roll];
+    
+    displaySpecialResult("Локация", location.name, location.description);
+    addToDiceHistory('Локация', 1, [location.name], 0);
+}
+
+function rollQuestDice() {
+    const questTypes = [
+        { type: "💀 Уничтожение", description: "Убить монстра или злодея" },
+        { type: "💎 Поиск", description: "Найти потерянный артефакт" },
+        { type: "🏰 Спасение", description: "Спасти заложника" },
+        { type: "📜 Доставка", description: "Доставить важное послание" },
+        { type: "🕵️‍♂️ Расследование", description: "Раскрыть тайну" },
+        { type: "⚔️ Защита", description: "Защитить локацию от врагов" }
+    ];
+    
+    const rewards = [
+        "50 золотых", "100 золотых", "Магический предмет", "Земельный надел",
+        "Титул", "Благодарность правителя", "Древнее знание", "Союзники"
+    ];
+    
+    const quest = questTypes[rollDice(questTypes.length, 1).total - 1];
+    const reward = rewards[rollDice(rewards.length, 1).total - 1];
+    
+    const questDescription = `${quest.type}: ${quest.description}. Награда: ${reward}.`;
+    
+    displaySpecialResult("Квест", questDescription, "");
+    addToDiceHistory('Квест', 1, [questDescription], 0);
+}
+
+function rollMagicItemDice() {
+    const magicItems = [
+        { name: "🔥 Пламенный меч", effect: "+2 к атаке, дополнительный урон огнем" },
+        { name: "🛡️ Щит отражения", effect: "+3 к защите, шанс отразить заклинания" },
+        { name: "🧭 Компас истины", effect: "Всегда указывает на ближайшую правду" },
+        { name: "💍 Невидимости", effect: "Позволяет становиться невидимым на 1 минуту" },
+        { name: "📖 Книга заклинаний", effect: "Позволяет выучить 1 дополнительное заклинание" },
+        { name: "🥾 Сапоги скорости", effect: "+10 к скорости движения" },
+        { name: "🧤 Перчатки силы", effect: "+2 к силе и ношению" },
+        { name: "👑 Корона мудрости", effect: "+2 ко всем магическим навыкам" }
+    ];
+    
+    const roll = rollDice(magicItems.length, 1).total - 1;
+    const item = magicItems[roll];
+    
+    displaySpecialResult("Магический предмет", item.name, item.effect);
+    addToDiceHistory('Маг. предмет', 1, [item.name], 0);
+}
+
+function displaySpecialResult(title, result, description) {
+    const container = document.getElementById('diceResults');
+    container.innerHTML = `
+        <h3 style="color: #d4af37;">${title}</h3>
+        <div style="font-size: 1.5em; margin: 20px 0; color: #27ae60;">${result}</div>
+        ${description ? `<div style="color: #b8a28a; font-size: 1.1em;">${description}</div>` : ''}
+    `;
+}
+
+// ========== БЫСТРЫЕ БРОСКИ НАВЫКОВ ==========
+
+function quickSkillCheck(skillName) {
+    if (!currentCharacter) {
+        alert('Сначала создайте персонажа!');
+        return;
+    }
+
+    const skillValue = currentCharacter.getSkillValue(skillName) || 10;
+    const check = rollSkillCheck(skillValue);
+    
+    let resultText, resultClass;
+    if (check.critical === 'success') {
+        resultText = "💫 КРИТИЧЕСКИЙ УСПЕХ!";
+        resultClass = "success";
+    } else if (check.critical === 'failure') {
+        resultText = "💥 КРИТИЧЕСКИЙ ПРОВАЛ!";
+        resultClass = "error";
+    } else if (check.success) {
+        resultText = "✅ УСПЕХ!";
+        resultClass = "success";
+    } else {
+        resultText = "❌ НЕУДАЧА!";
+        resultClass = "error";
+    }
+
+    const container = document.getElementById('diceResults');
+    container.innerHTML = `
+        <h3 style="color: #d4af37;">Бросок ${skillName} (${skillValue})</h3>
+        <div class="dice-rolls">
+            <div class="dice">${check.roll[0]}</div>
+        </div>
+        <div style="font-size: 1.5em; margin: 20px 0; color: #e0d0c0;">
+            Результат: <strong>${check.total}</strong>
+        </div>
+        <div class="${resultClass}" style="font-weight: bold; font-size: 1.3em; margin: 20px 0;">
+            ${resultText}
+        </div>
+    `;
+
+    addToDiceHistory(`Навык ${skillName}`, 1, [check.roll[0]], check.total);
+}
+
+// ========== УТИЛИТЫ ==========
+
+function clearDiceHistory() {
+    diceRollHistory = [];
+    renderDiceHistory();
+}
+
+function exportDiceHistory() {
+    const historyText = diceRollHistory.join('\n');
+    const blob = new Blob([historyText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'dice_history.txt';
+    link.click();
+    
+    URL.revokeObjectURL(url);
+}
+
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+console.log('✅ dice.js загружен! Система кубиков готова.');
+        // notes.js - Полная система заметок D&D
+
+// ========== СИСТЕМА ЗАМЕТОК ==========
+
+class NotesSystem {
+    constructor() {
+        this.notes = [];
+        this.categories = ['Общее', 'Квесты', 'Персонажи', 'Локации', 'Лор', 'Идеи'];
+        this.loadNotes();
+    }
+
+    addNote(title, content, category = 'Общее') {
+        const note = {
+            id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            title: title.trim(),
+            content: content.trim(),
+            category: category,
+            expanded: false,
+            created: new Date().toISOString(),
+            updated: new Date().toISOString(),
+            tags: []
+        };
+        
+        this.notes.unshift(note);
+        this.saveNotes();
+        return note;
+    }
+
+    editNote(noteId, title, content, category) {
+        const note = this.notes.find(n => n.id === noteId);
+        if (note) {
+            note.title = title.trim();
+            note.content = content.trim();
+            note.category = category;
+            note.updated = new Date().toISOString();
+            this.saveNotes();
+            return true;
+        }
+        return false;
+    }
+
+    deleteNote(noteId) {
+        const noteIndex = this.notes.findIndex(n => n.id === noteId);
+        if (noteIndex !== -1) {
+            this.notes.splice(noteIndex, 1);
+            this.saveNotes();
+            return true;
+        }
+        return false;
+    }
+
+    toggleNoteExpand(noteId) {
+        const note = this.notes.find(n => n.id === noteId);
+        if (note) {
+            note.expanded = !note.expanded;
+            this.saveNotes();
+            return true;
+        }
+        return false;
+    }
+
+    searchNotes(searchTerm) {
+        const term = searchTerm.toLowerCase();
+        return this.notes.filter(note => 
+            note.title.toLowerCase().includes(term) || 
+            note.content.toLowerCase().includes(term) ||
+            note.category.toLowerCase().includes(term)
+        );
+    }
+
+    getNotesByCategory(category) {
+        return this.notes.filter(note => note.category === category);
+    }
+
+    addTagToNote(noteId, tag) {
+        const note = this.notes.find(n => n.id === noteId);
+        if (note && !note.tags.includes(tag)) {
+            note.tags.push(tag);
+            note.updated = new Date().toISOString();
+            this.saveNotes();
+            return true;
+        }
+        return false;
+    }
+
+    removeTagFromNote(noteId, tag) {
+        const note = this.notes.find(n => n.id === noteId);
+        if (note) {
+            const tagIndex = note.tags.indexOf(tag);
+            if (tagIndex !== -1) {
+                note.tags.splice(tagIndex, 1);
+                note.updated = new Date().toISOString();
+                this.saveNotes();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    getAllTags() {
+        const allTags = new Set();
+        this.notes.forEach(note => {
+            note.tags.forEach(tag => allTags.add(tag));
+        });
+        return Array.from(allTags);
+    }
+
+    getStats() {
+        return {
+            total: this.notes.length,
+            byCategory: this.categories.reduce((acc, category) => {
+                acc[category] = this.getNotesByCategory(category).length;
+                return acc;
+            }, {}),
+            lastUpdated: this.notes.length > 0 ? 
+                new Date(this.notes[0].updated).toLocaleDateString() : 'Нет заметок'
+        };
+    }
+
+    saveNotes() {
+        StorageSystem.set('dnd_notes', {
+            notes: this.notes,
+            categories: this.categories
+        });
+    }
+
+    loadNotes() {
+        const data = StorageSystem.get('dnd_notes', {
+            notes: [],
+            categories: this.categories
+        });
+        
+        this.notes = data.notes;
+        this.categories = data.categories;
+    }
+
+    exportNotes() {
+        return JSON.stringify({
+            notes: this.notes,
+            categories: this.categories,
+            exported: new Date().toISOString(),
+            version: '1.0'
+        }, null, 2);
+    }
+
+    importNotes(jsonData) {
+        try {
+            const data = JSON.parse(jsonData);
+            if (data.notes && Array.isArray(data.notes)) {
+                this.notes = data.notes;
+                if (data.categories) {
+                    this.categories = data.categories;
+                }
+                this.saveNotes();
+                return this.notes.length;
+            }
+        } catch (error) {
+            console.error('Ошибка импорта заметок:', error);
+        }
+        return 0;
+    }
+
+    clearAllNotes() {
+        this.notes = [];
+        this.saveNotes();
+    }
+}
+
+// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+
+let notesSystem = new NotesSystem();
+
+// ========== ИНТЕРФЕЙС СИСТЕМЫ ЗАМЕТОК ==========
+
+function initializeNotesSystem() {
+    const notesTab = document.getElementById('notes-tab');
+    if (!notesTab) return;
+
+    const stats = notesSystem.getStats();
+
+    notesTab.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <h2 class="section-title">✍️ Система Заметок</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div style="background: #3d2418; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 2em; color: #d4af37;">${stats.total}</div>
+                    <div>Всего заметок</div>
+                </div>
+                <div style="background: #3d2418; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 2em; color: #d4af37;">${Object.keys(stats.byCategory).length}</div>
+                    <div>Категорий</div>
+                </div>
+                <div style="background: #3d2418; padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 1.2em; color: #d4af37;">${stats.lastUpdated}</div>
+                    <div>Последнее обновление</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn btn-plus" onclick="showAddNotePopup()">➕ Новая заметка</button>
+                <button class="btn btn-roll" onclick="showCategoryManager()">📂 Управление категориями</button>
+                <button class="btn btn-roll" onclick="exportNotes()">💾 Экспорт заметок</button>
+                <button class="btn btn-roll" onclick="importNotes()">📥 Импорт заметок</button>
+                <button class="btn btn-minus" onclick="showClearAllPopup()">🗑️ Очистить все</button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 250px 1fr; gap: 20px;">
+                <div style="background: #3d2418; padding: 20px; border-radius: 8px; border: 2px solid #5a3928;">
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">📂 Категории</h3>
+                    <div id="categoriesList">
+                        ${renderCategoriesList()}
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #5a3928;">
+                        <h4 style="color: #d4af37; margin-bottom: 10px;">🏷️ Теги</h4>
+                        <div id="tagsList">
+                            ${renderTagsList()}
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                        <input type="text" id="notesSearch" placeholder="🔍 Поиск в заметках..." 
+                               style="flex: 1; padding: 12px; border: 2px solid #8b4513; 
+                               border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                        <select id="sortNotes" style="padding: 12px; border: 2px solid #8b4513; 
+                               border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                            <option value="newest">Сначала новые</option>
+                            <option value="oldest">Сначала старые</option>
+                            <option value="title">По названию</option>
+                            <option value="updated">По изменению</option>
+                        </select>
+                    </div>
+                    
+                    <div id="notesContainer">
+                        ${renderNotes(notesSystem.notes)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    setupNotesEventListeners();
+}
+
+function renderCategoriesList() {
+    const stats = notesSystem.getStats();
+    let html = '';
+    
+    html += `<div class="category-item" data-category="all" style="margin-bottom: 10px;">
+        <button class="btn btn-roll" onclick="filterNotesByCategory('all')" 
+                style="width: 100%; text-align: left; justify-content: flex-start;">
+            📁 Все заметки
+            <span style="margin-left: auto; background: #8b4513; padding: 2px 8px; border-radius: 10px; font-size: 0.8em;">
+                ${stats.total}
+            </span>
+        </button>
+    </div>`;
+    
+    notesSystem.categories.forEach(category => {
+        const count = stats.byCategory[category] || 0;
+        html += `
+            <div class="category-item" data-category="${category}" style="margin-bottom: 10px;">
+                <button class="btn btn-roll" onclick="filterNotesByCategory('${category}')" 
+                        style="width: 100%; text-align: left; justify-content: flex-start;">
+                    📂 ${category}
+                    <span style="margin-left: auto; background: #8b4513; padding: 2px 8px; border-radius: 10px; font-size: 0.8em;">
+                        ${count}
+                    </span>
+                </button>
+            </div>
+        `;
+    });
+    
+    return html;
+}
+
+function renderTagsList() {
+    const tags = notesSystem.getAllTags();
+    if (tags.length === 0) {
+        return '<p style="color: #8b7d6b; font-size: 0.9em;">Тегов пока нет</p>';
+    }
+    
+    let html = '';
+    tags.forEach(tag => {
+        html += `
+            <span class="tag" onclick="filterNotesByTag('${tag}')" 
+                  style="display: inline-block; background: #8b4513; color: #e0d0c0; 
+                         padding: 2px 8px; margin: 2px; border-radius: 10px; font-size: 0.8em; 
+                         cursor: pointer; transition: all 0.2s;">
+                🏷️ ${tag}
+            </span>
+        `;
+    });
+    return html;
+}
+
+function renderNotes(notesToRender) {
+    if (notesToRender.length === 0) {
+        return `
+            <div style="text-align: center; padding: 50px; color: #8b7d6b;">
+                <h3>Заметок пока нет</h3>
+                <p>Создайте первую заметку чтобы начать!</p>
+                <button class="btn btn-plus" onclick="showAddNotePopup()">Создать заметку</button>
+            </div>
+        `;
+    }
+
+    let html = '';
+    notesToRender.forEach(note => {
+        const preview = note.content.length > 200 ? note.content.substring(0, 200) + '...' : note.content;
+        const createdDate = new Date(note.created).toLocaleDateString();
+        const updatedDate = new Date(note.updated).toLocaleDateString();
+        
+        html += `
+            <div class="note-item" data-note-id="${note.id}" data-category="${note.category}" 
+                 data-tags="${note.tags.join(',')}" style="background: #3d2418; margin: 15px 0; padding: 20px; 
+                 border-radius: 8px; border-left: 4px solid #27ae60; transition: all 0.3s ease;">
+                <div class="note-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                    <div style="flex: 1;">
+                        <span class="note-title" style="font-weight: bold; color: #d4af37; font-size: 1.2em;">${note.title}</span>
+                        <span class="note-category" style="background: #5a3928; color: #b8a28a; padding: 2px 8px; 
+                              border-radius: 10px; font-size: 0.8em; margin-left: 10px;">${note.category}</span>
+                        ${note.tags.length > 0 ? `
+                            <div style="margin-top: 5px;">
+                                ${note.tags.map(tag => `
+                                    <span class="note-tag" style="background: #8b4513; color: #e0d0c0; padding: 1px 6px; 
+                                          margin: 2px; border-radius: 8px; font-size: 0.7em;">🏷️ ${tag}</span>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="note-actions" style="display: flex; gap: 8px;">
+                        <button class="btn btn-small" onclick="editNote('${note.id}')" 
+                                style="background: #3498db; padding: 6px 10px; font-size: 12px;">✏️</button>
+                        <button class="btn btn-small" onclick="showTagManager('${note.id}')" 
+                                style="background: #9b59b6; padding: 6px 10px; font-size: 12px;">🏷️</button>
+                        <button class="btn btn-small" onclick="toggleNoteExpand('${note.id}')" 
+                                style="background: #8b4513; padding: 6px 10px; font-size: 12px;">
+                            ${note.expanded ? '▼' : '▶'}
+                        </button>
+                        <button class="btn btn-small" onclick="deleteNote('${note.id}')" 
+                                style="background: #c44536; padding: 6px 10px; font-size: 12px;">❌</button>
+                    </div>
+                </div>
+                <div class="note-preview" style="color: #b8a28a; font-size: 0.95em; line-height: 1.4; margin-bottom: 10px;">
+                    ${note.expanded ? note.content.replace(/\n/g, '<br>') : preview.replace(/\n/g, '<br>')}
+                </div>
+                <div style="color: #8b7d6b; font-size: 0.8em; display: flex; justify-content: space-between;">
+                    <span>Создано: ${createdDate}</span>
+                    <span>Изменено: ${updatedDate}</span>
+                </div>
+            </div>
+        `;
+    });
+
+    return html;
+}
+
+// ========== ФУНКЦИИ УПРАВЛЕНИЯ ЗАМЕТКАМИ ==========
+
+function setupNotesEventListeners() {
+    const searchInput = document.getElementById('notesSearch');
+    const sortSelect = document.getElementById('sortNotes');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            filterNotes(this.value);
+        });
+    }
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            sortNotes(this.value);
+        });
+    }
+}
+
+function showAddNotePopup() {
+    showPopup(
+        '✍️ Новая заметка',
+        `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Заголовок:</label>
+                <input type="text" id="newNoteTitle" placeholder="Введите заголовок заметки" 
+                       style="width: 100%; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
+                       background: #1a0f0b; color: #e0d0c0;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Категория:</label>
+                <select id="newNoteCategory" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
+                      border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    ${notesSystem.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Текст заметки:</label>
+                <textarea id="newNoteContent" placeholder="Введите текст заметки..." 
+                          style="width: 100%; height: 300px; padding: 12px; border: 2px solid #8b4513; 
+                          border-radius: 4px; background: #1a0f0b; color: #e0d0c0; resize: vertical;"></textarea>
+            </div>
+        `,
+        [
+            '<button class="btn btn-plus" onclick="addNewNote()">Добавить</button>',
+            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Отмена</button>'
+        ]
+    );
+}
+
+function addNewNote() {
+    const title = document.getElementById('newNoteTitle').value.trim();
+    const content = document.getElementById('newNoteContent').value.trim();
+    const category = document.getElementById('newNoteCategory').value;
+    
+    if (!title) {
+        alert('Введите заголовок заметки!');
+        return;
+    }
+    
+    if (!content) {
+        alert('Введите текст заметки!');
+        return;
+    }
+
+    notesSystem.addNote(title, content, category);
+    initializeNotesSystem();
+    closePopup(document.querySelector('.popup'));
+}
+
+function editNote(noteId) {
+    const note = notesSystem.notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    showPopup(
+        '✏️ Редактировать заметку',
+        `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Заголовок:</label>
+                <input type="text" id="editNoteTitle" value="${note.title}" 
+                       style="width: 100%; padding: 12px; border: 2px solid #8b4513; border-radius: 4px; 
+                       background: #1a0f0b; color: #e0d0c0;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Категория:</label>
+                <select id="editNoteCategory" style="width: 100%; padding: 12px; border: 2px solid #8b4513; 
+                      border-radius: 4px; background: #1a0f0b; color: #e0d0c0;">
+                    ${notesSystem.categories.map(cat => 
+                        `<option value="${cat}" ${cat === note.category ? 'selected' : ''}>${cat}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Текст заметки:</label>
+                <textarea id="editNoteContent" 
+                          style="width: 100%; height: 300px; padding: 12px; border: 2px solid #8b4513; 
+                          border-radius: 4px; background: #1a0f0b; color: #e0d0c0; resize: vertical;">${note.content}</textarea>
+            </div>
+        `,
+        [
+            `<button class="btn btn-plus" onclick="saveEditedNote('${noteId}')">Сохранить</button>`,
+            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Отмена</button>'
+        ]
+    );
+}
+
+function saveEditedNote(noteId) {
+    const title = document.getElementById('editNoteTitle').value.trim();
+    const content = document.getElementById('editNoteContent').value.trim();
+    const category = document.getElementById('editNoteCategory').value;
+    
+    if (!title) {
+        alert('Введите заголовок заметки!');
+        return;
+    }
+    
+    if (!content) {
+        alert('Введите текст заметки!');
+        return;
+    }
+
+    if (notesSystem.editNote(noteId, title, content, category)) {
+        initializeNotesSystem();
+        closePopup(document.querySelector('.popup'));
+    }
+}
+
+function deleteNote(noteId) {
+    if (confirm('Удалить эту заметку?')) {
+        if (notesSystem.deleteNote(noteId)) {
+            initializeNotesSystem();
+        }
+    }
+}
+
+function toggleNoteExpand(noteId) {
+    if (notesSystem.toggleNoteExpand(noteId)) {
+        initializeNotesSystem();
+    }
+}
+
+function showTagManager(noteId) {
+    const note = notesSystem.notes.find(n => n.id === noteId);
+    if (!note) return;
+
+    const allTags = notesSystem.getAllTags();
+    const currentTags = note.tags;
+
+    showPopup(
+        '🏷️ Управление тегами',
+        `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Текущие теги:</label>
+                <div id="currentTags" style="min-height: 40px; padding: 10px; background: #2c1810; 
+                     border-radius: 4px; border: 1px solid #5a3928;">
+                    ${currentTags.length > 0 ? 
+                        currentTags.map(tag => `
+                            <span style="display: inline-block; background: #8b4513; color: #e0d0c0; 
+                                   padding: 2px 8px; margin: 2px; border-radius: 10px; font-size: 0.8em;">
+                                ${tag}
+                                <button onclick="removeTagFromNote('${noteId}', '${tag}')" 
+                                        style="background: none; border: none; color: #e74c3c; cursor: pointer; margin-left: 5px;">×</button>
+                            </span>
+                        `).join('') : 
+                        '<span style="color: #8b7d6b;">Тегов нет</span>'
+                    }
+                </div>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Добавить тег:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newTagInput" placeholder="Введите новый тег" 
+                           style="flex: 1; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
+                           background: #1a0f0b; color: #e0d0c0;">
+                    <button class="btn btn-plus" onclick="addTagToNote('${noteId}')">Добавить</button>
+                </div>
+            </div>
+            ${allTags.length > 0 ? `
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: #d4af37;">Существующие теги:</label>
+                    <div style="max-height: 100px; overflow-y: auto; padding: 10px; background: #2c1810; 
+                         border-radius: 4px; border: 1px solid #5a3928;">
+                        ${allTags.filter(tag => !currentTags.includes(tag)).map(tag => `
+                            <span onclick="addExistingTagToNote('${noteId}', '${tag}')" 
+                                  style="display: inline-block; background: #5a3928; color: #b8a28a; 
+                                         padding: 2px 8px; margin: 2px; border-radius: 10px; font-size: 0.8em; 
+                                         cursor: pointer; transition: all 0.2s;">
+                                ${tag}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
+        `,
+        [
+            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Готово</button>'
+        ]
+    );
+}
+
+function addTagToNote(noteId) {
+    const tagInput = document.getElementById('newTagInput');
+    const tag = tagInput.value.trim();
+    
+    if (!tag) {
+        alert('Введите тег!');
+        return;
+    }
+    
+    if (notesSystem.addTagToNote(noteId, tag)) {
+        tagInput.value = '';
+        showTagManager(noteId); // Обновляем попап
+        initializeNotesSystem(); // Обновляем основной интерфейс
+    }
+}
+
+function addExistingTagToNote(noteId, tag) {
+    if (notesSystem.addTagToNote(noteId, tag)) {
+        showTagManager(noteId);
+        initializeNotesSystem();
+    }
+}
+
+function removeTagFromNote(noteId, tag) {
+    if (notesSystem.removeTagFromNote(noteId, tag)) {
+        showTagManager(noteId);
+        initializeNotesSystem();
+    }
+}
+
+// ========== ФИЛЬТРАЦИЯ И СОРТИРОВКА ==========
+
+function filterNotes(searchTerm) {
+    let filteredNotes;
+    
+    if (searchTerm.trim() === '') {
+        filteredNotes = notesSystem.notes;
+    } else {
+        filteredNotes = notesSystem.searchNotes(searchTerm);
+    }
+    
+    document.getElementById('notesContainer').innerHTML = renderNotes(filteredNotes);
+}
+
+function filterNotesByCategory(category) {
+    let filteredNotes;
+    
+    if (category === 'all') {
+        filteredNotes = notesSystem.notes;
+    } else {
+        filteredNotes = notesSystem.getNotesByCategory(category);
+    }
+    
+    document.getElementById('notesContainer').innerHTML = renderNotes(filteredNotes);
+    
+    // Подсветка активной категории
+    document.querySelectorAll('.category-item').forEach(item => {
+        const btn = item.querySelector('button');
+        if (item.getAttribute('data-category') === category) {
+            btn.style.background = '#8b4513';
+            btn.style.fontWeight = 'bold';
+        } else {
+            btn.style.background = '';
+            btn.style.fontWeight = '';
+        }
+    });
+}
+
+function filterNotesByTag(tag) {
+    const filteredNotes = notesSystem.notes.filter(note => 
+        note.tags.includes(tag)
+    );
+    
+    document.getElementById('notesContainer').innerHTML = renderNotes(filteredNotes);
+    document.getElementById('notesSearch').value = tag;
+}
+
+function sortNotes(sortBy) {
+    let sortedNotes = [...notesSystem.notes];
+    
+    switch (sortBy) {
+        case 'newest':
+            sortedNotes.sort((a, b) => new Date(b.created) - new Date(a.created));
+            break;
+        case 'oldest':
+            sortedNotes.sort((a, b) => new Date(a.created) - new Date(b.created));
+            break;
+        case 'title':
+            sortedNotes.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+        case 'updated':
+            sortedNotes.sort((a, b) => new Date(b.updated) - new Date(a.updated));
+            break;
+    }
+    
+    document.getElementById('notesContainer').innerHTML = renderNotes(sortedNotes);
+}
+
+// ========== УПРАВЛЕНИЕ КАТЕГОРИЯМИ ==========
+
+function showCategoryManager() {
+    showPopup(
+        '📂 Управление категориями',
+        `
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Существующие категории:</label>
+                <div id="categoriesManagerList" style="max-height: 200px; overflow-y: auto; padding: 10px; 
+                     background: #2c1810; border-radius: 4px; border: 1px solid #5a3928;">
+                    ${notesSystem.categories.map(category => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; 
+                             padding: 5px 0; border-bottom: 1px solid #3d2418;">
+                            <span>${category}</span>
+                            <button class="btn btn-small" onclick="deleteCategory('${category}')" 
+                                    style="background: #c44536; padding: 2px 6px; font-size: 10px;"
+                                    ${notesSystem.getNotesByCategory(category).length > 0 ? 'disabled' : ''}>
+                                Удалить
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; color: #d4af37;">Добавить категорию:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="newCategoryInput" placeholder="Введите название категории" 
+                           style="flex: 1; padding: 10px; border: 2px solid #8b4513; border-radius: 4px; 
+                           background: #1a0f0b; color: #e0d0c0;">
+                    <button class="btn btn-plus" onclick="addNewCategory()">Добавить</button>
+                </div>
+            </div>
+        `,
+        [
+            '<button class="btn btn-roll" onclick="closePopup(this.closest(\'.popup\'))">Готово</button>'
+        ]
+    );
+}
+
+function addNewCategory() {
+    const categoryInput = document.getElementById('newCategoryInput');
+    const category = categoryInput.value.trim();
+    
+    if (!category) {
+        alert('Введите название категории!');
+        return;
+    }
+    
+    if (notesSystem.categories.includes(category)) {
+        alert('Такая категория уже существует!');
+        return;
+    }
+    
+    notesSystem.categories.push(category);
+    notesSystem.saveNotes();
+    categoryInput.value = '';
+    showCategoryManager();
+    initializeNotesSystem();
+}
+
+function deleteCategory(category) {
+    if (notesSystem.getNotesByCategory(category).length > 0) {
+        alert('Нельзя удалить категорию, в которой есть заметки!');
+        return;
+    }
+    
+    if (confirm(`Удалить категорию "${category}"?`)) {
+        const categoryIndex = notesSystem.categories.indexOf(category);
+        if (categoryIndex !== -1) {
+            notesSystem.categories.splice(categoryIndex, 1);
+            notesSystem.saveNotes();
+            showCategoryManager();
+            initializeNotesSystem();
+        }
+    }
+}
+
+// ========== ЭКСПОРТ И ИМПОРТ ==========
+
+function exportNotes() {
+    const dataStr = notesSystem.exportNotes();
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `dnd_notes_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    alert(`✅ Заметки экспортированы! Всего: ${notesSystem.notes.length} заметок`);
+}
+
+function importNotes() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedCount = notesSystem.importNotes(e.target.result);
+                if (importedCount > 0) {
+                    initializeNotesSystem();
+                    alert(`✅ Заметки импортированы! Загружено: ${importedCount} заметок`);
+                } else {
+                    alert('❌ Не удалось импортировать заметки!');
+                }
+            } catch (error) {
+                alert('❌ Ошибка загрузки файла!');
+            }
+        };
+        reader.readAsText(file);
+    };
+    
+    input.click();
+}
+
+function showClearAllPopup() {
+    if (notesSystem.notes.length === 0) {
+        alert('Нет заметок для удаления!');
+        return;
+    }
+
+    if (confirm(`❌ ВЫ УВЕРЕНЫ?\n\nЭто удалит ВСЕ заметки (${notesSystem.notes.length} шт.)!\nЭто действие нельзя отменить!`)) {
+        notesSystem.clearAllNotes();
+        initializeNotesSystem();
+        alert('✅ Все заметки удалены!');
+    }
+}
+
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+console.log('✅ notes.js загружен! Система заметок готова.');
